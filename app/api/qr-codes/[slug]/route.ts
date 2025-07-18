@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Handlebars from 'handlebars';
-import prisma from '../../../../lib/db';
+import prisma from '@/app/lib/db';
 import QRCode from 'qrcode';
 
 // HTML şablonunu kod içinde string olarak tut
@@ -91,4 +91,4 @@ export async function GET(
     console.error('QR sayfası oluşturma hatası:', error);
     return NextResponse.json({ error: 'QR sayfası oluşturma hatası' }, { status: 500 });
   }
-} 
+}

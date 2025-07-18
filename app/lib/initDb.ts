@@ -1,18 +1,19 @@
 import { ensureDatabaseIsReady } from './db';
 
-// Veritabanını başlat
-try {
-  ensureDatabaseIsReady()
-    .then(() => {
-      console.log('Veritabanı başarıyla başlatıldı');
-    })
-    .catch((error) => {
-      console.error('Veritabanı başlatılırken hata oluştu:', error);
-    });
-} catch (error) {
-  console.error('Veritabanı başlatılırken hata oluştu:', error);
+export async function initializeDatabase() {
+  try {
+    const isReady = await ensureDatabaseIsReady();
+    if (isReady) {
+      console.log('Database initialized successfully');
+    } else {
+      console.error('Database initialization failed');
+    }
+    return isReady;
+  } catch (error) {
+    console.error('Database initialization error:', error);
+    return false;
+  }
 }
 
-export default function Init() {
-  return null;
-} 
+// Export the function that was being imported
+export { ensureDatabaseIsReady };

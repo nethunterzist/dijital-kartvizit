@@ -4,8 +4,8 @@ import { generateHtmlForFirma } from '@/app/lib/htmlGenerator';
 import * as fs from 'fs';
 import * as path from 'path';
 import { generateVCard } from '@/app/lib/vcardGenerator';
-import { generateQRCodeDataUrl } from '@/lib/qrCodeGenerator';
-import cloudinary from '@/lib/cloudinary';
+import { generateQRCode } from '@/app/lib/qrCodeGenerator';
+import cloudinary from '@/app/lib/cloudinary';
 
 // Sosyal medya veri yapısı
 interface SocialMediaData {
@@ -369,7 +369,7 @@ export async function POST(req: NextRequest) {
       console.log(`HTML oluşturuldu: ${refreshedFirma.slug}`);
       
       // QR kod oluştur
-      const qrCodeDataUrl = await generateQRCodeDataUrl(refreshedFirma.slug);
+      const qrCodeDataUrl = await generateQRCode(`${process.env.NEXT_PUBLIC_BASE_URL}/${refreshedFirma.slug}`);
       console.log('QR kod base64 üretildi:', qrCodeDataUrl ? 'OK' : 'HATA');
     } catch (error) {
       console.error('HTML/vCard oluşturulurken hata:', error);
@@ -1000,7 +1000,7 @@ export async function PUT(req: NextRequest) {
       
       // QR kod güncelle (eğer slug değiştiyse)
       if (slug !== existingFirm.slug) {
-        const qrCodeDataUrl = await generateQRCodeDataUrl(refreshedFirma.slug);
+        const qrCodeDataUrl = await generateQRCode(`${process.env.NEXT_PUBLIC_BASE_URL}/${refreshedFirma.slug}`);
         console.log('QR kod base64 güncellendi:', qrCodeDataUrl ? 'OK' : 'HATA');
       }
     } catch (error) {

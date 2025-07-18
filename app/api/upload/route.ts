@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import cloudinary from '@/lib/cloudinary';
+import cloudinary from '@/app/lib/cloudinary';
 
 export async function POST(request: NextRequest) {
   const formData = await request.formData();
@@ -29,4 +29,4 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     return NextResponse.json({ error: 'Yükleme başarısız' }, { status: 500 });
   }
-} 
+}

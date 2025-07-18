@@ -5,7 +5,7 @@ import { generateVCard, VCardData } from '@/app/lib/vcardGenerator';
 import * as fs from 'fs';
 import * as path from 'path';
 import { parseForm, processImages } from '@/app/lib/multerHelper';
-import { generateQRCodeDataUrl } from '@/lib/qrCodeGenerator';
+import { generateQRCode } from '@/app/lib/qrCodeGenerator';
 
 // SocialMediaData interface tanımı eklendi
 interface SocialMediaData {
@@ -186,7 +186,7 @@ export async function PUT(
     // HTML yeniden oluşturmayı dene (isteğe bağlı)
     try {
       if (typeof generateHtmlForFirma === 'function') {
-        await generateHtmlForFirma(updatedFirma, oldSlug !== newSlug ? oldSlug : undefined);
+        await generateHtmlForFirma(updatedFirma);
         console.log(`HTML yeniden oluşturuldu: ${updatedFirma.slug}`);
       }
     } catch (htmlError) {
@@ -321,4 +321,4 @@ const processSocialMediaAccounts = (formData: FormData): SocialMediaData => {
     // ... (POST'taki gibi eklenebilir)
 
     return socialMediaData;
-}; 
+};

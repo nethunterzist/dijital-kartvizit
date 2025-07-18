@@ -1030,3 +1030,137 @@ Bu işlemler sonucunda Prisma modeli veritabanıyla uyumlu hale geldi ve firma d
    - Hata durumları konsola kaydediliyor
 
 Bu değişikliklerle, firma düzenleme sayfasında tüm sekmelerin doğru şekilde içerikle doldurulması sağlandı, böylece kullanıcılar firma bilgilerini eksiksiz düzenleyebilecek.
+
+---
+
+## 🎨 2025-07-18 - 15 Yeni Dijital Kartvizit Teması Eklendi
+
+**Özellik:** Dijital kartvizit sistemi için 15 adet yeni tema tasarlandı ve sisteme entegre edildi. Bu temalar farklı sektörler ve kullanım alanları için çeşitli tasarım stilleri sunuyor.
+
+**Neden:** Kullanıcıların dijital kartvizitlerini kişiselleştirme seçeneklerini artırmak ve farklı sektörlere uygun tasarım alternatifleri sunmak için tema çeşitliliği gerekiyordu.
+
+**Eklenen Temalar:**
+
+1. **Corporate Slate** (ID: 7) - Kurumsal gri tema
+   - Profesyonel ve şık görünüm
+   - Gri & mavi renk şeması
+   - Kurumsal kimlik için ideal
+
+2. **Clean Sheet** (ID: 8) - Temiz beyaz tasarım
+   - Sade ve modern görünüm
+   - Beyaz & mavi renk şeması
+   - Minimalist yaklaşım
+
+3. **Night Pulse** (ID: 9) - Koyu tema
+   - Gece modu ve neon efektler
+   - Koyu & neon renk şeması
+   - Modern ve çarpıcı
+
+4. **Glass Aura** (ID: 10) - Cam efekti
+   - Şeffaf ve modern görünüm
+   - Blur efektler ve cam görünümü
+   - Teknoloji sektörü için uygun
+
+5. **Pastel Bloom** (ID: 11) - Pastel renkler
+   - Yumuşak ve sevimli görünüm
+   - Pastel renk paleti
+   - Yaratıcı sektörler için ideal
+
+6. **Retro Signal** (ID: 12) - Vintage tema
+   - Nostaljik ve retro görünüm
+   - Vintage & kahverengi tonlar
+   - Klasik işletmeler için uygun
+
+7. **Gridfolio** (ID: 13) - Grid tasarım
+   - Düzenli ve sistematik görünüm
+   - Gri & cyan renk şeması
+   - Portföy sunumları için ideal
+
+8. **MonoTone** (ID: 14) - Tek renk
+   - Siyah beyaz minimalist görünüm
+   - Monokrom tasarım
+   - Şık ve profesyonel
+
+9. **Vibe Stream** (ID: 15) - Neon akış
+   - Canlı renkler ve animasyonlar
+   - Neon & gradient efektler
+   - Dinamik ve enerjik
+
+10. **Goldmark** (ID: 16) - Altın tema
+    - Lüks ve premium görünüm
+    - Siyah & altın renk şeması
+    - Prestijli işletmeler için
+
+11. **Green Soul** (ID: 17) - Yeşil tema
+    - Doğal ve huzurlu görünüm
+    - Yeşil tonları
+    - Çevre dostu işletmeler için
+
+12. **Ocean Breeze** (ID: 18) - Okyanus teması
+    - Mavi tonlar ve ferah görünüm
+    - Okyanus mavisi renk paleti
+    - Sakin ve güvenilir
+
+13. **Sunset Glow** (ID: 19) - Gün batımı
+    - Sıcak renkler ve gradient
+    - Turuncu & sarı tonlar
+    - Canlı ve enerjik
+
+14. **Purple Rain** (ID: 20) - Mor tema
+    - Mistik ve büyülü görünüm
+    - Mor tonları ve gradient
+    - Yaratıcı ve artistik
+
+15. **Crimson Edge** (ID: 21) - Kırmızı tema
+    - Güçlü ve etkileyici görünüm
+    - Siyah & kırmızı renk şeması
+    - Dinamik ve güçlü
+
+**Teknik Özellikler:**
+- Her tema benzersiz renk şeması ve tipografi kullanıyor
+- Tüm temalar responsive tasarım ve mobil uyumlu
+- Popup'lar, banka hesapları ve tüm özellikler destekleniyor
+- Farklı font aileleri (Inter, Poppins, Raleway, Comfortaa, Oswald, vb.)
+- Çeşitli görsel efektler (gradient, blur, glow, animasyon)
+- Her tema için özel ikon renklendirme
+- Tutarlı kullanıcı deneyimi
+
+**Yapılan Güncellemeler:**
+
+1. **Template Dosyaları:**
+   - 15 yeni template dosyası oluşturuldu (`template7-21.ts`)
+   - Her template tam HTML yapısı ve CSS stilleri içeriyor
+   - Handlebars şablonları ile dinamik içerik desteği
+
+2. **Template Registry:**
+   - `templateRegistry.ts` dosyası güncellendi
+   - Tüm yeni temalar kayıt edildi
+   - Her tema için açıklama, stil kategorisi ve özellikler tanımlandı
+
+3. **Template Seçim Sistemi:**
+   - `cardTemplate.ts` dosyası güncellendi
+   - Tüm yeni temalar import edildi
+   - `getTemplateByType` fonksiyonu 21 temayı destekliyor
+
+**Dosyalar:**
+- `app/lib/templates/template7-corporate-slate.ts` - Corporate Slate teması
+- `app/lib/templates/template8-clean-sheet.ts` - Clean Sheet teması
+- `app/lib/templates/template9-night-pulse.ts` - Night Pulse teması
+- `app/lib/templates/template10-glass-aura.ts` - Glass Aura teması
+- `app/lib/templates/template11-pastel-bloom.ts` - Pastel Bloom teması
+- `app/lib/templates/template12-retro-signal.ts` - Retro Signal teması
+- `app/lib/templates/template13-gridfolio.ts` - Gridfolio teması
+- `app/lib/templates/template14-monotone.ts` - MonoTone teması
+- `app/lib/templates/template15-vibe-stream.ts` - Vibe Stream teması
+- `app/lib/templates/template16-goldmark.ts` - Goldmark teması
+- `app/lib/templates/template17-green-soul.ts` - Green Soul teması
+- `app/lib/templates/template18-ocean-breeze.ts` - Ocean Breeze teması
+- `app/lib/templates/template19-sunset-glow.ts` - Sunset Glow teması
+- `app/lib/templates/template20-purple-rain.ts` - Purple Rain teması
+- `app/lib/templates/template21-crimson-edge.ts` - Crimson Edge teması
+- `app/lib/templates/templateRegistry.ts` - Template kayıt sistemi güncellendi
+- `app/lib/cardTemplate.ts` - Template seçim sistemi güncellendi
+
+**Sonuç:** Bu güncelleme ile birlikte kullanıcılar toplam 20 farklı tema arasından seçim yapabilir (mevcut 5 + yeni 15). Her tema farklı sektör ve kullanım alanları için optimize edilmiş, benzersiz tasarım ve renk şemaları sunuyor. Sistem artık çok daha geniş bir kullanıcı kitlesine hitap edebilecek çeşitlilikte tema seçeneği sunuyor.
+
+**Not:** Tüm yeni temalar mevcut dijital kartvizit özelliklerini (QR kod, banka hesapları, sosyal medya, iletişim bilgileri, popup'lar) tam olarak destekliyor ve responsive tasarım ile tüm cihazlarda düzgün çalışıyor.

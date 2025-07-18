@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -53,6 +53,7 @@ model firmalar {
   onay                  Boolean  @default(false)
   tip                   String?
   firma_logo            String?
+  template_id           Int      @default(1)
 }
 
 model Icon {
