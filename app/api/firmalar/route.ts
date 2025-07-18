@@ -6,6 +6,9 @@ import * as path from 'path';
 import { generateVCard } from '@/app/lib/vcardGenerator';
 import { generateQRCode } from '@/app/lib/qrCodeGenerator';
 import cloudinary from '@/app/lib/cloudinary';
+import { logger } from '@/app/lib/logger';
+import { firmaSchema, validateData } from '@/app/lib/validation';
+import { invalidateFirmaCache } from '@/app/lib/cache';
 
 // Sosyal medya veri yapısı
 interface SocialMediaData {
