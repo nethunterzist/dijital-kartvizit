@@ -5,28 +5,28 @@ import { Icon } from '@/app/lib/icons';
 
 const feedbacks = [
   {
-    text: "Dijital Kartvizit ile tüm kartvizit süreçlerimizi dijitalleştirdik. QR kod ve vCard entegrasyonu sayesinde müşterilerimize hızlıca ulaşabiliyoruz. Cloudinary entegrasyonu ile dosya yükleme ve paylaşım çok pratik.",
-    name: "Zehra Türksoy",
-    title: "SEO & ASO Takım Lideri",
-    avatar: "https://images.ctfassets.net/h6goo9gw1hh6/2sNZtFAWOdP1lmQ33VwRN3/24e953b920a9cd0ff2e1d587742a2472/1-intro-photo-final.jpg?w=1200&h=992&fl=progressive&q=70&fm=jpg"
+    text: "Dijital kartvizit sayesinde müşterilerimle tanışma sürecim çok daha profesyonel hale geldi. QR kod ile hemen iletişim bilgilerimi paylaşabiliyorum, artık kağıt kartvizit taşımıyorum bile!",
+    name: "Ahmet Yılmaz",
+    title: "Satış Müdürü, TechSoft A.Ş.",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
   },
   {
-    text: "Serverless mimari ve modern arayüz sayesinde, ekibimiz her yerden güvenle erişim sağlıyor. Tüm sosyal medya ve iletişim bilgilerimizi tek bir linkte toplamak büyük kolaylık.",
-    name: "Melih Yurduseven",
-    title: "Büyüme Yöneticisi, Leke Games",
-    avatar: "https://plus.unsplash.com/premium_photo-1689568126014-06fea9d5d341?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8cHJvZmlsZXxlbnwwfHwwfHx8MA%3D%3D"
+    text: "Networking etkinliklerinde dijital kartvizitim sayesinde çok daha fazla kişiyle bağlantı kurabiliyorum. Sosyal medya hesaplarım ve portfolyom tek bir linkte toplanmış, müthiş bir çözüm!",
+    name: "Elif Kaya",
+    title: "Grafik Tasarımcı, Kreatif Ajans",
+    avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face"
   },
   {
-    text: "Vercel ve Supabase altyapısı ile hızlı, güvenli ve sürdürülebilir bir çözüm. Tüm dosya işlemlerinin Cloudinary ile yönetilmesi, projeyi rakiplerinden ayırıyor.",
-    name: "Mengjie Gao",
-    title: "ASO Strateji Direktörü, LinkDesks",
-    avatar: "https://media.istockphoto.com/id/1682296067/photo/happy-studio-portrait-or-professional-man-real-estate-agent-or-asian-businessman-smile-for.jpg?s=612x612&w=0&k=20&c=9zbG2-9fl741fbTWw5fNgcEEe4ll-JegrGlQQ6m54rg="
+    text: "Emlak sektöründe çalışıyorum ve dijital kartvizit müşteri ilişkilerimde devrim yarattı. WhatsApp, telefon, e-posta, hatta harita konumum bile bir QR kod ile paylaşılıyor. Çok pratik!",
+    name: "Mehmet Özkan",
+    title: "Emlak Danışmanı, Özkan Gayrimenkul",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face"
   },
   {
-    text: "Sunduğunuz altyapı sayesinde dijital kartvizit süreçlerimizi çok daha verimli ve profesyonel yönetiyoruz. Platformun tüm potansiyelini kullanmak işimizi büyüttü.",
-    name: "Li'ang Bian",
-    title: "Reklam Yöneticisi, IGG",
-    avatar: "https://writestylesonline.com/wp-content/uploads/2018/11/Three-Statistics-That-Will-Make-You-Rethink-Your-Professional-Profile-Picture-1024x1024.jpg"
+    text: "Avukatlık büromuzda tüm ekip dijital kartvizit kullanıyor. Müvekkillere profesyonel bir imaj sunuyoruz ve iletişim bilgilerimizi güncel tutmak çok kolay. Kesinlikle tavsiye ederim!",
+    name: "Ayşe Demir",
+    title: "Avukat, Demir Hukuk Bürosu",
+    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face"
   },
 ];
 
