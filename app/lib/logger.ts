@@ -33,14 +33,21 @@ const format = winston.format.combine(
   ),
 );
 
-const transports = [
+// Only use file transports on server-side
+const transports: winston.transport[] = [
   new winston.transports.Console(),
-  new winston.transports.File({
-    filename: 'logs/error.log',
-    level: 'error',
-  }),
-  new winston.transports.File({ filename: 'logs/all.log' }),
 ];
+
+// Add file transports only on server-side (Node.js environment)
+if (typeof window === 'undefined') {
+  transports.push(
+    new winston.transports.File({
+      filename: 'logs/error.log',
+      level: 'error',
+    }),
+    new winston.transports.File({ filename: 'logs/all.log' })
+  );
+}
 
 const Logger = winston.createLogger({
   level: level(),
