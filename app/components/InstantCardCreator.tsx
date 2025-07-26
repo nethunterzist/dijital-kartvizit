@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import PhonePreview from '../../components/PhonePreview';
 import TemplateSelector from '../../components/TemplateSelector';
+import { getTemplateById } from '@/app/lib/templates/templateRegistry';
 
 export default function InstantCardCreator() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -328,20 +329,20 @@ export default function InstantCardCreator() {
                     className="w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 transition-all text-gray-600 hover:text-blue-600"
                   >
                     <i className="fas fa-palette mr-2"></i>
-                    Tasarım Değiştir (Şu an: Template {selectedTemplate})
+                    Tasarım Değiştir (Şu an: {getTemplateById(selectedTemplate)?.name || `Template ${selectedTemplate}`})
                   </button>
                 </div>
 
                 <div className="flex gap-4">
                   <button
                     onClick={handlePrevStep}
-                    className="flex-1 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-all"
+                    className="flex-1 py-4 border border-gray-300 rounded-lg font-bold text-lg text-gray-700 hover:bg-gray-50 transition-all"
                   >
                     ← Geri
                   </button>
                   <button
                     onClick={scrollToPricing}
-                    className="flex-2 py-4 rounded-lg font-bold text-base bg-green-600 text-white hover:bg-green-700 hover:shadow-lg transform hover:-translate-y-0.5 transition-all"
+                    className="flex-1 py-4 rounded-lg font-bold text-lg bg-green-600 text-white hover:bg-green-700 hover:shadow-lg transform hover:-translate-y-0.5 transition-all"
                   >
                     <i className="fas fa-shopping-cart mr-2"></i>
                     Satın Al
