@@ -33,6 +33,13 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# SQLite databases (not needed for Supabase)
+*.sqlite
+*.sqlite3
+*.db
+prisma/*.db
+prisma/data/
+
 # vercel
 .vercel
 
