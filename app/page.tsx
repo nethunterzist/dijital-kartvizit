@@ -1,7 +1,6 @@
 import Navbar from './components/Navbar';
 import NewHero from './components/NewHero';
 import InstantCardCreator from './components/InstantCardCreator';
-import HowItWorksSection from "./components/HowItWorksSection";
 import PricingSection from './components/PricingSection';
 import VideoFaqSection from "./components/VideoFaqSection";
 import FeedbackCarousel from './components/FeedbackCarousel';
@@ -13,7 +12,6 @@ export default function HomePage() {
       <Navbar />
       <NewHero />
       <InstantCardCreator />
-      <HowItWorksSection />
       <PricingSection />
       <VideoFaqSection />
       <FeedbackCarousel />
