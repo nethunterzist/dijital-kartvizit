@@ -373,7 +373,6 @@ export default function InstantCardCreator() {
                 templateId={selectedTemplate}
                 bankAccounts={[]}
               />
-
             </div>
           </div>
         </div>
