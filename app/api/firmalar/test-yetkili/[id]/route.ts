@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/app/lib/db';
+import { logger } from '@/app/lib/logger';
 
 /**
  * Yetkili ve ünvan bilgilerinin kaydını test etmek için API
@@ -20,7 +21,7 @@ export async function POST(
     
     // Gelen veriyi al
     const data = await req.json();
-    console.log('Test verileri:', data);
+    logger.info('Test verileri alındı', { firmaId, data });
     
     // Firma kontrolü
     const existingFirma = await prisma.firmalar.findUnique({
@@ -45,7 +46,7 @@ export async function POST(
       },
     });
     
-    console.log('Güncelleme sonrası firma:', {
+    logger.info('Güncelleme sonrası firma', {
       id: updatedFirma.id,
       firma_adi: updatedFirma.firma_adi,
       yetkili_adi: updatedFirma.yetkili_adi,
@@ -65,7 +66,7 @@ export async function POST(
       }
     });
   } catch (error) {
-    console.error('Test sırasında hata oluştu:', error);
+    logger.error('Test sırasında hata oluştu', { error: error instanceof Error ? error.message : String(error), firmaId, stack: error instanceof Error ? error.stack : undefined });
     return NextResponse.json(
       { message: 'Test sırasında bir hata oluştu', error: String(error), success: false },
       { status: 500 }

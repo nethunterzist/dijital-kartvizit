@@ -1,0 +1,181 @@
+# SuperClaude Development Rules & Standards
+# Dijital Kartvizit Projesi için geliştirme kuralları
+
+development_practices:
+  git_safety:
+    workflow: "Status→branch→fetch→pull workflow"
+    required_checks:
+      - "git status before any operation"
+      - "Create feature branch for new work"
+      - "Pull latest changes before push"
+    branch_naming: "feature/description | fix/issue | hotfix/critical"
+    commit_standards:
+      - "Clear, descriptive commit messages in Turkish"
+      - "Reference issue numbers when applicable"
+      - "Atomic commits (one logical change per commit)"
+
+  testing_standards:
+    approach: "TDD patterns, comprehensive coverage"
+    requirements:
+      - "Unit tests for utility functions"
+      - "Integration tests for API endpoints"
+      - "E2E tests for critical user flows"
+    coverage_targets:
+      - "Minimum 80% code coverage"
+      - "100% coverage for payment flows"
+      - "Critical path testing mandatory"
+    test_types:
+      unit: "Jest + React Testing Library"
+      integration: "Supertest for API testing"
+      e2e: "Cypress or Playwright"
+
+  security_standards:
+    zero_tolerance: "Zero tolerance for vulnerabilities"
+    required_practices:
+      - "Input validation with Zod schemas"
+      - "SQL injection prevention (Prisma ORM)"
+      - "XSS protection in templates"
+      - "CSRF token validation"
+      - "Rate limiting on API endpoints"
+      - "Secure file upload (Cloudinary)"
+    authentication:
+      - "NextAuth.js for session management"
+      - "Secure password hashing (bcrypt)"
+      - "JWT token validation"
+    data_protection:
+      - "Personal data encryption"
+      - "GDPR compliance for EU users"
+      - "Secure payment processing"
+
+  performance_guidelines:
+    model_selection: "Simple→Sonnet | Complex→Sonnet-4 | Critical→Opus-4"
+    optimization_rules:
+      - "Native tools > MCP for simple tasks"
+      - "Parallel execution for independent operations"
+      - "Image optimization with Next.js Image"
+      - "Bundle size monitoring"
+      - "Database query optimization"
+    monitoring:
+      - "Core Web Vitals tracking"
+      - "API response time monitoring"
+      - "Database performance metrics"
+
+code_quality_standards:
+  typescript:
+    strict_mode: true
+    requirements:
+      - "Strict TypeScript configuration"
+      - "No 'any' types allowed"
+      - "Proper interface definitions"
+      - "Generic type usage where appropriate"
+    
+  react_patterns:
+    hooks: "Prefer hooks over class components"
+    state_management: "useState for local, SWR for server state"
+    component_structure:
+      - "Single responsibility principle"
+      - "Props interface definitions"
+      - "Proper error boundaries"
+      - "Memoization for performance"
+    
+  next_js_best_practices:
+    app_router: "Use App Router (Next.js 14)"
+    api_routes: "RESTful API design"
+    middleware: "Authentication and rate limiting"
+    optimization:
+      - "Static generation where possible"
+      - "Dynamic imports for code splitting"
+      - "Proper metadata for SEO"
+
+  database_standards:
+    prisma_patterns:
+      - "Proper schema relationships"
+      - "Index optimization"
+      - "Migration best practices"
+      - "Connection pooling"
+    data_modeling:
+      - "Normalized database design"
+      - "Foreign key constraints"
+      - "Cascade delete rules"
+      - "Proper data types"
+
+project_specific_rules:
+  digital_card_platform:
+    business_logic:
+      - "Card creation must be 3-step process"
+      - "QR code generation for every card"
+      - "vCard export functionality"
+      - "Template system flexibility"
+    
+    payment_processing:
+      - "Secure payment flow validation"
+      - "Order confirmation system"
+      - "Invoice generation"
+      - "Refund handling procedures"
+    
+    file_management:
+      - "Cloudinary for all file uploads"
+      - "No local file system usage"
+      - "Proper image optimization"
+      - "File type validation"
+    
+    user_experience:
+      - "Mobile-first responsive design"
+      - "Accessibility compliance (WCAG 2.1)"
+      - "Turkish language support"
+      - "Loading states for all operations"
+
+error_handling:
+  api_responses:
+    structure: "Consistent error response format"
+    logging: "Winston for error logging"
+    user_feedback: "User-friendly error messages in Turkish"
+  
+  client_side:
+    boundaries: "React Error Boundaries"
+    fallbacks: "Graceful degradation"
+    retry_logic: "Automatic retry for network errors"
+
+documentation_requirements:
+  code_documentation:
+    - "JSDoc comments for complex functions"
+    - "README updates for new features"
+    - "API documentation maintenance"
+  
+  architectural_decisions:
+    - "Document major architectural changes"
+    - "Record technology choices and rationale"
+    - "Maintain deployment procedures"
+
+deployment_standards:
+  serverless_compatibility:
+    - "No file system writes in production"
+    - "Environment variable configuration"
+    - "Stateless application design"
+  
+  vercel_optimization:
+    - "Edge function usage where appropriate"
+    - "Proper caching strategies"
+    - "Build optimization"
+  
+  monitoring_requirements:
+    - "Error tracking (Sentry recommended)"
+    - "Performance monitoring"
+    - "User analytics"
+
+turkish_language_support:
+  communication: "All user-facing content in Turkish"
+  error_messages: "Turkish error messages for users"
+  documentation: "Technical documentation can be in English"
+  comments: "Code comments in Turkish for business logic"
+
+compliance_requirements:
+  data_protection:
+    - "KVKK (Turkish data protection law) compliance"
+    - "GDPR compliance for EU users"
+    - "Secure data handling procedures"
+  
+  business_compliance:
+    - "Turkish tax law compliance for invoicing"
+    - "E-commerce regulations"
+    - "Digital service provider requirements"

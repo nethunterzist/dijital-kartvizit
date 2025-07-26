@@ -1,4 +1,5 @@
 // Client-side icon order utilities
+import { logger } from './logger';
 
 interface IconItem {
   id: string;
@@ -48,7 +49,7 @@ export async function getIconOrderClient(): Promise<IconItem[]> {
     }
     return DEFAULT_ICON_ORDER;
   } catch (error) {
-    console.error('İkon sıralaması alınırken hata:', error);
+    logger.error('İkon sıralaması alınırken hata', { error });
     return DEFAULT_ICON_ORDER;
   }
 }

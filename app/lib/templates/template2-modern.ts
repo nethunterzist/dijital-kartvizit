@@ -254,12 +254,15 @@ export const modernTemplate = `
             background: #667eea;
             border: none;
             border-radius: 8px;
-            padding: 5px 10px;
+            padding: 6px 8px;
             color: white;
             cursor: pointer;
-            margin-left: 10px;
-            font-size: 0.8rem;
+            margin-left: 8px;
+            font-size: 0.75rem;
             transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            vertical-align: middle;
         }
         .copy-btn:hover {
             background: #5a67d8;
@@ -343,7 +346,7 @@ export const modernTemplate = `
                     {{#each social_media}}
                     <div class="icon-card">
                         <a href="{{this.url}}" target="_blank">
-                            <i class="{{this.icon}}"></i>
+                            <i class="{{getIconClass this.icon this.label}}"></i>
                             <span class="icon-label">{{this.label}}</span>
                         </a>
                     </div>
@@ -355,7 +358,7 @@ export const modernTemplate = `
                     {{#each communication}}
                     <div class="icon-card">
                         <a href="{{this.url}}" target="_blank">
-                            <i class="{{this.icon}}"></i>
+                            <i class="{{getIconClass this.icon this.label}}"></i>
                             <span class="icon-label">{{this.label}}</span>
                         </a>
                     </div>
@@ -419,13 +422,13 @@ export const modernTemplate = `
             <h2 class="popup-title">Vergi Bilgileri</h2>
             <div class="tax-info">
                 <div><strong>Firma Ünvanı:</strong> {{tax.firma_unvan}}
-                    <button class="copy-btn" onclick="copyToClipboard('{{tax.firma_unvan}}', event)">Kopyala</button>
+                    <button class="copy-btn" onclick="copyToClipboard('{{tax.firma_unvan}}', event)"><i class="fas fa-copy"></i></button>
                 </div>
                 <div><strong>Vergi Numarası:</strong> {{tax.firma_vergi_no}}
-                    <button class="copy-btn" onclick="copyToClipboard('{{tax.firma_vergi_no}}', event)">Kopyala</button>
+                    <button class="copy-btn" onclick="copyToClipboard('{{tax.firma_vergi_no}}', event)"><i class="fas fa-copy"></i></button>
                 </div>
                 <div><strong>Vergi Dairesi:</strong> {{tax.vergi_dairesi}}
-                    <button class="copy-btn" onclick="copyToClipboard('{{tax.vergi_dairesi}}', event)">Kopyala</button>
+                    <button class="copy-btn" onclick="copyToClipboard('{{tax.vergi_dairesi}}', event)"><i class="fas fa-copy"></i></button>
                 </div>
             </div>
         </div>
@@ -503,11 +506,11 @@ export const modernTemplate = `
         if (!text) return;
         navigator.clipboard.writeText(text).then(function() {
             const btn = event.currentTarget;
-            const originalText = btn.textContent;
-            btn.textContent = 'Kopyalandı!';
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i>';
             btn.style.background = '#48bb78';
             setTimeout(() => { 
-                btn.textContent = originalText;
+                btn.innerHTML = originalHTML;
                 btn.style.background = '#667eea';
             }, 1000);
         });

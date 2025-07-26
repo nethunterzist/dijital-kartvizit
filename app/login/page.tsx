@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { logger } from '@/app/lib/logger';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -36,12 +37,12 @@ export default function LoginPage() {
       }
       
       if (result?.ok) {
-        console.log('Giriş başarılı!');
+        logger.info('Giriş başarılı!');
       router.push('/admin');
         router.refresh();
       }
     } catch (err) {
-      console.error('Giriş hatası:', err);
+      logger.error('Giriş hatası:', err);
       setError('Giriş sırasında bir hata oluştu. Lütfen tekrar deneyin.');
     } finally {
       setLoading(false);
@@ -53,7 +54,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md space-y-8">
         <div>
           <h1 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
-            Sanal Kartvizit Yönetim Paneli
+            Dijital Kartvizit Yönetim Paneli
           </h1>
           <h2 className="mt-2 text-center text-sm text-gray-600">
             Devam etmek için giriş yapın
@@ -112,4 +113,4 @@ export default function LoginPage() {
       </div>
     </div>
   );
-} 
+}

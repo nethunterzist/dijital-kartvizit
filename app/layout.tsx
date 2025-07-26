@@ -5,8 +5,8 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import './lib/initDb';
 
 export const metadata: Metadata = {
-  title: "Sanal Kartvizit Sistemi",
-  description: "Firmanızın sanal kartvizitleri",
+  title: "Dijital Kartvizit Sistemi",
+  description: "Firmanızın dijital kartvizitleri",
 };
 
 export default function RootLayout({
@@ -19,7 +19,7 @@ export default function RootLayout({
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="description" content="Sanal Kartvizit Sistemi" />
+        <meta name="description" content="Dijital Kartvizit Sistemi" />
       </head>
       <body>
         <ErrorBoundary>

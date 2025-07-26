@@ -4,7 +4,7 @@ export default function Dashboard() {
       {/* Sidebar */}
       <div className="bg-gray-800 text-white w-64 min-h-screen flex flex-col">
         <div className="px-4 py-6 border-b border-gray-700">
-          <h2 className="text-xl font-semibold">Sanal Kartvizit</h2>
+          <h2 className="text-xl font-semibold">Dijital Kartvizit</h2>
           <p className="text-gray-400 text-sm">Yönetim Paneli</p>
         </div>
         <nav className="flex-1 mt-6 px-2">
@@ -91,4 +91,4 @@ export default function Dashboard() {
       </div>
     </div>
   );
-} 
+}

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { logger } from '@/app/lib/logger';
 
 const SETTINGS_FILE = path.join(process.cwd(), 'data', 'icon-order.json');
 
@@ -44,7 +45,7 @@ function readIconOrder() {
     }
     return DEFAULT_ICON_ORDER;
   } catch (error) {
-    console.error('İkon sıralaması okunurken hata:', error);
+    logger.error('İkon sıralaması okunurken hata', { error: error instanceof Error ? error.message : String(error), stack: error instanceof Error ? error.stack : undefined });
     return DEFAULT_ICON_ORDER;
   }
 }
@@ -60,7 +61,7 @@ function saveIconOrder(iconOrder: any[]) {
     fs.writeFileSync(SETTINGS_FILE, JSON.stringify(data, null, 2));
     return true;
   } catch (error) {
-    console.error('İkon sıralaması kaydedilirken hata:', error);
+    logger.error('İkon sıralaması kaydedilirken hata', { error: error instanceof Error ? error.message : String(error), stack: error instanceof Error ? error.stack : undefined });
     return false;
   }
 }
@@ -71,7 +72,7 @@ export async function GET() {
     const iconOrder = readIconOrder();
     return NextResponse.json({ iconOrder });
   } catch (error) {
-    console.error('GET /api/settings/icon-order error:', error);
+    logger.error('GET /api/settings/icon-order error', { error: error instanceof Error ? error.message : String(error), stack: error instanceof Error ? error.stack : undefined });
     return NextResponse.json(
       { error: 'İkon sıralaması alınırken hata oluştu' },
       { status: 500 }
@@ -118,7 +119,7 @@ export async function POST(request: NextRequest) {
       iconOrder 
     });
   } catch (error) {
-    console.error('POST /api/settings/icon-order error:', error);
+    logger.error('POST /api/settings/icon-order error', { error: error instanceof Error ? error.message : String(error), stack: error instanceof Error ? error.stack : undefined });
     return NextResponse.json(
       { error: 'İkon sıralaması kaydedilirken hata oluştu' },
       { status: 500 }

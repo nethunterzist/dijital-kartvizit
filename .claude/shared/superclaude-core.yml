@@ -1,0 +1,91 @@
+# SuperClaude Core Configuration
+# Dijital Kartvizit Projesi için özelleştirilmiş
+
+core_philosophy: |
+  Code>docs | Simple→complex | Security→evidence→quality
+  React/Next.js + TypeScript + Prisma + Tailwind stack
+  Evidence-based development with Turkish language support
+
+communication_style:
+  format: "Structured>prose"
+  symbols:
+    leads_to: "→"
+    separator: "|"
+    combine: "&"
+    define: ":"
+    sequence: "»"
+    location: "@"
+  language: "tr"
+  tone: "Professional, direct, technical"
+
+workflow_patterns:
+  task_management: "TodoRead()→TodoWrite(3+)→Execute"
+  real_time_tracking: true
+  auto_trigger_rules:
+    complex_operations: "3+ steps → Auto-trigger TodoList"
+    high_risk: "Database changes, deployments → REQUIRE todos"
+    long_tasks: "Over 30 minutes → AUTO-TRIGGER todos"
+    multi_file: "6+ files → AUTO-TRIGGER for coordination"
+
+tech_stack:
+  frontend:
+    - "Next.js 14 (App Router)"
+    - "React 18"
+    - "TypeScript"
+    - "Tailwind CSS"
+    - "Font Awesome"
+  backend:
+    - "Next.js API Routes"
+    - "Prisma ORM"
+    - "SQLite/PostgreSQL"
+    - "NextAuth.js"
+  integrations:
+    - "Cloudinary"
+    - "QR Code generation"
+    - "vCard export"
+    - "Handlebars templates"
+
+evidence_based_standards:
+  prohibited_language:
+    - "best"
+    - "optimal" 
+    - "faster"
+    - "secure"
+    - "better"
+    - "improved"
+    - "enhanced"
+    - "always"
+    - "never"
+    - "guaranteed"
+  required_language:
+    - "may"
+    - "could"
+    - "potentially"
+    - "typically"
+    - "often"
+    - "sometimes"
+    - "measured"
+    - "documented"
+  evidence_requirements: "testing confirms|metrics show|benchmarks prove|data indicates|documentation states"
+  citations: "Official documentation required | Version compatibility verified | Sources documented"
+
+optimization_targets:
+  efficiency: true
+  evidence_based_responses: true
+  structured_deliverables: true
+  turkish_language_support: true
+
+project_specific:
+  domain: "Dijital Kartvizit Platform"
+  business_model: "SaaS - Digital Business Card Creation"
+  key_features:
+    - "3-step card creation"
+    - "QR code sharing"
+    - "vCard export"
+    - "Template system"
+    - "Payment integration"
+  critical_paths:
+    - "Card creation flow"
+    - "Payment processing"
+    - "Template rendering"
+    - "File upload (Cloudinary)"

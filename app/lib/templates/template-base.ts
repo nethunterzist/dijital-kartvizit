@@ -113,18 +113,19 @@ function closeBankPopup() {
     document.getElementById('bank-popup').style.display = 'none';
 }
 function copyToClipboard(text, event) {
-    event.preventDefault();
-    if (!text) return;
-    navigator.clipboard.writeText(text).then(function() {
-        const btn = event.currentTarget;
-        const originalText = btn.textContent;
-        btn.textContent = 'Kopyalandı!';
-        // Template-specific styling will be applied here
-        setTimeout(() => { 
-            btn.textContent = originalText;
-            // Reset to original styling
-        }, 1000);
-    });
+        event.preventDefault();
+        if (!text) return;
+        navigator.clipboard.writeText(text).then(function() {
+            const btn = event.currentTarget;
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i>';
+            btn.style.background = '#48bb78';
+            setTimeout(() => { 
+                btn.innerHTML = originalHTML;
+                btn.style.background = btn.style.background.replace('#48bb78', '');
+            }, 1000);
+        });
+    };
 }
 `;
 
@@ -267,13 +268,13 @@ export const STANDARD_HTML_STRUCTURE = `
         <h2 class="popup-title">Vergi Bilgileri</h2>
         <div class="tax-info">
             <div><strong>Firma Ünvanı:</strong> {{tax.firma_unvan}}
-                <button class="copy-btn" onclick="copyToClipboard('{{tax.firma_unvan}}', event)">Kopyala</button>
+                <button class="copy-btn" onclick="copyToClipboard('{{tax.firma_unvan}}', event)"><i class="fas fa-copy"></i></button>
             </div>
             <div><strong>Vergi Numarası:</strong> {{tax.firma_vergi_no}}
-                <button class="copy-btn" onclick="copyToClipboard('{{tax.firma_vergi_no}}', event)">Kopyala</button>
+                <button class="copy-btn" onclick="copyToClipboard('{{tax.firma_vergi_no}}', event)"><i class="fas fa-copy"></i></button>
             </div>
             <div><strong>Vergi Dairesi:</strong> {{tax.vergi_dairesi}}
-                <button class="copy-btn" onclick="copyToClipboard('{{tax.vergi_dairesi}}', event)">Kopyala</button>
+                <button class="copy-btn" onclick="copyToClipboard('{{tax.vergi_dairesi}}', event)"><i class="fas fa-copy"></i></button>
             </div>
         </div>
     </div>

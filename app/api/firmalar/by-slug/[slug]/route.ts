@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/app/lib/db';
+import { logger } from '@/app/lib/logger';
 
 export async function GET(
   req: NextRequest,
@@ -30,7 +31,7 @@ export async function GET(
     
     return NextResponse.json(firma);
   } catch (error) {
-    console.error('Firma getirilirken hata oluştu:', error);
+    logger.error('Firma getirilirken hata oluştu', { error: error instanceof Error ? error.message : String(error), slug: params.slug, stack: error instanceof Error ? error.stack : undefined });
     return NextResponse.json(
       { message: 'Firma getirilirken bir hata oluştu' },
       { status: 500 }

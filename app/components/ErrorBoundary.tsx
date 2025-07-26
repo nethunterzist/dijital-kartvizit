@@ -2,7 +2,8 @@
 
 import React, { ErrorInfo } from 'react';
 import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary';
-import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { Icon } from '@/app/lib/icons';
+import { logger } from '@/app/lib/logger';
 
 interface ErrorFallbackProps {
   error: Error;
@@ -14,7 +15,7 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6">
         <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full">
-          <ExclamationTriangleIcon className="w-6 h-6 text-red-600" />
+          <Icon name="alertTriangle" className="w-6 h-6 text-red-600" />
         </div>
         
         <div className="mt-4 text-center">
@@ -76,8 +77,8 @@ export default function ErrorBoundary({
   const handleError = (error: Error, errorInfo: ErrorInfo) => {
     // Log error to console in development
     if (process.env.NODE_ENV === 'development') {
-      console.error('Error Boundary caught an error:', error);
-      console.error('Component stack:', errorInfo.componentStack || 'No component stack available');
+      logger.error('Error Boundary caught an error:', error);
+      logger.error('Component stack:', errorInfo.componentStack || 'No component stack available');
     }
     
     // Call custom error handler if provided
@@ -113,7 +114,7 @@ export function APIErrorBoundary({ children }: { children: React.ReactNode }) {
       fallback={({ error, resetErrorBoundary }) => (
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
           <div className="flex">
-            <ExclamationTriangleIcon className="h-5 w-5 text-red-400" />
+            <Icon name="alertTriangle" className="h-5 w-5 text-red-400" />
             <div className="ml-3">
               <h3 className="text-sm font-medium text-red-800">
                 API Hatası
@@ -144,7 +145,7 @@ export function FormErrorBoundary({ children }: { children: React.ReactNode }) {
       fallback={({ error, resetErrorBoundary }) => (
         <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
           <div className="flex">
-            <ExclamationTriangleIcon className="h-5 w-5 text-yellow-400" />
+            <Icon name="warning" className="h-5 w-5 text-yellow-400" />
             <div className="ml-3">
               <h3 className="text-sm font-medium text-yellow-800">
                 Form Hatası

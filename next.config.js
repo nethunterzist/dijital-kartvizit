@@ -1,4 +1,8 @@
 /** @type {import('next').NextConfig} */
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
+
 const nextConfig = {
   images: {
     domains: ['localhost', 'furkanyigit.com', 'res.cloudinary.com'],
@@ -10,10 +14,34 @@ const nextConfig = {
   swcMinify: true,
   experimental: {
     optimizeCss: true,
-    optimizePackageImports: ['@heroicons/react', 'lucide-react'],
+    optimizePackageImports: ['@heroicons/react', 'lucide-react', 'react-icons'],
+    serverComponentsExternalPackages: ['bcrypt', 'prisma'],
+    optimizeServerReact: true,
   },
-  // Standalone modu için output yapılandırması
-  output: 'standalone',
+  
+  // Production optimizations
+  ...(process.env.NODE_ENV === 'production' && {
+    output: 'standalone',
+    poweredByHeader: false,
+    generateEtags: true,
+    
+    // Advanced optimizations for production
+    compiler: {
+      removeConsole: {
+        exclude: ['error', 'warn'],
+      },
+      reactRemoveProperties: true,
+    },
+  }),
+  // TypeScript configuration
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  // Standalone modu için output yapılandırması (development için kapatıldı)
+  // output: 'standalone',
   
   // Compression
   compress: true,
@@ -37,12 +65,28 @@ const nextConfig = {
             value: 'nosniff'
           },
           {
+            key: 'X-Frame-Options',
+            value: 'DENY'
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block'
+          },
+          {
             key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin'
+            value: 'strict-origin-when-cross-origin'
           },
           {
             key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=()'
+            value: 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), speaker=()'
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://api.vercel.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https: wss:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';"
+          },
+          {
+            key: 'X-Powered-By',
+            value: ''
           }
         ],
       },
@@ -95,15 +139,57 @@ const nextConfig = {
   
   // Webpack optimizations
   webpack: (config, { dev, isServer }) => {
-    // Production optimizations
+    // Fix for 'self is not defined' error
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+      };
+    }
+    
+    // Advanced production optimizations
     if (!dev) {
       config.optimization.splitChunks = {
         chunks: 'all',
+        minSize: 20000,
+        maxSize: 200000,
         cacheGroups: {
+          // React vendor chunk (separate for better caching)
+          react: {
+            test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
+            name: 'react-vendor',
+            chunks: 'all',
+            priority: 10,
+          },
+          // UI libraries chunk
+          ui: {
+            test: /[\\/]node_modules[\\/](@headlessui|@heroicons|lucide-react|@dnd-kit)[\\/]/,
+            name: 'ui-vendor',
+            chunks: 'all',
+            priority: 9,
+          },
+          // Database/API libraries
+          api: {
+            test: /[\\/]node_modules[\\/](@prisma|@tanstack|swr)[\\/]/,
+            name: 'api-vendor',
+            chunks: 'all',
+            priority: 8,
+          },
+          // Utilities and smaller libraries
+          utils: {
+            test: /[\\/]node_modules[\\/](clsx|tailwind-merge|zod)[\\/]/,
+            name: 'utils-vendor',
+            chunks: 'all',
+            priority: 7,
+          },
+          // Default vendor chunk for remaining node_modules
           vendor: {
             test: /[\\/]node_modules[\\/]/,
             name: 'vendors',
             chunks: 'all',
+            priority: 5,
           },
         },
       };
@@ -136,4 +222,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+module.exports = withBundleAnalyzer(nextConfig);

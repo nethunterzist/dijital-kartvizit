@@ -1,15 +1,14 @@
 'use client';
 import React, { useEffect, useRef } from "react";
-import { FaInstagram, FaFacebookF, FaYoutube, FaLinkedinIn, FaTelegramPlane, FaTiktok, FaWhatsapp, FaPhoneAlt } from "react-icons/fa";
-import { SiX } from "react-icons/si";
+import { Icon, CustomIcons } from '@/app/lib/icons';
 
 const ICONS = [
-  { icon: <FaInstagram size={32} color="#E1306C" />, name: "Instagram" },
-  { icon: <SiX size={32} color="#000" />, name: "X" },
-  { icon: <FaYoutube size={32} color="#FF0000" />, name: "YouTube" },
-  { icon: <FaLinkedinIn size={32} color="#0A66C2" />, name: "LinkedIn" },
-  { icon: <FaTiktok size={32} color="#000" />, name: "TikTok" },
-  { icon: <FaWhatsapp size={32} color="#25d366" />, name: "WhatsApp" },
+  { icon: <Icon name="instagram" size={32} color="#E1306C" />, name: "Instagram" },
+  { icon: <CustomIcons.x size={32} className="text-black" />, name: "X" },
+  { icon: <Icon name="youtube" size={32} color="#FF0000" />, name: "YouTube" },
+  { icon: <Icon name="linkedin" size={32} color="#0A66C2" />, name: "LinkedIn" },
+  { icon: <CustomIcons.tiktok size={32} className="text-black" />, name: "TikTok" },
+  { icon: <CustomIcons.whatsapp size={32} className="text-green-500" />, name: "WhatsApp" },
 ];
 
 const BUBBLE_SIZE = 64;
@@ -139,4 +138,4 @@ export default function SocialMediaBubbles() {
       </h2>
     </section>
   );
-} 
+}

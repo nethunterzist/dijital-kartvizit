@@ -1,10 +1,20 @@
 import { PrismaClient } from '@prisma/client';
+import { logger } from './logger';
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-export const prisma = globalForPrisma.prisma ?? new PrismaClient();
+// Production-ready Prisma configuration
+export const prisma = globalForPrisma.prisma ?? new PrismaClient({
+  log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+  errorFormat: 'pretty',
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL,
+    },
+  },
+});
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 
@@ -20,11 +30,46 @@ export async function getAllFirmalar() {
 export async function ensureDatabaseIsReady() {
   try {
     await prisma.$connect();
-    console.log('Database connection established');
+    
+    // Connection test query
+    await prisma.$queryRaw`SELECT 1`;
+    
+    logger.info('✅ Database connection established and verified');
     return true;
   } catch (error) {
-    console.error('Database connection failed:', error);
+    logger.error('❌ Database connection failed', { error });
     return false;
+  }
+}
+
+// Graceful shutdown handler
+export async function disconnectDatabase() {
+  try {
+    await prisma.$disconnect();
+    logger.info('✅ Database disconnected gracefully');
+  } catch (error) {
+    logger.error('❌ Database disconnect error', { error });
+  }
+}
+
+// Health check for monitoring
+export async function getDatabaseHealth() {
+  try {
+    const start = Date.now();
+    await prisma.$queryRaw`SELECT 1`;
+    const responseTime = Date.now() - start;
+    
+    return {
+      status: 'healthy',
+      responseTime: `${responseTime}ms`,
+      timestamp: new Date().toISOString()
+    };
+  } catch (error) {
+    return {
+      status: 'unhealthy',
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    };
   }
 }
 

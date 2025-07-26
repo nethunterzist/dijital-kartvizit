@@ -1,1039 +1,633 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/app/lib/db';
-import { generateHtmlForFirma } from '@/app/lib/htmlGenerator';
-import * as fs from 'fs';
-import * as path from 'path';
-import { generateVCard } from '@/app/lib/vcardGenerator';
-import { generateQRCode } from '@/app/lib/qrCodeGenerator';
-import cloudinary from '@/app/lib/cloudinary';
 import { logger } from '@/app/lib/logger';
-import { firmaSchema, validateData } from '@/app/lib/validation';
-import { invalidateFirmaCache } from '@/app/lib/cache';
+import { invalidateFirmaCache, FirmaCacheService, CacheMetrics } from '@/app/lib/cache';
+// Use ServiceRegistry for lazy loading to reduce bundle size
+import { 
+  getAuthService, 
+  getFormDataParser, 
+  getFileUploadService, 
+  getFirmaService, 
+  getPostProcessingService,
+  getQuantumCacheInvalidationService 
+} from '@/app/lib/services/ServiceRegistry';
+import { prisma } from '@/app/lib/db';
 
-// Sosyal medya veri yapısı
-interface SocialMediaData {
-  instagramlar: Array<{url: string, label?: string}>;
-  youtubelar: Array<{url: string, label?: string}>;
-  websiteler: Array<{url: string, label?: string}>;
-  haritalar: Array<{url: string, label?: string}>;
-  linkedinler: Array<{url: string, label?: string}>;
-  twitterlar: Array<{url: string, label?: string}>;
-  facebooklar: Array<{url: string, label?: string}>;
-  tiktoklar: Array<{url: string, label?: string}>;
+// API yanıt helper fonksiyonları
+function successResponse(data: any, message?: string, status = 200) {
+  return NextResponse.json({ data, message }, { status });
 }
 
+function errorResponse(message: string, code?: string, details?: any, status = 400) {
+  return NextResponse.json({ 
+    error: { message, code, details } 
+  }, { status });
+}
+
+
 export async function GET(req: NextRequest) {
+  const cacheService = new FirmaCacheService();
+  
   try {
-    const firmalar = await prisma.firmalar.findMany({
-      orderBy: {
-        created_at: 'desc'
-      }
+    const { searchParams } = new URL(req.url);
+    
+    // Parse parameters
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '20')));
+    const search = searchParams.get('search')?.trim() || undefined;
+
+    // 🚀 TRY CACHE FIRST
+    const cachedData = await cacheService.getFirmaList(page, limit, search);
+    
+    if (cachedData) {
+      // Cache hit - return immediately with performance logging
+      CacheMetrics.recordHit();
+      logger.info('🎯 Cache HIT for firmalar list', {
+        page, 
+        limit, 
+        search,
+        age: `${((Date.now() - cachedData.timestamp) / 1000).toFixed(1)}s`,
+        cacheKey: `firmalar:list:p${page}:l${limit}${search ? `:s${search}` : ''}`
+      });
+      
+      return NextResponse.json({
+        ...cachedData,
+        meta: {
+          ...cachedData.meta,
+          cached: true,
+          cacheAge: Date.now() - cachedData.timestamp
+        }
+      });
+    }
+
+    // 🔍 Cache miss - fetch from database
+    CacheMetrics.recordMiss();
+    logger.info('💾 Cache MISS for firmalar list - fetching from database', { 
+      page, 
+      limit, 
+      search 
     });
-    return NextResponse.json({ firmalar });
+    
+    const skip = (page - 1) * limit;
+    const whereClause = search ? {
+      OR: [
+        { firma_adi: { contains: search, mode: 'insensitive' as const } },
+        { slug: { contains: search, mode: 'insensitive' as const } },
+        { yetkili_adi: { contains: search, mode: 'insensitive' as const } }
+      ]
+    } : {};
+
+    // Parallel database queries with count cache optimization
+    const [firmalar, cachedCount] = await Promise.all([
+      prisma.firmalar.findMany({
+        where: whereClause,
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          firma_adi: true,
+          slug: true,
+          profil_foto: true,
+          firma_logo: true,
+          yetkili_adi: true,
+          yetkili_pozisyon: true,
+          created_at: true,
+          updated_at: true,
+          goruntulenme: true,
+          template_id: true,
+          onay: true,
+          // Optimized relations - only essential contact info
+          iletisim_bilgileri: {
+            where: { 
+              aktif: true,
+              tip: { in: ['telefon', 'eposta', 'website'] }
+            },
+            select: { tip: true, deger: true, etiket: true },
+            orderBy: { sira: 'asc' }
+          }
+        },
+        orderBy: { created_at: 'desc' }
+      }),
+      // Try to get count from cache first
+      cacheService.getFirmaCount(search)
+    ]);
+
+    // Get total count (from cache or database)
+    const totalCount = cachedCount ?? await prisma.firmalar.count({ where: whereClause });
+
+    // Transform data
+    const transformedFirmalar = firmalar.map(firma => ({
+      ...firma,
+      goruntulenme: firma.goruntulenme || 0
+    }));
+
+    // Calculate pagination metadata
+    const totalPages = Math.ceil(totalCount / limit);
+    const hasNextPage = page < totalPages;
+    const hasPrevPage = page > 1;
+
+    const responseData = {
+      firmalar: transformedFirmalar,
+      pagination: {
+        page,
+        limit,
+        total: totalCount,
+        totalPages,
+        hasNextPage,
+        hasPrevPage
+      },
+      meta: {
+        count: firmalar.length,
+        search: search || null,
+        cached: false,
+        fetchTime: new Date().toISOString()
+      }
+    };
+
+    // 💾 Cache the response (fire and forget - don't block response)
+    Promise.all([
+      cacheService.setFirmaList(page, limit, {
+        ...responseData,
+        timestamp: Date.now()
+      }, search),
+      cacheService.setFirmaCount(totalCount, search)
+    ]).catch(error => {
+      CacheMetrics.recordError();
+      logger.error('Cache write error (non-blocking):', error);
+    });
+
+    logger.info('✅ Database query completed, response cached', {
+      page,
+      limit,
+      search,
+      resultCount: firmalar.length,
+      totalCount
+    });
+
+    return NextResponse.json(responseData);
+
   } catch (error) {
-    console.error('Firmalar getirilirken hata oluştu:', error);
-    return NextResponse.json(
-      { message: 'Firmalar getirilirken bir hata oluştu' },
-      { status: 500 }
-    );
+    CacheMetrics.recordError();
+    logger.error('Firmalar getirilirken hata:', error);
+    return errorResponse('Firmalar getirilirken bir hata oluştu', 'FETCH_ERROR', null, 500);
   }
 }
 
 export async function POST(req: NextRequest) {
-  console.log("POST request received");
   try {
-    const formData = await req.formData();
-    console.log("Raw form data:", formData);
-
-    // Form verilerini al
-    const firmaAdi = (formData.get('firmaAdi') || formData.get('firma_adi'))?.toString() || '';
-    const slug = formData.get('slug')?.toString() || '';
-    const firmaTuru = formData.get('firmaTuru')?.toString() || '';
-    const adres = formData.get('adres')?.toString() || '';
-    const website = formData.get('website')?.toString() || '';
-    const telefonStr = formData.get('telefon')?.toString() || '';
-    const harita = formData.get('harita')?.toString() || '';
-    const hakkimizda = (formData.get('hakkimizda') || formData.get('firma_hakkinda'))?.toString() || '';
-    const firma_hakkinda_baslik = formData.get('firma_hakkinda_baslik')?.toString() || '';
-    const firma_unvan = formData.get('firma_unvan')?.toString() || '';
-    const firma_vergi_no = formData.get('firma_vergi_no')?.toString() || '';
-    const vergi_dairesi = formData.get('vergi_dairesi')?.toString() || '';
-    
-    // Yetkili bilgilerini farklı olası anahtar isimlerinden al
-    const yetkili_adi = (
-      formData.get('yetkili_adi') || 
-      formData.get('yetkiliAdi')
-    )?.toString() || null;
-    
-    const yetkili_pozisyon = (
-      formData.get('yetkili_pozisyon') || 
-      formData.get('yetkiliPozisyon')
-    )?.toString() || null;
-    
-    // Yetkili bilgilerini logla
-    console.log("=== YETKİLİ BİLGİLERİ ===");
-    console.log("Form data anahtarları:", Array.from(formData.keys()));
-    console.log("Yetkili adı (yetkili_adi):", formData.get('yetkili_adi'));
-    console.log("Yetkili adı (yetkiliAdi):", formData.get('yetkiliAdi'));
-    console.log("Yetkili pozisyon (yetkili_pozisyon):", formData.get('yetkili_pozisyon'));
-    console.log("Yetkili pozisyon (yetkiliPozisyon):", formData.get('yetkiliPozisyon'));
-    console.log("Kullanılacak yetkili_adi:", yetkili_adi);
-    console.log("Kullanılacak yetkili_pozisyon:", yetkili_pozisyon);
-
-    // İletişim hesaplarını al
-    const communicationDataStr = formData.get('communication_data') as string;
-    let communicationAccounts = [];
-    
-    if (communicationDataStr) {
-      try {
-        const parsedData = JSON.parse(communicationDataStr);
-        // Eğer JSON array değilse, boş array olarak devam et
-        communicationAccounts = Array.isArray(parsedData) ? parsedData : [];
-        if (!Array.isArray(parsedData)) {
-          console.error("Communication data parse edildi ama bir dizi değil:", typeof parsedData);
-        }
-        console.log("Communication accounts:", communicationAccounts);
-      } catch (error) {
-        console.error("Communication data parse error:", error);
-        communicationAccounts = []; // Hata durumunda boş dizi
-      }
-    }
-
-    // İletişim türleri için boş dizileri tanımla (tip belirterek)
-    let telefonlar: Array<{value: string, label?: string}> = [];
-    let epostalar: Array<{value: string, label?: string}> = [];
-    let whatsapplar: Array<{value: string, label?: string}> = [];
-    let telegramlar: Array<{value: string, label?: string}> = [];
-    let haritalar: Array<{value: string, label?: string}> = [];
-    let websiteler: Array<{value: string, label?: string}> = [];
-    
-    // FormData'nın tüm anahtarlarını al
-    const formKeys = Array.from(formData.keys());
-    
-    // Anahtar ve değerleri logla
-    console.log("Tüm form anahtarları:", formKeys.join(", "));
-    
-    // Her iletişim türü için SADECE İNDEKSLİ DEĞERLERİ işle
-    ['telefon', 'eposta', 'whatsapp', 'telegram', 'harita', 'website'].forEach(type => {
-      // İndeksli değerleri al
-      formKeys.filter(key => key.startsWith(`${type}[`)).forEach(key => {
-        const value = formData.get(key)?.toString();
-        // İndeks değerini çıkar (örn: telefon[0] -> 0)
-        const indexMatch = key.match(/\[(\d+)\]/);
-        const index = indexMatch ? indexMatch[1] : null;
-        
-        // Doğru label anahtarını oluştur
-        const labelKey = index ? `${type}_label[${index}]` : null;
-        const label = labelKey ? formData.get(labelKey)?.toString() : null;
-        
-        console.log(`İndeksli iletişim değeri: ${key}, value: ${value || 'yok'}, labelKey: ${labelKey || 'yok'}, label: ${label || 'yok'}`);
-        
-        if (value) {
-          const item: {value: string, label?: string} = { value };
-          if (label && label.trim() !== '') {
-            item.label = label.trim();
-            console.log(`İndeksli iletişim etiketi (${type}[${index}]): "${label.trim()}"`);
-          }
-          
-          // item nesnesini doğru tipe sahip diziye ekle (as any kaldırıldı)
-          if (type === 'telefon') telefonlar.push(item);
-          else if (type === 'eposta') epostalar.push(item);
-          else if (type === 'whatsapp') whatsapplar.push(item);
-          else if (type === 'telegram') telegramlar.push(item);
-          else if (type === 'harita') haritalar.push(item);
-          else if (type === 'website') websiteler.push(item);
-        }
-      });
-    });
-
-    // Tekrarlanan değerleri çıkar (VALUE bazında kontrol et, SON EKLENENİ veya LABEL'ı olanı koru)
-    const uniqueItems = <T extends { value: string, label?: string }>(array: T[]): Array<T> => {
-      if (!array || !Array.isArray(array)) return [];
-      const seenValues = new Map<string, T>();
-      // Diziyi normal sırada işleyelim, böylece aynı değere sahip 
-      // birden fazla giriş varsa Map'e en son eklenen kalır.
-      array.forEach(item => {
-        if (item && item.value) { // Ekstra kontrol: item ve item.value geçerli mi?
-          const normalizedValue = item.value.toLowerCase().trim();
-          // Her zaman Map'e ekle/güncelle. Aynı anahtar varsa üzerine yazılacak.
-          seenValues.set(normalizedValue, item);
-        }
-      });
-      return Array.from(seenValues.values());
-    };
-
-    telefonlar = uniqueItems(telefonlar);
-    epostalar = uniqueItems(epostalar);
-    whatsapplar = uniqueItems(whatsapplar);
-    telegramlar = uniqueItems(telegramlar);
-    haritalar = uniqueItems(haritalar);
-    websiteler = uniqueItems(websiteler);
-    
-    // Telegram kullanıcı adlarından @ işaretini kaldır
-    telegramlar = telegramlar.map(item => ({
-      ...item,
-      value: item.value.replace(/^@/, '')
-    }));
-
-    // İletişim verilerini JSON formatına dönüştür
-    const communicationData = {
-      telefonlar: telefonlar,
-      epostalar: epostalar,
-      whatsapplar: whatsapplar,
-      telegramlar: telegramlar,
-      haritalar: haritalar,
-      websiteler: websiteler
-    };
-    
-    const communicationDataJSON = JSON.stringify(communicationData);
-    console.log("Güncellenen Communication Data:", communicationDataJSON);
-
-    // Sosyal medya hesaplarını işleyen yardımcı fonksiyon
-    const sosyalMedyaHesaplariStr = formData.get('sosyalMedyaHesaplari') as string;
-    let sosyalMedyaHesaplari = [];
-
-    console.log("Sosyal medya hesapları işleniyor (POST)");
-    console.log("Raw sosyalMedyaHesaplariStr:", sosyalMedyaHesaplariStr);
-
-    if (sosyalMedyaHesaplariStr) {
-      try {
-        // String olarak gelen veri, direkt JSON olabilir veya escaped JSON olabilir
-        // Önce normal JSON parse deneyelim
-        try {
-          sosyalMedyaHesaplari = JSON.parse(sosyalMedyaHesaplariStr);
-        } catch (firstError) {
-          // Eğer başarısız olursa, stringi düzeltip yeniden deneyelim
-          try {
-            // Çift tırnak içindeki tek tırnakları düzelt
-            const cleanedStr = sosyalMedyaHesaplariStr
-              .replace(/\\"/g, '"')                  // Escaped çift tırnakları düzelt
-              .replace(/^"(.*)"$/, '$1')            // Başta ve sonda çift tırnak varsa kaldır
-              .replace(/\\\\"/g, '\\"');            // Escaped ters eğik çizgileri düzelt
-            
-            sosyalMedyaHesaplari = JSON.parse(cleanedStr);
-          } catch (secondError) {
-            // Hala başarısız oluyorsa orijinal hatayı göster
-            console.error('sosyalMedyaHesaplari parse hatası (ilk deneme):', firstError);
-            console.error('sosyalMedyaHesaplari parse hatası (ikinci deneme):', secondError);
-            console.error('Parse edilemeyen içerik:', sosyalMedyaHesaplariStr);
-          }
-        }
-        
-        console.log("Parse edilen sosyalMedyaHesaplari:", sosyalMedyaHesaplari);
-      } catch (error) {
-        console.error('sosyalMedyaHesaplari parse hatası (genel):', error);
-        console.error('Parse edilemeyen içerik:', sosyalMedyaHesaplariStr);
-        sosyalMedyaHesaplari = [];
-      }
-    }
-
-    // sosyalMedyaHesaplari bir array değilse düzelt
-    if (!Array.isArray(sosyalMedyaHesaplari)) {
-      console.error('sosyalMedyaHesaplari bir array değil:', typeof sosyalMedyaHesaplari);
-      sosyalMedyaHesaplari = [];
-    } else {
-      // Her bir sosyal medya hesabını kontrol et
-      sosyalMedyaHesaplari.forEach((hesap, index) => {
-        console.log(`Sosyal medya hesabı ${index}:`, hesap);
-        if (hesap && typeof hesap === 'object') {
-          console.log(`Platform: ${hesap.platform}, Değer: ${hesap.value}`);
-        } else {
-          console.warn(`Geçersiz sosyal medya hesabı formatı (index: ${index}):`, hesap);
-        }
-      });
-    }
-
-    const socialMediaData = await processSocialMediaAccounts(formData, sosyalMedyaHesaplari);
-
-    // Banka hesaplarını al
-    const bankaHesaplariStr = formData.get('bankaHesaplari') as string;
-    const bankaHesaplari = bankaHesaplariStr ? JSON.parse(bankaHesaplariStr) : [];
-    console.log("Bank accounts:", bankaHesaplari);
-
-    // Zorunlu alanları kontrol et
-    if (!firmaAdi || !slug) {
-      return NextResponse.json({ error: 'Firma adı ve slug zorunludur' }, { status: 400 });
-    }
-
-    // Slug kontrolü
-    const existingFirm = await prisma.firmalar.findUnique({
-      where: { slug },
-    });
-
-    if (existingFirm) {
-      return NextResponse.json({ error: 'Bu slug zaten kullanılıyor' }, { status: 400 });
-    }
-
-    // Dosya yüklemeleri
-    let profilePhotoUrl = null;
-    let catalogUrl = null;
-    let avatarFileName = null;
-    let katalogFileName = null;
-    let firmLogoFileName = null;
-
-    // Profil fotoğrafı yükleme
-    const profilePhoto = formData.get('profilePhoto') as File;
-    if (profilePhoto && profilePhoto.size > 0) {
-      avatarFileName = await uploadToCloudinary(profilePhoto, 'profil_fotograflari');
-      console.log("Profile photo Cloudinary'e yüklendi:", avatarFileName);
-    }
-
-    // Firma logosu yükleme
-    const logoFile = formData.get('logoFile') as File;
-    if (logoFile && logoFile.size > 0) {
-      firmLogoFileName = await uploadToCloudinary(logoFile, 'firma_logolari');
-      console.log("Firma logosu Cloudinary'e yüklendi:", firmLogoFileName);
-    }
-
-    // Katalog yükleme (POST ve PUT için ortak mantık)
-    const katalog = formData.get('katalog') as File | string;
-    if (katalog) {
-      if (typeof katalog === 'string') {
-        katalogFileName = katalog;
-      } else if (katalog.size > 0) {
-        katalogFileName = await uploadToCloudinary(katalog, 'firma_kataloglari');
-      }
-    }
-    console.log("Katalog formData'dan gelen:", katalog);
-    console.log("Katalog kaydedilecek değer:", katalogFileName);
-
-    // Form'da social media alanları
-    console.log("Social Media alanları işleniyor");
-
-    const bankAccountsJSON = formData.get("bankaHesaplari")?.toString() || "[]";
-    
-    // Sosyal medya verilerini formData'dan al
-    const socialMediaDataJSON = formData.get("social_media_data")?.toString() || "{}";
-    console.log("Social Media Data JSON (formData'dan):", socialMediaDataJSON);
-    
-    // socialMediaData'dan JSON oluştur - doğru format için bu yapıya çevir
-    const formattedSocialMediaData = {
-      instagramlar: socialMediaData.instagramlar.map(item => ({ url: item.url, label: item.label })),
-      youtubelar: socialMediaData.youtubelar.map(item => ({ url: item.url, label: item.label })),
-      websiteler: socialMediaData.websiteler.map(item => ({ url: item.url, label: item.label })),
-      haritalar: socialMediaData.haritalar.map(item => ({ url: item.url, label: item.label })),
-      linkedinler: socialMediaData.linkedinler.map(item => ({ url: item.url, label: item.label })),
-      twitterlar: socialMediaData.twitterlar.map(item => ({ url: item.url, label: item.label })),
-      facebooklar: socialMediaData.facebooklar.map(item => ({ url: item.url, label: item.label })),
-      tiktoklar: socialMediaData.tiktoklar.map(item => ({ url: item.url, label: item.label }))
-    };
-    
-    // Eğer socialMediaDataJSON boş ise formattedSocialMediaData'yı kullan
-    const finalSocialMediaJSON = socialMediaDataJSON && socialMediaDataJSON !== "{}" 
-      ? socialMediaDataJSON 
-      : JSON.stringify(formattedSocialMediaData);
-    
-    console.log("Final Social Media JSON:", finalSocialMediaJSON);
-    console.log("Bank Accounts JSON:", bankAccountsJSON);
-
-    // İşlenen sosyal medya verilerini güvenli şekilde al
-    // BU FONKSİYON KULLANILMIYOR GİBİ, ŞİMDİLİK YORUMA ALINABİLİR VEYA KALDIRILABİLİR
-    /*
-    const getSocialMediaValue = (source: any, field: string) => {
-      // ... (fonksiyon içeriği)
-    };
-    */
-
-    // Veritabanına kaydet (Doğru olan blok bu)
-    const newFirm = await prisma.firmalar.create({
-      data: {
-        firma_adi: firmaAdi || "",
-        slug: slug,
-        profil_foto: avatarFileName ? avatarFileName : null,
-        firma_logo: firmLogoFileName ? firmLogoFileName : null,
-        katalog: katalogFileName || null,
-        yetkili_adi: yetkili_adi,
-        yetkili_pozisyon: yetkili_pozisyon,
-        firma_hakkinda: hakkimizda || null,
-        firma_unvan: firma_unvan || null,
-        firma_vergi_no: firma_vergi_no || null,
-        vergi_dairesi: vergi_dairesi || null,
-        firma_hakkinda_baslik: firma_hakkinda_baslik || null,
-        communication_data: communicationDataJSON, // İşlenmiş iletişim verileri
-        bank_accounts: bankAccountsJSON,           // Banka hesapları
-        social_media_data: finalSocialMediaJSON,  // İşlenmiş sosyal medya verileri
-      },
-    });
-
-    console.log("Yeni firma oluşturuldu:", newFirm);
-
-    // En güncel firma verilerini tekrar çek
-    const refreshedFirma = await prisma.firmalar.findUnique({
-      where: { id: newFirm.id }
-    }) as any;
-    
-    if (!refreshedFirma) {
-      throw new Error("Güncel firma verisi bulunamadı");
-    }
-    
-    // HTML ve vCard dosyalarını oluştur
-    try {
-      await generateHtmlForFirma(refreshedFirma);
-      console.log(`HTML oluşturuldu: ${refreshedFirma.slug}`);
-      
-      // QR kod oluştur
-      const qrCodeDataUrl = await generateQRCode(`${process.env.NEXT_PUBLIC_BASE_URL}/${refreshedFirma.slug}`);
-      console.log('QR kod base64 üretildi:', qrCodeDataUrl ? 'OK' : 'HATA');
-    } catch (error) {
-      console.error('HTML/vCard oluşturulurken hata:', error);
-      // HTML oluşturma hatası, firma oluşturma işlemini engellemeyecek
-    }
-    
-    return NextResponse.json({
-      message: 'Firma başarıyla oluşturuldu',
-      firma: refreshedFirma
-    }, { status: 201 });
-    
-  } catch (error) {
-    console.error('Firma oluşturulurken hata oluştu:', error);
-    // Hata detaylarını göster
-    let errorMessage = 'Firma oluşturulurken bir hata oluştu';
-    let errorDetails = '';
-    
-    if (error instanceof Error) {
-      errorMessage = error.message;
-      errorDetails = JSON.stringify(error, Object.getOwnPropertyNames(error), 2);
-    }
-    
-    return NextResponse.json(
-      { 
-        message: errorMessage, 
-        error: error instanceof Error ? error.toString() : 'Bilinmeyen hata',
-        details: errorDetails 
-      },
-      { status: 500 }
-    );
-  }
-}
-
-// Sosyal medya hesaplarını işleyen yardımcı fonksiyon
-async function processSocialMediaAccounts(formData: FormData, sosyalMedyaHesaplari: any[] = []): Promise<{ 
-  instagramlar: Array<{url: string, label?: string}>, 
-  youtubelar: Array<{url: string, label?: string}>, 
-  websiteler: Array<{url: string, label?: string}>, 
-  haritalar: Array<{url: string, label?: string}>, 
-  linkedinler: Array<{url: string, label?: string}>, 
-  twitterlar: Array<{url: string, label?: string}>, 
-  facebooklar: Array<{url: string, label?: string}>, 
-  tiktoklar: Array<{url: string, label?: string}>
-}> {
-  console.log("=== SOSYAL MEDYA HESAPLARI İŞLENİYOR ===");
-  console.log("Form data anahtarları:", Array.from(formData.keys()));
-  
-  // İşlenmiş sosyalMedyaHesaplari parametresini kontrol et
-  if (!sosyalMedyaHesaplari || !Array.isArray(sosyalMedyaHesaplari)) {
-    console.error("sosyalMedyaHesaplari tanımlı değil veya bir array değil, boş array kullanılacak");
-    sosyalMedyaHesaplari = [];
-  }
-  
-  const formKeys = Array.from(formData.keys());
-  
-  // Sosyal medya platformları için diziler (artık her biri obje dizisi)
-  let instagramlar: Array<{url: string, label?: string}> = [];
-  let youtubelar: Array<{url: string, label?: string}> = [];
-  let websiteler: Array<{url: string, label?: string}> = [];
-  let haritalar: Array<{url: string, label?: string}> = [];
-  let linkedinler: Array<{url: string, label?: string}> = [];
-  let twitterlar: Array<{url: string, label?: string}> = [];
-  let facebooklar: Array<{url: string, label?: string}> = [];
-  let tiktoklar: Array<{url: string, label?: string}> = [];
-  
-  // İletişim formundan gelen websiteler ve haritaları ekle
-  if (sosyalMedyaHesaplari && sosyalMedyaHesaplari.length > 0) {
-    try {
-      console.log('İletişim formundan gelen platform değerleri:', sosyalMedyaHesaplari.map(account => account && account.platform ? account.platform : 'undefined'));
-      sosyalMedyaHesaplari.forEach(account => {
-        if (account && typeof account === 'object' && account.platform && typeof account.platform === 'string' && account.url && typeof account.url === 'string' && account.url.trim() !== '') {
-          const hesapObj = { url: account.url.trim(), label: account.label };
-          switch (account.platform.toLowerCase()) {
-            case 'instagram': instagramlar.push(hesapObj); break;
-            case 'youtube': youtubelar.push(hesapObj); break;
-            case 'website': websiteler.push(hesapObj); break;
-            case 'harita': haritalar.push(hesapObj); break;
-            case 'linkedin': linkedinler.push(hesapObj); break;
-            case 'twitter': twitterlar.push(hesapObj); break;
-            case 'facebook': facebooklar.push(hesapObj); break;
-            case 'tiktok': tiktoklar.push(hesapObj); break;
-            default:
-              console.warn(`Bilinmeyen platform türü: ${account.platform}`);
-          }
-        } else {
-          console.warn("Geçersiz sosyal medya hesabı formatı: ", account);
-        }
-      });
-    } catch (error) {
-      console.error("sosyalMedyaHesaplari işlenirken hata oluştu:", error);
-    }
-  }
-  
-  // FormData'dan tüm değerleri doğru şekilde alma
-  // 'website' ve 'harita' çıkarıldı, bunlar iletişim bölümünde işleniyor.
-  const platformlar = ['instagram', 'youtube', 'linkedin', 'twitter', 'facebook', 'tiktok'];
-  
-  console.log("İşlenecek platformlar (processSocialMediaAccounts):", platformlar);
-  
-  // Her platform için sosyal medya hesaplarını işleyelim
-  platformlar.forEach(platform => {
-    try {
-      // URL değerlerini toplama (platform[index])
-      const urlKeys = formKeys.filter(key => key.startsWith(`${platform}[`) && key.endsWith(']') && !key.includes('label'));
-      
-      // Her URL için label değerini de bulma girişimi
-      urlKeys.forEach(urlKey => {
-        const value = formData.get(urlKey)?.toString();
-        if (value && value.trim() !== '') {
-          // URL'den indeksi çıkar, örn: "instagram[0]" -> "0"
-          const indexMatch = urlKey.match(/\[(\d+)\]/);
-          if (indexMatch && indexMatch[1]) {
-            const index = indexMatch[1];
-            
-            // Bu indeks için label var mı kontrol et
-            const labelKey = `${platform}_label[${index}]`;
-            let label = formData.get(labelKey)?.toString() || '';
-            
-            // Eğer label yoksa veya boşsa undefined olarak bırak
-            if (!label || label.trim() === '') {
-              label = undefined as any; // tip hatası olmasın diye any olarak dönüştürüyoruz
-            }
-            
-            // Platform tipine göre doğru diziye ekle
-            const hesapObj = { url: value.trim(), label };
-            switch (platform) {
-              case 'instagram': instagramlar.push(hesapObj); break;
-              case 'youtube': youtubelar.push(hesapObj); break;
-              case 'linkedin': linkedinler.push(hesapObj); break;
-              case 'twitter': twitterlar.push(hesapObj); break;
-              case 'facebook': facebooklar.push(hesapObj); break;
-              case 'tiktok': tiktoklar.push(hesapObj); break;
-            }
-          }
-        }
-      });
-    } catch (error) {
-      console.error(`Platform ${platform} işlenirken hata oluştu:`, error);
-    }
-  });
-  
-  // Sosyal Medya hesaplarından gelen değerleri de ekleyelim (sosyalMedyaHesaplari parametresinden)
-  console.log("sosyalMedyaHesaplari içeriğini işliyorum:", sosyalMedyaHesaplari);
-  
-  try {
-    // Hatalı yapıdaki sosyal medya hesaplarını filtreleme
-    const validAccounts = sosyalMedyaHesaplari.filter(account => 
-      account && 
-      typeof account === 'object' && 
-      account.platform && 
-      typeof account.platform === 'string' &&
-      account.url && 
-      typeof account.url === 'string' &&
-      account.url.trim() !== ''
-    );
-    
-    if (validAccounts.length !== sosyalMedyaHesaplari.length) {
-      console.warn(`${sosyalMedyaHesaplari.length - validAccounts.length} adet geçersiz sosyal medya hesabı filtrelendi`);
-    }
-    
-    // Geçerli sosyal medya hesaplarını işle
-    validAccounts.forEach((account) => {
-      try {
-        const platform = account.platform.toLowerCase();
-        const url = account.url.trim();
-        const label = account.label && account.label.trim() !== '' ? account.label.trim() : undefined;
-        
-        console.log(`JSON'dan işleniyor: Platform: ${platform}, URL: ${url}, Label: ${label || 'yok'}`);
-        
-        const hesapObj = { url, label };
-        // 'website' ve 'harita' case'leri kaldırıldı.
-        switch (platform) {
-          case 'instagram': instagramlar.push(hesapObj); break;
-          case 'youtube': youtubelar.push(hesapObj); break;
-          case 'linkedin': linkedinler.push(hesapObj); break;
-          case 'twitter': twitterlar.push(hesapObj); break;
-          case 'facebook': facebooklar.push(hesapObj); break;
-          case 'tiktok': tiktoklar.push(hesapObj); break;
-          default:
-            // Website ve Harita dışındaki bilinmeyenler için uyar
-            if (platform !== 'website' && platform !== 'harita') {
-               console.warn(`Bilinmeyen platform türü (processSocialMediaAccounts): ${platform}`);
-            }
-        }
-      } catch (error) {
-        console.error("Sosyal medya hesabı işlenirken hata oluştu:", error);
-      }
-    });
-    
-    // Instagram ve YouTube kullanıcı adı/URL düzenlemeleri
-    instagramlar = instagramlar.map(item => {
-      try {
-        const url = item.url.replace(/^@/, ''); // @ işaretini kaldır
-        // instagram.com/ veya instagram.com/p/ gibi URL parçalarını temizle
-        const match = url.match(/(?:instagram\.com\/)?(?:p\/)?([^/?]+)/i);
-        return { 
-          url: match ? match[1] : url, 
-          label: item.label 
-        };
-      } catch (error) {
-        console.error("Instagram URL'i işlenirken hata oluştu:", error);
-        return item;
-      }
-    });
-    
-    youtubelar = youtubelar.map(item => {
-      try {
-        let url = item.url;
-        // URL'yi temizleme işlemi
-        if (url.includes('youtube.com') || url.includes('youtu.be')) {
-          const match = url.match(/(?:youtube\.com\/(?:user\/|channel\/|c\/)?|youtu\.be\/)([^/?&]+)/i);
-          if (match) {
-            url = match[1];
-          }
-        }
-        return { 
-          url, 
-          label: item.label 
-        };
-      } catch (error) {
-        console.error("YouTube URL'i işlenirken hata oluştu:", error);
-        return item;
-      }
-    });
-    
-    // Tekrarlanan URL'leri kaldır (aynı URL'ye sahip hesaplardan sadece bir tane sakla, label'ı olan tercih edilir)
-    // Her platform için ayrı ayrı yapmalıyız
-    const uniqueByUrl = <T extends { url: string, label?: string }>(array: T[]): T[] => {
-      try {
-        if (!array || !Array.isArray(array)) {
-          console.error("uniqueByUrl: Array tanımlı değil veya array formatında değil");
-          return [];
-        }
-        
-        const seen = new Map<string, T>();
-        
-        // Önce label'lı olanları işle, sonra diğerlerini
-        const sorted = [...array].sort((a, b) => ((b.label ? 1 : 0) - (a.label ? 1 : 0)));
-        
-        for (const item of sorted) {
-          if (!seen.has(item.url)) {
-            seen.set(item.url, item);
-          }
-        }
-        
-        return Array.from(seen.values());
-      } catch (error) {
-        console.error("uniqueByUrl işlemi sırasında hata oluştu:", error);
-        return array || [];
-      }
-    };
-    
-    instagramlar = uniqueByUrl(instagramlar);
-    youtubelar = uniqueByUrl(youtubelar);
-    websiteler = uniqueByUrl(websiteler);
-    haritalar = uniqueByUrl(haritalar);
-    linkedinler = uniqueByUrl(linkedinler);
-    twitterlar = uniqueByUrl(twitterlar);
-    facebooklar = uniqueByUrl(facebooklar);
-    tiktoklar = uniqueByUrl(tiktoklar);
-  } catch (error) {
-    console.error("Sosyal medya hesapları işlenirken kritik hata oluştu:", error);
-  }
-  
-  console.log("=== SOSYAL MEDYA HESAPLARI İŞLEME TAMAMLANDI ===");
-  console.log("İşlenen sosyal medya hesapları:", {
-    instagramlar,
-    youtubelar,
-    websiteler,
-    haritalar,
-    linkedinler,
-    twitterlar,
-    facebooklar,
-    tiktoklar
-  });
-  
-  return {
-    instagramlar,
-    youtubelar,
-    websiteler,
-    haritalar,
-    linkedinler,
-    twitterlar,
-    facebooklar,
-    tiktoklar
-  };
-}
-
-async function uploadToCloudinary(file: File, folder: string): Promise<string | null> {
-  try {
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    const uploadResult = await new Promise<any>((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
-        { folder, resource_type: 'raw' }, // PDF ve diğer binary dosyalar için raw
-        (error: any, result: any) => {
-          if (error) return reject(error);
-          resolve(result);
-        }
+    // 1. Authentication
+    const authService = await getAuthService();
+    const authResult = await authService.validateSession(req);
+    if (!authResult.isValid) {
+      return errorResponse(
+        authResult.error || 'Authentication failed',
+        'AUTH_REQUIRED',
+        { requiredAuth: true },
+        401
       );
-      stream.end(buffer);
+    }
+
+    // 2. Parse form data
+    const formData = await req.formData();
+    
+    // 3. Parse and validate basic data
+    const formDataParser = await getFormDataParser();
+    const basicDataResult = formDataParser.parseBasicData(formData);
+    if (!basicDataResult.success) {
+      return errorResponse(
+        'Validasyon hatası',
+        'VALIDATION_ERROR',
+        basicDataResult.errors
+      );
+    }
+
+    // 4. Parse relational data
+    const relationalData = formDataParser.parseRelationalData(formData);
+
+    // 5. Process file uploads
+    const fileUploadService = await getFileUploadService();
+    const fileUploadResult = await fileUploadService.processUploads(formData);
+    if (!fileUploadResult.success) {
+      return errorResponse(
+        fileUploadResult.error || 'File upload failed',
+        'FILE_UPLOAD_ERROR'
+      );
+    }
+
+    // 6. Create firma in database
+    const firmaService = await getFirmaService();
+    const createResult = await firmaService.createFirma({
+      basicData: basicDataResult.data,
+      relationalData,
+      fileUrls: fileUploadResult.urls!
     });
-    return uploadResult.secure_url;
+
+    if (!createResult.success) {
+      return errorResponse(
+        createResult.error || 'Database operation failed',
+        'CREATE_ERROR'
+      );
+    }
+
+    // 7. C7 Level: Quantum Cache Invalidation for CREATE operation
+    const quantumCacheService = await getQuantumCacheInvalidationService();
+    quantumCacheService.quantumInvalidate('create', createResult.firma!, {
+      quantumEntanglement: true,
+      multiverseInvalidation: true,
+      temporalCacheSync: true,
+      probabilisticInvalidation: true,
+      quantumTunneling: true,
+      waveformCollapse: true,
+      superpositionCache: true,
+      quantumCoherence: true,
+      entanglementRadius: 8,
+      uncertaintyPrinciple: true,
+      quantumDecoherence: false,
+      parallelUniverseSync: true
+    }).then(result => {
+      logger.info('🌌 Quantum cache invalidation completed for CREATE', {
+        entityId: createResult.firma!.id,
+        quantumState: result.quantumState,
+        entangledKeys: result.entangledKeys.length,
+        quantumEfficiency: result.quantumEfficiency,
+        multiverseSync: result.multiverseSync,
+        parallelUniverseCount: result.parallelUniverseCount
+      });
+    }).catch(error => {
+      logger.error('💥 Quantum cache invalidation failed (non-critical):', error);
+    });
+
+    // 8. Post-processing (non-blocking)
+    const postProcessingService = await getPostProcessingService();
+    postProcessingService.processNewFirma(createResult.firma!).catch(error => {
+      logger.error('Post-processing failed (non-critical):', error);
+    });
+
+    // 9. Return success response
+    return successResponse(createResult.firma, 'Firma başarıyla oluşturuldu', 201);
+
   } catch (error) {
-    console.error('Cloudinary yükleme hatası:', error);
-    return null;
+    logger.error('POST method error:', error);
+    return errorResponse(
+      'Firma oluşturulurken bir hata oluştu',
+      'CREATE_ERROR',
+      error instanceof Error ? error.message : 'Bilinmeyen hata',
+      500
+    );
   }
 }
 
 export async function PUT(req: NextRequest) {
-  console.log("PUT request received");
+  const startTime = performance.now();
+  
   try {
+    logger.info('🔄 PUT operation initiated');
+
+    // 1. Extract firma ID from URL
+    const url = new URL(req.url);
+    const pathSegments = url.pathname.split('/');
+    const firmaId = pathSegments[pathSegments.length - 1];
+    
+    if (!firmaId || firmaId === 'route.ts') {
+      return errorResponse(
+        'Firma ID gereklidir',
+        'MISSING_FIRMA_ID',
+        { providedPath: url.pathname },
+        400
+      );
+    }
+
+    // 2. Authentication
+    const authService = await getAuthService();
+    const authResult = await authService.validateSession(req);
+    if (!authResult.isValid) {
+      return errorResponse(
+        authResult.error || 'Authentication failed',
+        'AUTH_REQUIRED',
+        { requiredAuth: true },
+        401
+      );
+    }
+
+    // 3. Check if firma exists
+    const existingFirma = await prisma.firmalar.findUnique({
+      where: { id: parseInt(firmaId) },
+      select: {
+        id: true,
+        firma_adi: true,
+        slug: true,
+        profil_foto: true,
+        firma_logo: true,
+        template_id: true,
+        created_at: true
+      }
+    });
+
+    if (!existingFirma) {
+      return errorResponse(
+        'Firma bulunamadı',
+        'FIRMA_NOT_FOUND',
+        { firmaId },
+        404
+      );
+    }
+
+    // 4. Parse form data
     const formData = await req.formData();
-    console.log("Raw form data:", formData);
-
-    // Form verilerini al
-    const firmaId = formData.get('firmaId')?.toString() || '';
-    const firmaAdi = (formData.get('firmaAdi') || formData.get('firma_adi'))?.toString() || '';
-    const slug = formData.get('slug')?.toString() || '';
-    const adres = formData.get('adres')?.toString() || '';
-    const website = formData.get('website')?.toString() || '';
-    const harita = formData.get('harita')?.toString() || '';
-    const firma_hakkinda = (formData.get('firma_hakkinda') || formData.get('hakkimizda'))?.toString() || '';
-    const firma_hakkinda_baslik = formData.get('firma_hakkinda_baslik')?.toString() || '';
-    const firma_unvan = formData.get('firma_unvan')?.toString() || '';
-    const firma_vergi_no = formData.get('firma_vergi_no')?.toString() || '';
-    const vergi_dairesi = formData.get('vergi_dairesi')?.toString() || '';
-    const yetkiliAdi = formData.get('yetkiliAdi')?.toString() || '';
-    const yetkiliPozisyon = formData.get('yetkiliPozisyon')?.toString() || '';
-
-    // İletişim hesaplarını al
-    const communicationDataStr = formData.get('communication_data') as string;
-    let communicationAccounts = [];
     
-    if (communicationDataStr) {
-      try {
-        const parsedData = JSON.parse(communicationDataStr);
-        // Eğer JSON array değilse, boş array olarak devam et
-        communicationAccounts = Array.isArray(parsedData) ? parsedData : [];
-        if (!Array.isArray(parsedData)) {
-          console.error("Communication data parse edildi ama bir dizi değil:", typeof parsedData);
-        }
-        console.log("Communication accounts:", communicationAccounts);
-      } catch (error) {
-        console.error("Communication data parse error:", error);
-        communicationAccounts = []; // Hata durumunda boş dizi
-      }
+    // 5. Parse and validate basic data
+    const formDataParser = await getFormDataParser();
+    const basicDataResult = formDataParser.parseBasicData(formData);
+    if (!basicDataResult.success) {
+      return errorResponse(
+        'Validasyon hatası',
+        'VALIDATION_ERROR',
+        basicDataResult.errors
+      );
     }
 
-    // İletişim verilerini türlerine göre gruplandır
-    const telefonlar = communicationAccounts.filter(acc => acc.type === 'telefon').map(acc => ({ value: acc.value, label: acc.label }));
-    const epostalar = communicationAccounts.filter(acc => acc.type === 'eposta').map(acc => ({ value: acc.value, label: acc.label }));
-    const whatsapplar = communicationAccounts.filter(acc => acc.type === 'whatsapp').map(acc => ({ value: acc.value, label: acc.label }));
-    const telegramlar = communicationAccounts.filter(acc => acc.type === 'telegram').map(acc => ({ value: acc.value, label: acc.label }));
-    const haritalar = communicationAccounts.filter(acc => acc.type === 'harita').map(acc => ({ value: acc.value, label: acc.label }));
-    const websiteler = communicationAccounts.filter(acc => acc.type === 'website').map(acc => ({ value: acc.value, label: acc.label }));
+    // 6. Parse relational data
+    const relationalData = formDataParser.parseRelationalData(formData);
+
+    // 7. Process file uploads (only if new files provided)
+    const fileUploadService = await getFileUploadService();
+    const fileUploadResult = await fileUploadService.processUploads(formData);
     
-    // İletişim hesaplarından gelen değerleri de ekleyelim
-    if (Array.isArray(communicationAccounts)) {
-      communicationAccounts.forEach((account: any) => {
-        if (account && typeof account === 'object') {
-          // account.value veya account.url kontrolü yap (iki format da desteklensin)
-          const value = typeof account.value === 'string' ? account.value : 
-                        typeof account.url === 'string' ? account.url : null;
-                        
-          if (value) {
-            // Label her zaman bir değer alacak - boş string de olsa
-            const label = typeof account.label === 'string' && account.label.trim() !== '' ? 
-                         account.label.trim() : '';
-            
-            // item objesi label zorunlu olarak tanımlandı
-            const item = { value, label };
-            
-            console.log(`İletişim hesabı ekleniyor: ${account.type}, değer: ${value}, etiket: ${label || 'yok'}`);
-            
-            // Dizileri item ile güncelle - tip tanımlarını dönüştürerek
-            if (account.type === 'telefon') telefonlar.push(item);
-            else if (account.type === 'eposta') epostalar.push(item);
-            else if (account.type === 'whatsapp') whatsapplar.push(item);
-            else if (account.type === 'telegram') telegramlar.push(item);
-            else if (account.type === 'harita') haritalar.push(item);
-            else if (account.type === 'website') websiteler.push(item);
-          }
-        }
-      });
-    } else {
-      console.error("communicationAccounts bir dizi değil:", typeof communicationAccounts);
+    if (!fileUploadResult.success) {
+      return errorResponse(
+        fileUploadResult.error || 'File upload failed',
+        'FILE_UPLOAD_ERROR'
+      );
     }
 
-    // İletişim verilerini JSON formatına dönüştür
-    const communicationData = {
-      telefonlar: telefonlar,
-      epostalar: epostalar,
-      whatsapplar: whatsapplar,
-      telegramlar: telegramlar,
-      haritalar: haritalar,
-      websiteler: websiteler
-    };
-    
-    const communicationDataJSON = JSON.stringify(communicationData);
-    console.log("Güncellenen Communication Data:", communicationDataJSON);
-
-    // Sosyal medya hesaplarını işleyen yardımcı fonksiyon
-    const sosyalMedyaHesaplariStr = formData.get('sosyalMedyaHesaplari') as string;
-    let sosyalMedyaHesaplari = [];
-    
-    console.log("Sosyal medya hesapları işleniyor (PUT)");
-    console.log("Raw sosyalMedyaHesaplariStr:", sosyalMedyaHesaplariStr);
-    
-    if (sosyalMedyaHesaplariStr) {
-      try {
-        // String olarak gelen veri, direkt JSON olabilir veya escaped JSON olabilir
-        // Önce normal JSON parse deneyelim
-        try {
-          sosyalMedyaHesaplari = JSON.parse(sosyalMedyaHesaplariStr);
-        } catch (firstError) {
-          // Eğer başarısız olursa, stringi düzeltip yeniden deneyelim
-          try {
-            // Çift tırnak içindeki tek tırnakları düzelt
-            const cleanedStr = sosyalMedyaHesaplariStr
-              .replace(/\\"/g, '"')                  // Escaped çift tırnakları düzelt
-              .replace(/^"(.*)"$/, '$1')            // Başta ve sonda çift tırnak varsa kaldır
-              .replace(/\\\\"/g, '\\"');            // Escaped ters eğik çizgileri düzelt
-            
-            sosyalMedyaHesaplari = JSON.parse(cleanedStr);
-          } catch (secondError) {
-            // Hala başarısız oluyorsa orijinal hatayı göster
-            console.error('sosyalMedyaHesaplari parse hatası (ilk deneme):', firstError);
-            console.error('sosyalMedyaHesaplari parse hatası (ikinci deneme):', secondError);
-            console.error('Parse edilemeyen içerik:', sosyalMedyaHesaplariStr);
-          }
-        }
-        
-        console.log("Parse edilen sosyalMedyaHesaplari:", sosyalMedyaHesaplari);
-      } catch (error) {
-        console.error('sosyalMedyaHesaplari parse hatası (genel):', error);
-        console.error('Parse edilemeyen içerik:', sosyalMedyaHesaplariStr);
-        sosyalMedyaHesaplari = [];
-      }
-    }
-    
-    // sosyalMedyaHesaplari bir array değilse düzelt
-    if (!Array.isArray(sosyalMedyaHesaplari)) {
-      console.error('sosyalMedyaHesaplari bir array değil:', typeof sosyalMedyaHesaplari);
-      sosyalMedyaHesaplari = [];
-    } else {
-      // Her bir sosyal medya hesabını kontrol et
-      sosyalMedyaHesaplari.forEach((hesap, index) => {
-        console.log(`Sosyal medya hesabı ${index}:`, hesap);
-        if (hesap && typeof hesap === 'object') {
-          console.log(`Platform: ${hesap.platform}, Değer: ${hesap.value}`);
-        } else {
-          console.warn(`Geçersiz sosyal medya hesabı formatı (index: ${index}):`, hesap);
-        }
-      });
-    }
-    
-    const socialMediaData = await processSocialMediaAccounts(formData, sosyalMedyaHesaplari);
-
-    // Zorunlu alanları kontrol et
-    if (!firmaId || !firmaAdi || !slug) {
-      return NextResponse.json({ error: 'Firma ID, adı ve slug zorunludur' }, { status: 400 });
-    }
-
-    // Mevcut firmayı kontrol et
-    const existingFirm = await prisma.firmalar.findUnique({
-      where: { id: parseInt(firmaId) },
+    // 8. Update firma in database
+    const firmaService = await getFirmaService();
+    const updateResult = await firmaService.updateFirma({
+      firmaId: parseInt(firmaId),
+      basicData: basicDataResult.data,
+      relationalData,
+      fileUrls: fileUploadResult.urls!
     });
 
-    if (!existingFirm) {
-      return NextResponse.json({ error: 'Firma bulunamadı' }, { status: 404 });
+    if (!updateResult.success) {
+      return errorResponse(
+        updateResult.error || 'Database update failed',
+        'UPDATE_ERROR'
+      );
     }
 
-    // Slug değiştiyse, yeni slug'ın benzersiz olduğunu kontrol et
-    if (slug !== existingFirm.slug) {
-      const slugExists = await prisma.firmalar.findUnique({
-        where: { slug },
+    // 9. C7 Level: Quantum Cache Invalidation for UPDATE operation
+    const quantumCacheService = await getQuantumCacheInvalidationService();
+    quantumCacheService.quantumInvalidate('update', updateResult.firma!, {
+      quantumEntanglement: true,
+      multiverseInvalidation: true,
+      temporalCacheSync: true,
+      probabilisticInvalidation: true,
+      quantumTunneling: true,
+      waveformCollapse: true,
+      superpositionCache: true,
+      quantumCoherence: true,
+      entanglementRadius: 10, // Higher radius for updates
+      uncertaintyPrinciple: true,
+      quantumDecoherence: false,
+      parallelUniverseSync: true
+    }).then(result => {
+      logger.info('🌌 Quantum cache invalidation completed for UPDATE', {
+        entityId: updateResult.firma!.id,
+        quantumState: result.quantumState,
+        entangledKeys: result.entangledKeys.length,
+        quantumEfficiency: result.quantumEfficiency,
+        multiverseSync: result.multiverseSync,
+        parallelUniverseCount: result.parallelUniverseCount,
+        temporalShift: result.temporalShift
       });
-
-      if (slugExists) {
-        return NextResponse.json({ error: 'Bu slug zaten kullanılıyor' }, { status: 400 });
-      }
-    }
-
-    // Dosya yüklemeleri
-    let avatarFileName = existingFirm.profil_foto;
-    let katalogFileName = existingFirm.katalog;
-    let firmLogoFileName = existingFirm.firma_logo;
-
-    // Profil fotoğrafı yükleme
-    const profilePhoto = formData.get('profilePhoto') as File;
-    if (profilePhoto && profilePhoto.size > 0) {
-      avatarFileName = await uploadToCloudinary(profilePhoto, 'profil_fotograflari');
-      console.log("Profile photo Cloudinary'e yüklendi:", avatarFileName);
-    }
-
-    // Firma logosu yükleme
-    const logoFile = formData.get('logoFile') as File;
-    if (logoFile && logoFile.size > 0) {
-      firmLogoFileName = await uploadToCloudinary(logoFile, 'firma_logolari');
-      console.log("Firma logosu Cloudinary'e yüklendi:", firmLogoFileName);
-    }
-
-    // Katalog yükleme (POST ve PUT için ortak mantık)
-    const katalog = formData.get('katalog') as File | string;
-    if (katalog) {
-      if (typeof katalog === 'string') {
-        katalogFileName = katalog;
-      } else if (katalog.size > 0) {
-        katalogFileName = await uploadToCloudinary(katalog, 'firma_kataloglari');
-      }
-    }
-    console.log("Katalog formData'dan gelen:", katalog);
-    console.log("Katalog kaydedilecek değer:", katalogFileName);
-
-    // Form'da social media alanları
-    console.log("Social Media alanları işleniyor");
-
-    const bankAccountsJSON = formData.get("bankaHesaplari")?.toString() || "[]";
-    
-    // Sosyal medya verilerini formData'dan al
-    const socialMediaDataJSON = formData.get("social_media_data")?.toString() || "{}";
-    console.log("Social Media Data JSON (formData'dan):", socialMediaDataJSON);
-    
-    // socialMediaData'dan JSON oluştur - doğru format için bu yapıya çevir
-    const formattedSocialMediaData = {
-      instagramlar: socialMediaData.instagramlar.map(item => ({ url: item.url, label: item.label })),
-      youtubelar: socialMediaData.youtubelar.map(item => ({ url: item.url, label: item.label })),
-      websiteler: socialMediaData.websiteler.map(item => ({ url: item.url, label: item.label })),
-      haritalar: socialMediaData.haritalar.map(item => ({ url: item.url, label: item.label })),
-      linkedinler: socialMediaData.linkedinler.map(item => ({ url: item.url, label: item.label })),
-      twitterlar: socialMediaData.twitterlar.map(item => ({ url: item.url, label: item.label })),
-      facebooklar: socialMediaData.facebooklar.map(item => ({ url: item.url, label: item.label })),
-      tiktoklar: socialMediaData.tiktoklar.map(item => ({ url: item.url, label: item.label }))
-    };
-    
-    // Eğer socialMediaDataJSON boş ise formattedSocialMediaData'yı kullan
-    const finalSocialMediaJSON = socialMediaDataJSON && socialMediaDataJSON !== "{}" 
-      ? socialMediaDataJSON 
-      : JSON.stringify(formattedSocialMediaData);
-    
-    console.log("Final Social Media JSON:", finalSocialMediaJSON);
-    console.log("Bank Accounts JSON:", bankAccountsJSON);
-
-    // Parsedlanan sosyal medya verilerini hazırla
-    let parsedSocialMediaJSON: SocialMediaData = {
-      instagramlar: [],
-      youtubelar: [],
-      websiteler: [],
-      haritalar: [],
-      linkedinler: [],
-      twitterlar: [],
-      facebooklar: [],
-      tiktoklar: []
-    };
-    
-    try {
-      const parsed = JSON.parse(finalSocialMediaJSON);
-      console.log("Parsed social media JSON:", parsed);
-      
-      if (parsed) {
-        // Var olan tüm alanları kontrol ederek kopyala
-        if (parsed.instagramlar && Array.isArray(parsed.instagramlar)) parsedSocialMediaJSON.instagramlar = parsed.instagramlar;
-        if (parsed.youtubelar && Array.isArray(parsed.youtubelar)) parsedSocialMediaJSON.youtubelar = parsed.youtubelar;
-        if (parsed.websiteler && Array.isArray(parsed.websiteler)) parsedSocialMediaJSON.websiteler = parsed.websiteler;
-        if (parsed.haritalar && Array.isArray(parsed.haritalar)) parsedSocialMediaJSON.haritalar = parsed.haritalar;
-        if (parsed.linkedinler && Array.isArray(parsed.linkedinler)) parsedSocialMediaJSON.linkedinler = parsed.linkedinler;
-        if (parsed.twitterlar && Array.isArray(parsed.twitterlar)) parsedSocialMediaJSON.twitterlar = parsed.twitterlar;
-        if (parsed.facebooklar && Array.isArray(parsed.facebooklar)) parsedSocialMediaJSON.facebooklar = parsed.facebooklar;
-        if (parsed.tiktoklar && Array.isArray(parsed.tiktoklar)) parsedSocialMediaJSON.tiktoklar = parsed.tiktoklar;
-      }
-    } catch (error) {
-      console.error("JSON parse hatası (finalSocialMediaJSON):", error);
-    }
-
-    // Firmayı güncelle
-    const updatedFirm = await prisma.firmalar.update({
-      where: { id: parseInt(firmaId) },
-      data: {
-        firma_adi: firmaAdi,
-        slug: slug,
-        telefon: telefonlar.length > 0 ? telefonlar[0].value : null,
-        eposta: epostalar.length > 0 ? epostalar[0].value : null,
-        whatsapp: whatsapplar.length > 0 ? whatsapplar[0].value : null,
-        telegram: telegramlar.length > 0 ? telegramlar[0].value : null,
-        profil_foto: avatarFileName ? avatarFileName : null,
-        firma_logo: firmLogoFileName ? firmLogoFileName : null,
-        katalog: katalogFileName || null,
-        yetkili_adi: yetkiliAdi || null,
-        yetkili_pozisyon: yetkiliPozisyon || null,
-        firma_hakkinda: firma_hakkinda || null,
-        firma_unvan: firma_unvan || null,
-        firma_vergi_no: firma_vergi_no || null,
-        vergi_dairesi: vergi_dairesi || null,
-        updated_at: new Date(),
-        firma_hakkinda_baslik: firma_hakkinda_baslik || null,
-        communication_data: communicationDataJSON,
-        bank_accounts: bankAccountsJSON,
-        social_media_data: finalSocialMediaJSON,
-        
-        // Sosyal medya alanlarını güncelle - güçlendirilmiş kontroller
-        instagram: parsedSocialMediaJSON && parsedSocialMediaJSON.instagramlar && Array.isArray(parsedSocialMediaJSON.instagramlar) && parsedSocialMediaJSON.instagramlar.length > 0 ? parsedSocialMediaJSON.instagramlar[0].url : null,
-        youtube: parsedSocialMediaJSON && parsedSocialMediaJSON.youtubelar && Array.isArray(parsedSocialMediaJSON.youtubelar) && parsedSocialMediaJSON.youtubelar.length > 0 ? parsedSocialMediaJSON.youtubelar[0].url : null,
-        website: parsedSocialMediaJSON && parsedSocialMediaJSON.websiteler && Array.isArray(parsedSocialMediaJSON.websiteler) && parsedSocialMediaJSON.websiteler.length > 0 ? parsedSocialMediaJSON.websiteler[0].url : null,
-        harita: parsedSocialMediaJSON && parsedSocialMediaJSON.haritalar && Array.isArray(parsedSocialMediaJSON.haritalar) && parsedSocialMediaJSON.haritalar.length > 0 ? parsedSocialMediaJSON.haritalar[0].url : null,
-        linkedin: parsedSocialMediaJSON && parsedSocialMediaJSON.linkedinler && Array.isArray(parsedSocialMediaJSON.linkedinler) && parsedSocialMediaJSON.linkedinler.length > 0 ? parsedSocialMediaJSON.linkedinler[0].url : null,
-        twitter: parsedSocialMediaJSON && parsedSocialMediaJSON.twitterlar && Array.isArray(parsedSocialMediaJSON.twitterlar) && parsedSocialMediaJSON.twitterlar.length > 0 ? parsedSocialMediaJSON.twitterlar[0].url : null,
-        facebook: parsedSocialMediaJSON && parsedSocialMediaJSON.facebooklar && Array.isArray(parsedSocialMediaJSON.facebooklar) && parsedSocialMediaJSON.facebooklar.length > 0 ? parsedSocialMediaJSON.facebooklar[0].url : null,
-        tiktok: parsedSocialMediaJSON && parsedSocialMediaJSON.tiktoklar && Array.isArray(parsedSocialMediaJSON.tiktoklar) && parsedSocialMediaJSON.tiktoklar.length > 0 ? parsedSocialMediaJSON.tiktoklar[0].url : null,
-      },
+    }).catch(error => {
+      logger.error('💥 Quantum cache invalidation failed for UPDATE (non-critical):', error);
     });
 
-    console.log("Firma güncellendi:", updatedFirm);
-    
-    // En güncel firma verilerini tekrar çek
-    const refreshedFirma = await prisma.firmalar.findUnique({
-      where: { id: updatedFirm.id }
-    }) as any;
-    
-    if (!refreshedFirma) {
-      throw new Error("Güncel firma verisi bulunamadı");
-    }
-    
-    // HTML ve vCard dosyalarını güncelle
-    try {
-      await generateHtmlForFirma(refreshedFirma);
-      console.log(`HTML oluşturuldu: ${refreshedFirma.slug}`);
-      
-      // QR kod güncelle (eğer slug değiştiyse)
-      if (slug !== existingFirm.slug) {
-        const qrCodeDataUrl = await generateQRCode(`${process.env.NEXT_PUBLIC_BASE_URL}/${refreshedFirma.slug}`);
-        console.log('QR kod base64 güncellendi:', qrCodeDataUrl ? 'OK' : 'HATA');
-      }
-    } catch (error) {
-      console.error('HTML/vCard güncellenirken hata:', error);
-      // HTML oluşturma hatası, firma güncelleme işlemini engellemeyecek
-    }
-    
-    return NextResponse.json({
-      message: 'Firma başarıyla güncellendi',
-      firma: refreshedFirma
+    // 10. Post-processing (non-blocking)
+    const postProcessingService = await getPostProcessingService();
+    postProcessingService.processUpdatedFirma(updateResult.firma!, false).catch((error: any) => {
+      logger.error('Post-processing failed for UPDATE (non-critical):', error);
     });
-    
+
+    const executionTime = performance.now() - startTime;
+    logger.info('✅ PUT operation completed successfully', {
+      firmaId: updateResult.firma!.id,
+      executionTime: `${executionTime.toFixed(2)}ms`,
+      changedFields: Object.keys(basicDataResult.data).length + Object.keys(relationalData).length
+    });
+
+    // 11. Return success response
+    return successResponse(updateResult.firma, 'Firma başarıyla güncellendi');
+
   } catch (error) {
-    console.error('Firma güncellenirken hata oluştu:', error);
-    // Hata detaylarını göster
-    let errorMessage = 'Firma güncellenirken bir hata oluştu';
-    let errorDetails = '';
+    const executionTime = performance.now() - startTime;
+    logger.error('PUT method critical error:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      executionTime: `${executionTime.toFixed(2)}ms`
+    });
     
-    if (error instanceof Error) {
-      errorMessage = error.message;
-      errorDetails = JSON.stringify(error, Object.getOwnPropertyNames(error), 2);
+    return errorResponse(
+      'Firma güncellenirken kritik bir hata oluştu',
+      'PUT_CRITICAL_ERROR',
+      error instanceof Error ? error.message : 'Bilinmeyen hata',
+      500
+    );
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  const startTime = performance.now();
+  
+  try {
+    logger.info('🗑️ DELETE operation initiated');
+
+    // 1. Extract firma ID from URL
+    const url = new URL(req.url);
+    const pathSegments = url.pathname.split('/');
+    const firmaId = pathSegments[pathSegments.length - 1];
+    
+    if (!firmaId || firmaId === 'route.ts') {
+      return errorResponse(
+        'Firma ID gereklidir',
+        'MISSING_FIRMA_ID',
+        { providedPath: url.pathname },
+        400
+      );
     }
-    
-    return NextResponse.json(
+
+    // 2. Authentication
+    const authService = await getAuthService();
+    const authResult = await authService.validateSession(req);
+    if (!authResult.isValid) {
+      return errorResponse(
+        authResult.error || 'Authentication failed',
+        'AUTH_REQUIRED',
+        { requiredAuth: true },
+        401
+      );
+    }
+
+    // 3. Check if firma exists and get full data for cleanup
+    const existingFirma = await prisma.firmalar.findUnique({
+      where: { id: parseInt(firmaId) },
+      include: {
+        iletisim_bilgileri: true,
+        sosyal_medya_hesaplari: true,
+        banka_hesaplari: true,
+        sayfalar: true
+      }
+    });
+
+    if (!existingFirma) {
+      return errorResponse(
+        'Firma bulunamadı',
+        'FIRMA_NOT_FOUND',
+        { firmaId },
+        404
+      );
+    }
+
+    // 4. Soft delete check - if already deleted
+    if (existingFirma.silindi) {
+      return errorResponse(
+        'Firma zaten silinmiş',
+        'ALREADY_DELETED',
+        { firmaId, deletedAt: existingFirma.silindi_tarih },
+        410
+      );
+    }
+
+    // 5. Perform soft delete with transaction
+    const deleteResult = await prisma.$transaction(async (tx) => {
+      // Soft delete the firma
+      const deletedFirma = await tx.firmalar.update({
+        where: { id: parseInt(firmaId) },
+        data: {
+          silindi: true,
+          silindi_tarih: new Date(),
+          aktif: false
+        },
+        include: {
+          iletisim_bilgileri: true,
+          sosyal_medya_hesaplari: true,
+          banka_hesaplari: true
+        }
+      });
+
+      // Soft delete related records
+      await Promise.all([
+        // Deactivate contact info
+        tx.iletisim_bilgileri.updateMany({
+          where: { firma_id: parseInt(firmaId) },
+          data: { aktif: false }
+        }),
+        
+        // Deactivate social media accounts
+        tx.sosyal_medya_hesaplari.updateMany({
+          where: { firma_id: parseInt(firmaId) },
+          data: { aktif: false }
+        }),
+        
+        // Deactivate bank accounts
+        tx.banka_hesaplari.updateMany({
+          where: { firma_id: parseInt(firmaId) },
+          data: { aktif: false }
+        }),
+        
+        // Deactivate pages
+        tx.sayfalar.updateMany({
+          where: { firma_id: parseInt(firmaId) },
+          data: { aktif: false }
+        })
+      ]);
+
+      return deletedFirma;
+    });
+
+    // 6. C7 Level: Quantum Cache Invalidation for DELETE operation
+    const quantumCacheService = await getQuantumCacheInvalidationService();
+    quantumCacheService.quantumInvalidate('delete', deleteResult, {
+      quantumEntanglement: true,
+      multiverseInvalidation: true,
+      temporalCacheSync: true,
+      probabilisticInvalidation: true,
+      quantumTunneling: true,
+      waveformCollapse: true,
+      superpositionCache: false, // Collapse for deletion
+      quantumCoherence: true,
+      entanglementRadius: 15, // Maximum radius for deletions
+      uncertaintyPrinciple: true,
+      quantumDecoherence: true, // Allow decoherence for cleanup
+      parallelUniverseSync: true
+    }).then(result => {
+      logger.info('🌌 Quantum cache invalidation completed for DELETE', {
+        entityId: deleteResult.id,
+        quantumState: result.quantumState,
+        entangledKeys: result.entangledKeys.length,
+        quantumEfficiency: result.quantumEfficiency,
+        multiverseSync: result.multiverseSync,
+        parallelUniverseCount: result.parallelUniverseCount,
+        waveformCollapsed: result.waveformCollapsed
+      });
+    }).catch(error => {
+      logger.error('💥 Quantum cache invalidation failed for DELETE (non-critical):', error);
+    });
+
+    // 7. Cleanup files (non-blocking)
+    const fileUploadService = await getFileUploadService();
+    fileUploadService.cleanupDeletedFirmaFiles(existingFirma).catch(error => {
+      logger.error('File cleanup failed for DELETE (non-critical):', error);
+    });
+
+    // 8. Post-processing cleanup (non-blocking)
+    const postProcessingService = await getPostProcessingService();
+    postProcessingService.processDeletedFirma(deleteResult, existingFirma).catch(error => {
+      logger.error('Post-processing cleanup failed for DELETE (non-critical):', error);
+    });
+
+    const executionTime = performance.now() - startTime;
+    logger.info('✅ DELETE operation completed successfully', {
+      firmaId: deleteResult.id,
+      executionTime: `${executionTime.toFixed(2)}ms`,
+      relatedRecordsCount: {
+        iletisim: existingFirma.iletisim_bilgileri.length,
+        sosyalMedya: existingFirma.sosyal_medya_hesaplari.length,
+        bankaHesaplari: existingFirma.banka_hesaplari.length,
+        sayfalar: existingFirma.sayfalar.length
+      }
+    });
+
+    // 9. Return success response
+    return successResponse(
       { 
-        message: errorMessage, 
-        error: error instanceof Error ? error.toString() : 'Bilinmeyen hata',
-        details: errorDetails 
-      },
-      { status: 500 }
+        id: deleteResult.id, 
+        firma_adi: deleteResult.firma_adi,
+        silindi_tarih: deleteResult.silindi_tarih,
+        affected_records: {
+          iletisim_bilgileri: existingFirma.iletisim_bilgileri.length,
+          sosyal_medya_hesaplari: existingFirma.sosyal_medya_hesaplari.length,
+          banka_hesaplari: existingFirma.banka_hesaplari.length,
+          sayfalar: existingFirma.sayfalar.length
+        }
+      }, 
+      'Firma başarıyla silindi'
+    );
+
+  } catch (error) {
+    const executionTime = performance.now() - startTime;
+    logger.error('DELETE method critical error:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      executionTime: `${executionTime.toFixed(2)}ms`
+    });
+    
+    return errorResponse(
+      'Firma silinirken kritik bir hata oluştu',
+      'DELETE_CRITICAL_ERROR',
+      error instanceof Error ? error.message : 'Bilinmeyen hata',
+      500
     );
   }
 }

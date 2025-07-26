@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/app/lib/db';
+import { logger } from '@/app/lib/logger';
 
 export async function GET(req: NextRequest) {
   try {
@@ -23,7 +24,7 @@ export async function GET(req: NextRequest) {
     
     return NextResponse.json({ ilceler });
   } catch (error) {
-    console.error('İlçeler getirilirken hata oluştu:', error);
+    logger.error('İlçeler getirilirken hata oluştu:', error);
     return NextResponse.json(
       { message: 'İlçeler getirilirken bir hata oluştu' },
       { status: 500 }

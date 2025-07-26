@@ -1,30 +1,31 @@
 import { NextResponse } from 'next/server';
 import { getAllFirmalar } from '@/app/lib/db';
 import { generateHtmlForFirma } from '@/app/lib/htmlGenerator';
+import { logger } from '@/app/lib/logger';
 
 export async function POST() {
   try {
-    console.log('Tüm firma HTML sayfalarını yeniden oluşturma isteği alındı');
+    logger.info('Tüm firma HTML sayfalarını yeniden oluşturma isteği alındı');
     
     // Tüm firmaları veritabanından al
     const firmalar = await getAllFirmalar();
     
     if (!firmalar || firmalar.length === 0) {
-      console.log('Veritabanında firma bulunamadı.');
+      logger.info('Veritabanında firma bulunamadı.');
       return NextResponse.json(
         { success: false, message: 'Veritabanında firma bulunamadı' },
         { status: 404 }
       );
     }
     
-    console.log(`Toplam ${firmalar.length} firma için HTML sayfaları yeniden oluşturulacak.`);
+    logger.info(`Toplam ${firmalar.length} firma için HTML sayfaları yeniden oluşturulacak.`);
     
     // Her firma için HTML sayfasını yeniden oluştur
     const results = [];
     
     for (const firma of firmalar) {
       try {
-        console.log(`${firma.firma_adi} (${firma.slug}) firması için HTML yeniden oluşturuluyor...`);
+        logger.info(`${firma.firma_adi} (${firma.slug}) firması için HTML yeniden oluşturuluyor...`);
         const htmlPath = await generateHtmlForFirma(firma);
         
         results.push({
@@ -35,9 +36,9 @@ export async function POST() {
           path: htmlPath
         });
         
-        console.log(`${firma.firma_adi} firması için HTML başarıyla oluşturuldu: ${htmlPath}`);
+        logger.info(`${firma.firma_adi} firması için HTML başarıyla oluşturuldu: ${htmlPath}`);
       } catch (error) {
-        console.error(`${firma.firma_adi} firması için HTML oluştururken hata:`, error);
+        logger.error(`${firma.firma_adi} firması için HTML oluştururken hata:`, error);
         
         results.push({
           id: firma.id,
@@ -53,7 +54,7 @@ export async function POST() {
     const successful = results.filter(r => r.success).length;
     const failed = results.filter(r => !r.success).length;
     
-    console.log(`HTML yeniden oluşturma işlemi tamamlandı. Başarılı: ${successful}, Başarısız: ${failed}`);
+    logger.info(`HTML yeniden oluşturma işlemi tamamlandı. Başarılı: ${successful}, Başarısız: ${failed}`);
     
     return NextResponse.json({
       success: true,
@@ -61,7 +62,7 @@ export async function POST() {
       results
     });
   } catch (error) {
-    console.error('Tüm HTML sayfalarını yeniden oluşturma işlemi sırasında hata:', error);
+    logger.error('Tüm HTML sayfalarını yeniden oluşturma işlemi sırasında hata:', error);
     return NextResponse.json(
       { success: false, message: 'HTML sayfalarını yeniden oluşturma sırasında bir hata oluştu', error: error instanceof Error ? error.message : String(error) },
       { status: 500 }

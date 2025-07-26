@@ -1,0 +1,91 @@
+2025-07-25 13:03:58:358 [31merror[39m: [31mCache get error:[39m
+2025-07-25 13:03:58:358 [32minfo[39m: [32m💾 Cache MISS for firmalar list - fetching from database[39m
+2025-07-25 13:03:58:358 [31merror[39m: [31mCache get error:[39m
+2025-07-25 13:03:58:358 [31merror[39m: [31mCache set error:[39m
+2025-07-25 13:03:58:358 [31merror[39m: [31mCache set error:[39m
+2025-07-25 13:03:58:358 [32minfo[39m: [32m✅ Database query completed, response cached[39m
+2025-07-25 13:04:07:47 [31merror[39m: [31mCache get error:[39m
+2025-07-25 13:04:07:47 [32minfo[39m: [32m💾 Cache MISS for firmalar list - fetching from database[39m
+2025-07-25 13:04:07:47 [31merror[39m: [31mCache get error:[39m
+2025-07-25 13:04:07:47 [31merror[39m: [31mCache set error:[39m
+2025-07-25 13:04:07:47 [31merror[39m: [31mCache set error:[39m
+2025-07-25 13:04:07:47 [32minfo[39m: [32m✅ Database query completed, response cached[39m
+2025-07-25 13:10:33:1033 [33mwarn[39m: [33mVercel KV is not available, skipping cache GET operation[39m
+2025-07-25 13:10:33:1033 [32minfo[39m: [32m💾 Cache MISS for firmalar list - fetching from database[39m
+2025-07-25 13:10:33:1033 [33mwarn[39m: [33mVercel KV is not available, skipping cache GET operation[39m
+2025-07-25 13:10:33:1033 [33mwarn[39m: [33mVercel KV is not available, skipping cache SET operation[39m
+2025-07-25 13:10:33:1033 [33mwarn[39m: [33mVercel KV is not available, skipping cache SET operation[39m
+2025-07-25 13:10:33:1033 [32minfo[39m: [32m✅ Database query completed, response cached[39m
+2025-07-25 13:10:43:1043 [33mwarn[39m: [33mVercel KV is not available, skipping cache GET operation[39m
+2025-07-25 13:10:43:1043 [32minfo[39m: [32m💾 Cache MISS for firmalar list - fetching from database[39m
+2025-07-25 13:10:43:1043 [33mwarn[39m: [33mVercel KV is not available, skipping cache GET operation[39m
+2025-07-25 13:10:43:1043 [33mwarn[39m: [33mVercel KV is not available, skipping cache SET operation[39m
+2025-07-25 13:10:43:1043 [33mwarn[39m: [33mVercel KV is not available, skipping cache SET operation[39m
+2025-07-25 13:10:43:1043 [32minfo[39m: [32m✅ Database query completed, response cached[39m
+2025-07-25 13:32:18:3218 [33mwarn[39m: [33mUnauthorized API attempt[39m
+2025-07-25 13:32:28:3228 [33mwarn[39m: [33mVercel KV is not available, skipping cache GET operation[39m
+2025-07-25 13:32:28:3228 [32minfo[39m: [32m💾 Cache MISS for firmalar list - fetching from database[39m
+2025-07-25 13:32:28:3228 [33mwarn[39m: [33mVercel KV is not available, skipping cache GET operation[39m
+2025-07-25 13:32:28:3228 [33mwarn[39m: [33mVercel KV is not available, skipping cache SET operation[39m
+2025-07-25 13:32:28:3228 [33mwarn[39m: [33mVercel KV is not available, skipping cache SET operation[39m
+2025-07-25 13:32:28:3228 [32minfo[39m: [32m✅ Database query completed, response cached[39m
+2025-07-25 13:56:42:5642 [32minfo[39m: [32mCache MISS[39m
+2025-07-25 13:56:43:5643 [32minfo[39m: [32m💾 Cache MISS for firmalar list - fetching from database[39m
+2025-07-25 13:56:43:5643 [32minfo[39m: [32mCache MISS[39m
+2025-07-25 13:56:43:5643 [32minfo[39m: [32m✅ Database query completed, response cached[39m
+2025-07-25 13:56:43:5643 [32minfo[39m: [32mCache SET[39m
+2025-07-25 13:56:43:5643 [32minfo[39m: [32mCache SET[39m
+2025-07-25 13:56:53:5653 [32minfo[39m: [32mCache HIT[39m
+2025-07-25 13:56:53:5653 [32minfo[39m: [32m🎯 Cache HIT for firmalar list[39m
+2025-07-25 13:57:02:572 [32minfo[39m: [32mCache HIT[39m
+2025-07-25 13:57:02:572 [32minfo[39m: [32m🎯 Cache HIT for firmalar list[39m
+2025-07-25 14:01:23:123 [32minfo[39m: [32mCache MISS[39m
+2025-07-25 14:01:23:123 [32minfo[39m: [32m💾 Cache MISS for firmalar list - fetching from database[39m
+2025-07-25 14:01:23:123 [32minfo[39m: [32mCache HIT[39m
+2025-07-25 14:01:23:123 [32minfo[39m: [32m✅ Database query completed, response cached[39m
+2025-07-25 14:01:23:123 [32minfo[39m: [32mCache SET[39m
+2025-07-25 14:01:23:123 [32minfo[39m: [32mCache SET[39m
+2025-07-25 14:01:43:143 [32minfo[39m: [32mCache HIT[39m
+2025-07-25 14:01:43:143 [32minfo[39m: [32m🎯 Cache HIT for firmalar list[39m
+2025-07-25 17:57:49:5749 [32minfo[39m: [32mCache MISS[39m
+2025-07-25 17:57:49:5749 [32minfo[39m: [32m💾 Cache MISS for firmalar list - fetching from database[39m
+2025-07-25 17:57:49:5749 [32minfo[39m: [32mCache MISS[39m
+2025-07-25 17:57:49:5749 [32minfo[39m: [32m✅ Database query completed, response cached[39m
+2025-07-25 17:57:49:5749 [32minfo[39m: [32mCache SET[39m
+2025-07-25 17:57:49:5749 [32minfo[39m: [32mCache SET[39m
+2025-07-25 17:57:49:5749 [32minfo[39m: [32mCache HIT[39m
+2025-07-25 17:57:49:5749 [32minfo[39m: [32m🎯 Cache HIT for firmalar list[39m
+2025-07-25 17:57:50:5750 [32minfo[39m: [32mCache HIT[39m
+2025-07-25 17:57:50:5750 [32minfo[39m: [32m🎯 Cache HIT for firmalar list[39m
+2025-07-26 01:59:56:5956 [31merror[39m: [31mİlçeler getirilirken hata oluştu: Dynamic server usage: Route /api/ilceler couldn't be rendered statically because it used `nextUrl.searchParams`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error[39m
+2025-07-26 01:59:56:5956 [31merror[39m: [31mKategoriler getirilirken hata oluştu: [39m
+[31mInvalid `prisma.kategoriler.findMany()` invocation:[39m
+
+
+[31mThe table `main.kategoriler` does not exist in the current database.[39m
+2025-07-26 01:59:56:5956 [31merror[39m: [31mSektörler getirilirken hata oluştu: [39m
+[31mInvalid `prisma.sektorler.findMany()` invocation:[39m
+
+
+[31mThe table `main.sektorler` does not exist in the current database.[39m
+2025-07-26 01:59:56:5956 [31merror[39m: [31mİller getirilirken hata oluştu: [39m
+[31mInvalid `prisma.iller.findMany()` invocation:[39m
+
+
+[31mThe table `main.iller` does not exist in the current database.[39m
+2025-07-26 12:31:49:3149 [31merror[39m: [31mİlçeler getirilirken hata oluştu: Dynamic server usage: Route /api/ilceler couldn't be rendered statically because it used `nextUrl.searchParams`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error[39m
+2025-07-26 12:31:49:3149 [31merror[39m: [31mİller getirilirken hata oluştu: [39m
+[31mInvalid `prisma.iller.findMany()` invocation:[39m
+
+
+[31mThe table `main.iller` does not exist in the current database.[39m
+2025-07-26 12:31:49:3149 [31merror[39m: [31mKategoriler getirilirken hata oluştu: [39m
+[31mInvalid `prisma.kategoriler.findMany()` invocation:[39m
+
+
+[31mThe table `main.kategoriler` does not exist in the current database.[39m
+2025-07-26 12:31:49:3149 [31merror[39m: [31mSektörler getirilirken hata oluştu: [39m
+[31mInvalid `prisma.sektorler.findMany()` invocation:[39m
+
+
+[31mThe table `main.sektorler` does not exist in the current database.[39m

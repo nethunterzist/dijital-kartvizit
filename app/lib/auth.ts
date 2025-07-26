@@ -2,6 +2,7 @@ import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcrypt';
 import { prisma } from './db';
+import { logger } from './logger';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -42,7 +43,7 @@ export const authOptions: NextAuthOptions = {
             return null;
           }
         } catch (error) {
-          console.error('Kimlik doğrulama hatası:', error);
+          logger.error('Kimlik doğrulama hatası', { error, username: credentials.username });
           return null;
         }
       }
@@ -50,7 +51,8 @@ export const authOptions: NextAuthOptions = {
   ],
   session: {
     strategy: 'jwt',
-    maxAge: 60 * 60 * 24 // 1 gün
+    maxAge: 60 * 60 * 8, // 8 saat (güvenlik için kısaltıldı)
+    updateAge: 60 * 60 * 2, // Session her 2 saatte bir yenile
   },
   pages: {
     signIn: '/login',
@@ -70,7 +72,7 @@ export const authOptions: NextAuthOptions = {
       return session;
     }
   },
-  secret: process.env.NEXTAUTH_SECRET || 'gizli-anahtar',
+  secret: process.env.NEXTAUTH_SECRET,
 };
 
 // Admin erişimi koruma fonksiyonu (middleware olarak kullanılabilir)
@@ -80,4 +82,4 @@ export async function isAdmin(req: any, res: any) {
     return false;
   }
   return true;
-} 
+}

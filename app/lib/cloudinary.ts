@@ -1,4 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary';
+import { logger } from './logger';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -27,7 +28,7 @@ export async function uploadToCloudinary(file: File, folder: string = 'uploads')
       ).end(buffer);
     });
   } catch (error) {
-    console.error('Cloudinary upload error:', error);
+    logger.error('Cloudinary upload error', { error, fileName: file.name, fileSize: file.size, folder });
     throw new Error('File upload failed');
   }
 }

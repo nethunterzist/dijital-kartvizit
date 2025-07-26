@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import handlebars from 'handlebars';
 import { cardTemplate } from '../lib/cardTemplate';
+import { logger } from '../lib/logger';
 
 // Handlebars helper fonksiyonunu kaydet
 handlebars.registerHelper('ifEquals', function(this: any, arg1: any, arg2: any, options: any) {
@@ -11,6 +12,43 @@ handlebars.registerHelper('ifEquals', function(this: any, arg1: any, arg2: any, 
 // Banka hesapları için JSON parse helper'ı
 handlebars.registerHelper('parseBankAccounts', function(jsonStr: string) {
     try { return JSON.parse(jsonStr); } catch { return []; }
+});
+
+// Icon mapping helper'ı - resim yolunu Font Awesome class'ına çevir
+handlebars.registerHelper('getIconClass', function(iconPath: string, label: string) {
+    if (!iconPath) return 'fas fa-circle';
+    
+    // Label'a göre mapping
+    const labelLower = (label || '').toLowerCase();
+    
+    if (labelLower.includes('instagram')) return 'fab fa-instagram';
+    if (labelLower.includes('facebook')) return 'fab fa-facebook';
+    if (labelLower.includes('twitter')) return 'fab fa-twitter';
+    if (labelLower.includes('linkedin')) return 'fab fa-linkedin';
+    if (labelLower.includes('youtube')) return 'fab fa-youtube';
+    if (labelLower.includes('tiktok')) return 'fab fa-tiktok';
+    if (labelLower.includes('whatsapp')) return 'fab fa-whatsapp';
+    if (labelLower.includes('telegram')) return 'fab fa-telegram';
+    if (labelLower.includes('telefon') || labelLower.includes('phone')) return 'fas fa-phone';
+    if (labelLower.includes('e-posta') || labelLower.includes('email') || labelLower.includes('mail')) return 'fas fa-envelope';
+    if (labelLower.includes('website') || labelLower.includes('web')) return 'fas fa-globe';
+    if (labelLower.includes('harita') || labelLower.includes('map') || labelLower.includes('adres')) return 'fas fa-map-marker-alt';
+    
+    // Icon path'e göre mapping (fallback)
+    if (iconPath.includes('instagram')) return 'fab fa-instagram';
+    if (iconPath.includes('facebook')) return 'fab fa-facebook';
+    if (iconPath.includes('twitter')) return 'fab fa-twitter';
+    if (iconPath.includes('linkedin')) return 'fab fa-linkedin';
+    if (iconPath.includes('youtube')) return 'fab fa-youtube';
+    if (iconPath.includes('tiktok')) return 'fab fa-tiktok';
+    if (iconPath.includes('wp') || iconPath.includes('whatsapp')) return 'fab fa-whatsapp';
+    if (iconPath.includes('telegram')) return 'fab fa-telegram';
+    if (iconPath.includes('tel') || iconPath.includes('phone')) return 'fas fa-phone';
+    if (iconPath.includes('mail')) return 'fas fa-envelope';
+    if (iconPath.includes('web')) return 'fas fa-globe';
+    if (iconPath.includes('adres') || iconPath.includes('map')) return 'fas fa-map-marker-alt';
+    
+    return 'fas fa-circle'; // Varsayılan icon
 });
 
 // Dinamik metadatayı oluşturan fonksiyon
@@ -47,7 +85,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
             },
         };
     } catch (error) {
-        console.error('Metadata oluşturulurken hata:', error);
+        logger.error('Metadata oluşturulurken hata', { error, slug });
         return {
             title: 'Kartvizit Bulunamadı',
             description: 'İstediğiniz kartvizit sayfası bulunamadı.'
@@ -79,10 +117,14 @@ export default async function KartvizitPage({ params }: { params: { slug: string
 
         // JSON verisini parse et
         const data = await response.json();
-        console.log('API JSON:', data);
+        logger.info('API JSON verisi alındı', { slug, templateId: data.template_id });
+        
+        // Template ID'ye göre doğru template'i al
+        const { getTemplateByType } = await import('@/app/lib/cardTemplate');
+        const selectedTemplate = getTemplateByType(data.template_id || 2);
         
         // Handlebars ile template'i derle
-        const compiledTemplate = handlebars.compile(cardTemplate);
+        const compiledTemplate = handlebars.compile(selectedTemplate);
         
         // Template'i veri ile doldur
         const html = compiledTemplate({
@@ -103,7 +145,7 @@ export default async function KartvizitPage({ params }: { params: { slug: string
             <div dangerouslySetInnerHTML={{ __html: html }} />
         );
     } catch (error) {
-        console.error('Kartvizit sayfası oluşturulurken hata:', error);
+        logger.error('Kartvizit sayfası oluşturulurken hata', { error, slug });
         return notFound();
     }
 }

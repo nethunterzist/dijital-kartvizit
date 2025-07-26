@@ -49,20 +49,6 @@ process.env.NEXTAUTH_SECRET = 'test-secret'
 process.env.NEXTAUTH_URL = 'http://localhost:3000'
 process.env.DATABASE_URL = 'file:./test.db'
 
-// Mock Prisma
-jest.mock('@/app/lib/db', () => ({
-  prisma: {
-    firmalar: {
-      findMany: jest.fn(),
-      findUnique: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-      count: jest.fn(),
-      aggregate: jest.fn(),
-    },
-  },
-}))
 
 // Mock Cloudinary
 jest.mock('@/app/lib/cloudinary', () => ({
@@ -97,6 +83,19 @@ jest.mock('@/app/lib/logger', () => ({
 
 // Mock fetch
 global.fetch = jest.fn()
+
+// Mock NextResponse for API testing
+jest.mock('next/server', () => ({
+  NextRequest: jest.fn(),
+  NextResponse: {
+    json: jest.fn((data, options) => ({
+      status: options?.status || 200,
+      json: jest.fn().mockResolvedValue(data),
+      ...options,
+    })),
+    redirect: jest.fn(),
+  },
+}))
 
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {

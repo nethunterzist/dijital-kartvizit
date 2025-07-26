@@ -1,213 +1,240 @@
 import { z } from 'zod';
 
-// Firma validation schema
-export const firmaSchema = z.object({
+// Firma oluşturma/güncelleme için validasyon şeması
+export const createFirmaSchema = z.object({
   firma_adi: z.string()
-    .min(2, 'Firma adı en az 2 karakter olmalıdır')
-    .max(100, 'Firma adı en fazla 100 karakter olabilir')
+    .min(2, "Firma adı en az 2 karakter olmalı")
+    .max(100, "Firma adı en fazla 100 karakter olabilir")
     .trim(),
   
   slug: z.string()
-    .min(2, 'Slug en az 2 karakter olmalıdır')
-    .max(50, 'Slug en fazla 50 karakter olabilir')
-    .regex(/^[a-z0-9-]+$/, 'Slug sadece küçük harf, rakam ve tire içerebilir')
+    .min(2, "URL en az 2 karakter olmalı")
+    .max(50, "URL en fazla 50 karakter olabilir")
+    .regex(/^[a-z0-9-]+$/, "URL sadece küçük harf, rakam ve tire içerebilir")
     .trim(),
   
   yetkili_adi: z.string()
-    .min(2, 'Yetkili adı en az 2 karakter olmalıdır')
-    .max(100, 'Yetkili adı en fazla 100 karakter olabilir')
+    .max(100, "Yetkili adı en fazla 100 karakter olabilir")
     .trim()
     .optional(),
   
   yetkili_pozisyon: z.string()
-    .max(100, 'Pozisyon en fazla 100 karakter olabilir')
+    .max(100, "Pozisyon en fazla 100 karakter olabilir")
     .trim()
     .optional(),
   
-  telefon: z.string()
-    .regex(/^[0-9+\-\s()]+$/, 'Geçersiz telefon formatı')
-    .min(10, 'Telefon numarası en az 10 karakter olmalıdır')
-    .max(20, 'Telefon numarası en fazla 20 karakter olabilir')
-    .optional()
-    .or(z.literal('')),
+  firma_unvan: z.string()
+    .max(200, "Firma ünvanı en fazla 200 karakter olabilir")
+    .trim()
+    .optional(),
   
-  eposta: z.string()
-    .email('Geçersiz e-posta formatı')
-    .max(255, 'E-posta en fazla 255 karakter olabilir')
+  firma_vergi_no: z.string()
+    .regex(/^[0-9]{10}$/, "Vergi numarası 10 haneli olmalı")
     .optional()
-    .or(z.literal('')),
+    .or(z.literal("")),
   
-  website: z.string()
-    .url('Geçersiz website URL formatı')
-    .max(255, 'Website URL en fazla 255 karakter olabilir')
-    .optional()
-    .or(z.literal('')),
-  
-  whatsapp: z.string()
-    .regex(/^[0-9+\-\s()]+$/, 'Geçersiz WhatsApp formatı')
-    .optional()
-    .or(z.literal('')),
-  
-  instagram: z.string()
-    .max(255, 'Instagram URL en fazla 255 karakter olabilir')
-    .optional()
-    .or(z.literal('')),
-  
-  linkedin: z.string()
-    .max(255, 'LinkedIn URL en fazla 255 karakter olabilir')
-    .optional()
-    .or(z.literal('')),
-  
-  twitter: z.string()
-    .max(255, 'Twitter URL en fazla 255 karakter olabilir')
-    .optional()
-    .or(z.literal('')),
-  
-  facebook: z.string()
-    .max(255, 'Facebook URL en fazla 255 karakter olabilir')
-    .optional()
-    .or(z.literal('')),
-  
-  youtube: z.string()
-    .max(255, 'YouTube URL en fazla 255 karakter olabilir')
-    .optional()
-    .or(z.literal('')),
+  vergi_dairesi: z.string()
+    .max(100, "Vergi dairesi en fazla 100 karakter olabilir")
+    .trim()
+    .optional(),
   
   firma_hakkinda: z.string()
-    .max(1000, 'Firma hakkında bilgisi en fazla 1000 karakter olabilir')
-    .optional()
-    .or(z.literal('')),
+    .max(2000, "Hakkımızda metni en fazla 2000 karakter olabilir")
+    .trim()
+    .optional(),
   
   firma_hakkinda_baslik: z.string()
-    .max(100, 'Firma hakkında başlığı en fazla 100 karakter olabilir')
-    .optional()
-    .or(z.literal('')),
+    .max(50, "Hakkımızda başlığı en fazla 50 karakter olabilir")
+    .trim()
+    .optional(),
   
-  adres: z.string()
-    .max(500, 'Adres en fazla 500 karakter olabilir')
-    .optional()
-    .or(z.literal('')),
-  
-  harita: z.string()
-    .url('Geçersiz harita URL formatı')
-    .max(1000, 'Harita URL en fazla 1000 karakter olabilir')
-    .optional()
-    .or(z.literal('')),
+  templateId: z.number()
+    .int("Template ID tam sayı olmalı")
+    .min(1, "Template ID en az 1 olmalı")
+    .max(50, "Geçersiz template ID"),
 });
 
-// Partial schema for updates
-export const firmaUpdateSchema = firmaSchema.partial();
-
-// ID parameter validation
-export const idParamSchema = z.object({
-  id: z.string().regex(/^\d+$/, 'ID sadece rakam olabilir').transform(Number),
+// İletişim bilgileri validasyonu (Yeni normalize edilmiş yapı)
+export const iletisimBilgisiSchema = z.object({
+  tip: z.enum(['telefon', 'eposta', 'whatsapp', 'telegram', 'website', 'harita'], {
+    errorMap: () => ({ message: "Geçersiz iletişim türü" })
+  }),
+  deger: z.string()
+    .min(1, "İletişim bilgisi boş olamaz")
+    .max(200, "İletişim bilgisi en fazla 200 karakter olabilir")
+    .trim(),
+  etiket: z.string()
+    .max(50, "Etiket en fazla 50 karakter olabilir")
+    .trim()
+    .optional(),
+  aktif: z.boolean().default(true),
+  sira: z.number().int().min(0).default(0)
 });
 
-// Slug parameter validation
-export const slugParamSchema = z.object({
-  slug: z.string().min(1, 'Slug boş olamaz'),
+// Sosyal medya validasyonu (Yeni normalize edilmiş yapı)
+export const sosyalMedyaHesabiSchema = z.object({
+  platform: z.enum(['instagram', 'facebook', 'twitter', 'linkedin', 'youtube', 'tiktok'], {
+    errorMap: () => ({ message: "Geçersiz sosyal medya platformu" })
+  }),
+  url: z.string()
+    .min(1, "URL boş olamaz")
+    .max(200, "URL en fazla 200 karakter olabilir")
+    .url("Geçersiz URL formatı")
+    .trim(),
+  etiket: z.string()
+    .max(50, "Etiket en fazla 50 karakter olabilir")
+    .trim()
+    .optional(),
+  aktif: z.boolean().default(true),
+  sira: z.number().int().min(0).default(0)
 });
 
-// File upload validation
-export const fileUploadSchema = z.object({
-  file: z.instanceof(File)
-    .refine((file) => file.size <= 5 * 1024 * 1024, 'Dosya boyutu 5MB\'dan küçük olmalıdır')
-    .refine(
-      (file) => ['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type),
-      'Sadece JPEG, PNG, WebP ve GIF formatları desteklenir'
-    ),
+// Banka hesabı validasyonu (Yeni normalize edilmiş yapı)
+export const bankaHesabiSchema = z.object({
+  banka_adi: z.string()
+    .min(1, "Banka adı boş olamaz")
+    .max(50, "Banka adı en fazla 50 karakter olabilir"),
+  
+  banka_kodu: z.string()
+    .max(10, "Banka kodu en fazla 10 karakter olabilir")
+    .optional(),
+  
+  banka_logo: z.string()
+    .url("Geçersiz logo URL'si")
+    .optional(),
+  
+  hesap_sahibi: z.string()
+    .min(1, "Hesap sahibi adı boş olamaz")
+    .max(100, "Hesap sahibi adı en fazla 100 karakter olabilir"),
+  
+  aktif: z.boolean().default(true),
+  sira: z.number().int().min(0).default(0),
+  
+  hesaplar: z.array(z.object({
+    iban: z.string()
+      .regex(/^TR[0-9]{2}\s?[0-9]{4}\s?[0-9]{4}\s?[0-9]{4}\s?[0-9]{4}\s?[0-9]{4}\s?[0-9]{2}$/, "Geçersiz IBAN formatı")
+      .transform(val => val.replace(/\s/g, '')), // Boşlukları kaldır
+    para_birimi: z.enum(['TRY', 'USD', 'EUR'], {
+      errorMap: () => ({ message: "Geçersiz para birimi" })
+    }).default('TRY'),
+    hesap_turu: z.string()
+      .max(50, "Hesap türü en fazla 50 karakter olabilir")
+      .optional(),
+    aktif: z.boolean().default(true)
+  })).min(1, "En az bir hesap bilgisi gerekli")
 });
 
-// Social media data validation
-export const socialMediaSchema = z.object({
-  instagramlar: z.array(z.object({
-    url: z.string().url('Geçersiz Instagram URL'),
-    label: z.string().optional(),
-  })).optional(),
-  
-  youtubelar: z.array(z.object({
-    url: z.string().url('Geçersiz YouTube URL'),
-    label: z.string().optional(),
-  })).optional(),
-  
-  websiteler: z.array(z.object({
-    url: z.string().url('Geçersiz Website URL'),
-    label: z.string().optional(),
-  })).optional(),
-  
-  haritalar: z.array(z.object({
-    url: z.string().url('Geçersiz Harita URL'),
-    label: z.string().optional(),
-  })).optional(),
-  
-  linkedinler: z.array(z.object({
-    url: z.string().url('Geçersiz LinkedIn URL'),
-    label: z.string().optional(),
-  })).optional(),
-  
-  twitterlar: z.array(z.object({
-    url: z.string().url('Geçersiz Twitter URL'),
-    label: z.string().optional(),
-  })).optional(),
-  
-  facebooklar: z.array(z.object({
-    url: z.string().url('Geçersiz Facebook URL'),
-    label: z.string().optional(),
-  })).optional(),
-  
-  tiktoklar: z.array(z.object({
-    url: z.string().url('Geçersiz TikTok URL'),
-    label: z.string().optional(),
-  })).optional(),
+// Geriye uyumluluk için eski şemalar (deprecated)
+export const communicationSchema = iletisimBilgisiSchema.omit({ aktif: true, sira: true }).extend({
+  type: z.enum(['telefon', 'eposta', 'whatsapp', 'telegram', 'website', 'harita']),
+  value: z.string().min(1).max(200).trim(),
+  label: z.string().max(50).trim().optional()
 });
 
-// Communication data validation
-export const communicationSchema = z.object({
-  telefonlar: z.array(z.object({
-    numara: z.string().regex(/^[0-9+\-\s()]+$/, 'Geçersiz telefon formatı'),
-    label: z.string().optional(),
-  })).optional(),
-  
-  epostalar: z.array(z.object({
-    adres: z.string().email('Geçersiz e-posta formatı'),
-    label: z.string().optional(),
-  })).optional(),
-  
-  whatsapplar: z.array(z.object({
-    numara: z.string().regex(/^[0-9+\-\s()]+$/, 'Geçersiz WhatsApp formatı'),
-    label: z.string().optional(),
-  })).optional(),
+export const socialMediaSchema = sosyalMedyaHesabiSchema.omit({ aktif: true, sira: true }).extend({
+  platform: z.enum(['instagram', 'facebook', 'twitter', 'linkedin', 'youtube', 'tiktok']),
+  url: z.string().min(1).max(200).trim(),
+  label: z.string().max(50).trim().optional()
 });
 
-// Bank account validation
 export const bankAccountSchema = z.object({
-  banka_adi: z.string().min(1, 'Banka adı gereklidir'),
-  hesap_sahibi: z.string().min(1, 'Hesap sahibi gereklidir'),
-  iban: z.string()
-    .regex(/^TR\d{2}\s?\d{4}\s?\d{4}\s?\d{4}\s?\d{4}\s?\d{4}\s?\d{2}$/, 'Geçersiz IBAN formatı')
-    .transform(val => val.replace(/\s/g, '')), // Boşlukları kaldır
-  hesap_no: z.string().optional(),
+  bank_name: z.string().min(1).max(50),
+  bank_label: z.string().min(1).max(100),
+  bank_logo: z.string().url().optional().or(z.literal("")),
+  account_holder: z.string().min(1).max(100),
+  accounts: z.array(z.object({
+    iban: z.string().regex(/^TR[0-9]{2}\s?[0-9]{4}\s?[0-9]{4}\s?[0-9]{4}\s?[0-9]{4}\s?[0-9]{4}\s?[0-9]{2}$/).transform(val => val.replace(/\s/g, '')),
+    currency: z.enum(['TL', 'TRY', 'USD', 'EUR'])
+  })).min(1)
 });
 
-// Helper function to validate data
-export function validateData<T>(schema: z.ZodSchema<T>, data: unknown): {
-  success: boolean;
-  data?: T;
-  errors?: string[];
-} {
-  try {
-    const result = schema.parse(data);
-    return { success: true, data: result };
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      const errors = error.errors.map(err => `${err.path.join('.')}: ${err.message}`);
-      return { success: false, errors };
-    }
-    return { success: false, errors: ['Bilinmeyen validation hatası'] };
-  }
-}
+// E-posta validasyonu
+export const emailSchema = z.string()
+  .email("Geçersiz e-posta adresi")
+  .max(100, "E-posta adresi en fazla 100 karakter olabilir");
 
-// Helper function to safely parse data
-export function safeParseData<T>(schema: z.ZodSchema<T>, data: unknown): z.SafeParseReturnType<unknown, T> {
-  return schema.safeParse(data);
-}
+// Telefon validasyonu (Türkiye formatı)
+export const phoneSchema = z.string()
+  .regex(/^(\+90|0)?[5][0-9]{9}$/, "Geçersiz telefon numarası formatı (örn: 0555 123 45 67)");
+
+// URL validasyonu
+export const urlSchema = z.string()
+  .url("Geçersiz URL formatı")
+  .max(200, "URL en fazla 200 karakter olabilir");
+
+// Dosya yükleme validasyonu
+export const fileUploadSchema = z.object({
+  size: z.number()
+    .max(5 * 1024 * 1024, "Dosya boyutu en fazla 5MB olabilir"), // 5MB limit
+  
+  type: z.string()
+    .refine(
+      (type) => ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(type),
+      "Sadece JPEG, PNG ve WebP formatları desteklenir"
+    )
+});
+
+// PDF dosya validasyonu
+export const pdfUploadSchema = z.object({
+  size: z.number()
+    .max(10 * 1024 * 1024, "PDF dosyası en fazla 10MB olabilir"), // 10MB limit
+  
+  type: z.string()
+    .refine(
+      (type) => type === 'application/pdf',
+      "Sadece PDF formatı desteklenir"
+    )
+});
+
+// Güvenli HTML içerik validasyonu (XSS koruması)
+export const safeHtmlSchema = z.string()
+  .refine(
+    (content) => {
+      // Tehlikeli HTML etiketlerini kontrol et
+      const dangerousTags = /<script|<iframe|<object|<embed|<form|javascript:|data:/i;
+      return !dangerousTags.test(content);
+    },
+    "İçerik güvenlik açısından uygun değil"
+  );
+
+// Slug validasyonu ve temizleme
+export const slugSchema = z.string()
+  .transform((val) => {
+    return val
+      .toLowerCase()
+      .trim()
+      .replace(/[çğıöşü]/g, (match) => {
+        const map: { [key: string]: string } = {
+          'ç': 'c', 'ğ': 'g', 'ı': 'i', 'ö': 'o', 'ş': 's', 'ü': 'u'
+        };
+        return map[match] || match;
+      })
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  })
+  .refine((val) => val.length >= 2, "URL en az 2 karakter olmalı")
+  .refine((val) => val.length <= 50, "URL en fazla 50 karakter olabilir");
+
+// API yanıt formatları
+export const apiSuccessSchema = z.object({
+  data: z.any(),
+  message: z.string().optional()
+});
+
+export const apiErrorSchema = z.object({
+  error: z.object({
+    message: z.string(),
+    code: z.string().optional(),
+    details: z.any().optional()
+  })
+});
+
+// Type exports
+export type CreateFirmaInput = z.infer<typeof createFirmaSchema>;
+export type CommunicationInput = z.infer<typeof communicationSchema>;
+export type SocialMediaInput = z.infer<typeof socialMediaSchema>;
+export type BankAccountInput = z.infer<typeof bankAccountSchema>;
+export type FileUploadInput = z.infer<typeof fileUploadSchema>;
+export type PdfUploadInput = z.infer<typeof pdfUploadSchema>;

@@ -1,11 +1,11 @@
 "use client";
 import React, { useEffect, useCallback } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
-import { FaQuoteLeft } from 'react-icons/fa';
+import { Icon } from '@/app/lib/icons';
 
 const feedbacks = [
   {
-    text: "Sanal Kartvizit ile tüm kartvizit süreçlerimizi dijitalleştirdik. QR kod ve vCard entegrasyonu sayesinde müşterilerimize hızlıca ulaşabiliyoruz. Cloudinary entegrasyonu ile dosya yükleme ve paylaşım çok pratik.",
+    text: "Dijital Kartvizit ile tüm kartvizit süreçlerimizi dijitalleştirdik. QR kod ve vCard entegrasyonu sayesinde müşterilerimize hızlıca ulaşabiliyoruz. Cloudinary entegrasyonu ile dosya yükleme ve paylaşım çok pratik.",
     name: "Zehra Türksoy",
     title: "SEO & ASO Takım Lideri",
     avatar: "https://images.ctfassets.net/h6goo9gw1hh6/2sNZtFAWOdP1lmQ33VwRN3/24e953b920a9cd0ff2e1d587742a2472/1-intro-photo-final.jpg?w=1200&h=992&fl=progressive&q=70&fm=jpg"
@@ -63,8 +63,8 @@ export default function FeedbackCarousel() {
                       <span className="text-base text-gray-500">{f.title}</span>
                     </div>
                     <span className="flex-1" />
-                    {/* Sağda büyük tırnak işareti (react-icons) */}
-                    <FaQuoteLeft className="w-14 h-14 ml-4 -mr-2 text-gray-200 opacity-80" />
+                    {/* Sağda büyük tırnak işareti (consolidated icons) */}
+                    <Icon name="quote" className="w-14 h-14 ml-4 -mr-2 text-gray-200 opacity-80" />
                   </div>
                 </div>
               </div>
@@ -74,4 +74,4 @@ export default function FeedbackCarousel() {
       </div>
     </section>
   );
-} 
+}

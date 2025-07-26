@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/app/lib/db';
 import { generateVCard } from '@/app/lib/vcardGenerator';
+import { logger } from '@/app/lib/logger';
 
 export async function GET(
   request: NextRequest,
@@ -36,7 +37,7 @@ export async function GET(
       }
     });
   } catch (error) {
-    console.error('vCard oluşturulurken hata:', error);
+    logger.error('vCard oluşturulurken hata', { error: error instanceof Error ? error.message : String(error), slug: params.slug, stack: error instanceof Error ? error.stack : undefined });
     return NextResponse.json({ error: 'vCard oluşturulurken bir hata oluştu' }, { status: 500 });
   }
 } 

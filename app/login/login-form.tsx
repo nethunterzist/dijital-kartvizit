@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { logger } from '@/app/lib/logger';
 
 export default function LoginForm() {
   const router = useRouter();
@@ -31,14 +32,14 @@ export default function LoginForm() {
       
       if (result?.error) {
         setError('Kullanıcı adı veya şifre hatalı.');
-        console.error('Giriş hatası:', result.error);
+        logger.error('Giriş hatası:', result.error);
       } else {
         router.push('/admin');
         router.refresh();
       }
     } catch (error) {
       setError('Giriş işlemi sırasında bir hata oluştu.');
-      console.error('Giriş hatası:', error);
+      logger.error('Giriş hatası:', error);
     } finally {
       setLoading(false);
     }

@@ -1,0 +1,131 @@
+{
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": ["@upstash/context7-mcp"],
+      "description": "Official library documentation & examples",
+      "capabilities": [
+        "documentation_lookup",
+        "pattern_research",
+        "version_compatibility"
+      ],
+      "project_specific": [
+        "Next.js 14 App Router patterns",
+        "Prisma schema best practices",
+        "Cloudinary integration docs",
+        "NextAuth.js configuration"
+      ]
+    },
+    "sequential": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-sequential-thinking"],
+      "description": "Multi-step problem solving & architectural thinking",
+      "capabilities": [
+        "complex_system_design",
+        "root_cause_analysis",
+        "performance_investigation",
+        "architecture_review"
+      ],
+      "project_specific": [
+        "Payment flow analysis",
+        "Card generation pipeline",
+        "Database relationship optimization",
+        "Serverless architecture review"
+      ]
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-filesystem", "--allowed-directories", "."],
+      "description": "File system access for Magic UI component generation",
+      "capabilities": [
+        "file_operations",
+        "directory_management",
+        "component_generation",
+        "code_scaffolding"
+      ],
+      "project_specific": [
+        "React component creation",
+        "Template file generation",
+        "Configuration file management",
+        "Asset organization"
+      ]
+    },
+    "puppeteer": {
+      "command": "npx",
+      "args": ["@kirkdeam/puppeteer-mcp-server"],
+      "description": "Browser automation for E2E testing and validation",
+      "capabilities": [
+        "browser_automation",
+        "e2e_testing",
+        "performance_monitoring",
+        "visual_validation"
+      ],
+      "project_specific": [
+        "Card creation flow testing",
+        "Payment process validation",
+        "Mobile responsiveness testing",
+        "QR code generation testing"
+      ]
+    }
+  },
+  "project_context": {
+    "name": "dijital-kartvizit",
+    "domain": "SaaS - Digital Business Card Platform",
+    "tech_stack": [
+      "Next.js 14",
+      "React 18", 
+      "TypeScript",
+      "Prisma ORM",
+      "Tailwind CSS",
+      "Cloudinary",
+      "NextAuth.js"
+    ],
+    "critical_flows": [
+      "card_creation",
+      "payment_processing", 
+      "template_rendering",
+      "file_upload"
+    ],
+    "deployment": "Vercel Serverless"
+  },
+  "usage_patterns": {
+    "card_development": {
+      "primary_mcp": "filesystem",
+      "secondary_mcp": "context7",
+      "use_case": "Component generation with official patterns"
+    },
+    "payment_integration": {
+      "primary_mcp": "sequential",
+      "secondary_mcp": "puppeteer",
+      "use_case": "Complex flow analysis and testing"
+    },
+    "performance_optimization": {
+      "primary_mcp": "puppeteer",
+      "secondary_mcp": "sequential", 
+      "use_case": "Performance monitoring and systematic analysis"
+    },
+    "architecture_review": {
+      "primary_mcp": "sequential",
+      "secondary_mcp": "context7",
+      "use_case": "System design with official documentation"
+    }
+  },
+  "auto_activation": {
+    "enabled": true,
+    "rules": {
+      "file_type_detection": {
+        "tsx|jsx": "filesystem",
+        "api|route": "sequential", 
+        "prisma|schema": "context7",
+        "test|spec": "puppeteer"
+      },
+      "keyword_triggers": {
+        "component|ui|design": "filesystem",
+        "performance|optimize|slow": "puppeteer + sequential",
+        "architecture|design|system": "sequential + context7",
+        "test|e2e|validation": "puppeteer",
+        "documentation|docs|reference": "context7"
+      }
+    }
+  }
+}

@@ -250,12 +250,15 @@ export const minimalTemplate = `
             background: #f3f4f6;
             border: 1px solid #d1d5db;
             border-radius: 4px;
-            padding: 4px 8px;
+            padding: 6px 8px;
             color: #374151;
             cursor: pointer;
             margin-left: 8px;
             font-size: 0.75rem;
             transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            vertical-align: middle;
         }
         .copy-btn:hover {
             background: #e5e7eb;
@@ -416,13 +419,13 @@ export const minimalTemplate = `
             <h2 class="popup-title">Vergi Bilgileri</h2>
             <div class="tax-info">
                 <div><strong>Firma Ünvanı:</strong> {{tax.firma_unvan}}
-                    <button class="copy-btn" onclick="copyToClipboard('{{tax.firma_unvan}}', event)">Kopyala</button>
+                    <button class="copy-btn" onclick="copyToClipboard('{{tax.firma_unvan}}', event)"><i class="fas fa-copy"></i></button>
                 </div>
                 <div><strong>Vergi Numarası:</strong> {{tax.firma_vergi_no}}
-                    <button class="copy-btn" onclick="copyToClipboard('{{tax.firma_vergi_no}}', event)">Kopyala</button>
+                    <button class="copy-btn" onclick="copyToClipboard('{{tax.firma_vergi_no}}', event)"><i class="fas fa-copy"></i></button>
                 </div>
                 <div><strong>Vergi Dairesi:</strong> {{tax.vergi_dairesi}}
-                    <button class="copy-btn" onclick="copyToClipboard('{{tax.vergi_dairesi}}', event)">Kopyala</button>
+                    <button class="copy-btn" onclick="copyToClipboard('{{tax.vergi_dairesi}}', event)"><i class="fas fa-copy"></i></button>
                 </div>
             </div>
         </div>
@@ -500,18 +503,15 @@ export const minimalTemplate = `
         if (!text) return;
         navigator.clipboard.writeText(text).then(function() {
             const btn = event.currentTarget;
-            const originalText = btn.textContent;
-            btn.textContent = 'Kopyalandı!';
-            btn.style.background = '#d1fae5';
-            btn.style.borderColor = '#a7f3d0';
-            btn.style.color = '#065f46';
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i>';
+            btn.style.background = '#48bb78';
             setTimeout(() => { 
-                btn.textContent = originalText;
-                btn.style.background = '#f3f4f6';
-                btn.style.borderColor = '#d1d5db';
-                btn.style.color = '#374151';
+                btn.innerHTML = originalHTML;
+                btn.style.background = btn.style.background.replace('#48bb78', '');
             }, 1000);
         });
+    };
     }
     function showBankPopup(e) {
         e.preventDefault();

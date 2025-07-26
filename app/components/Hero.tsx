@@ -2,6 +2,7 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { Typewriter } from 'react-simple-typewriter';
 import HeroCarousel from './HeroCarousel';
+import { logger } from '@/app/lib/logger';
 
 export default function Hero() {
   const [showModal, setShowModal] = useState(false);
@@ -10,7 +11,7 @@ export default function Hero() {
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // Burada backend entegrasyonu yapılabilir
-    console.log('Demo Talebi:', form);
+    logger.info('Demo talebi gönderildi', { form });
     setShowModal(false);
     setForm({ adSoyad: '', telefon: '', webSite: '', firmaAdi: '' });
   };

@@ -1,5 +1,7 @@
 import { unstable_cache } from 'next/cache';
+import { kv } from '@vercel/kv';
 import { prisma } from './db';
+import { logger } from './logger';
 
 // Cache tags for invalidation
 export const CACHE_TAGS = {
@@ -16,6 +18,294 @@ export const CACHE_DURATIONS = {
   LONG: 3600,    // 1 hour
   VERY_LONG: 86400, // 24 hours
 } as const;
+
+// 🏗️ VERCEL KV CACHE SERVICE LAYER
+export class VercelKVCache {
+  private isKVAvailable = !!(process.env.KV_URL && process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
+
+  private static instance: VercelKVCache;
+  
+  static getInstance(): VercelKVCache {
+    if (!this.instance) {
+      this.instance = new VercelKVCache();
+    }
+    return this.instance;
+  }
+
+  async get<T>(key: string): Promise<T | null> {
+    if (!this.isKVAvailable) {
+      logger.warn('Vercel KV is not available, skipping cache GET operation');
+      return null;
+    }
+
+    try {
+      const start = performance.now();
+      const data = await kv.get<T>(key);
+      const duration = performance.now() - start;
+      
+      logger.info(`Cache ${data ? 'HIT' : 'MISS'}`, {
+        key,
+        duration: `${duration.toFixed(2)}ms`,
+        hit: !!data
+      });
+      
+      return data;
+    } catch (error) {
+      logger.error('Cache get error:', { key, error: error.message, stack: error.stack });
+      return null; // Graceful degradation
+    }
+  }
+
+  async set<T>(key: string, value: T, ttl?: number): Promise<boolean> {
+    if (!this.isKVAvailable) {
+      logger.warn('Vercel KV is not available, skipping cache SET operation');
+      return false;
+    }
+
+    try {
+      const start = performance.now();
+      
+      if (ttl) {
+        await kv.setex(key, ttl, value);
+      } else {
+        await kv.set(key, value);
+      }
+      
+      const duration = performance.now() - start;
+      logger.info('Cache SET', {
+        key,
+        ttl,
+        duration: `${duration.toFixed(2)}ms`
+      });
+      
+      return true;
+    } catch (error) {
+      logger.error('Cache set error:', { key, error: error.message, stack: error.stack });
+      return false; // Graceful degradation
+    }
+  }
+
+  async del(pattern: string): Promise<number> {
+    try {
+      const keys = await kv.keys(pattern);
+      if (keys.length === 0) return 0;
+      
+      const deleted = await kv.del(...keys);
+      logger.info('Cache invalidation', {
+        pattern,
+        keysDeleted: deleted
+      });
+      
+      return deleted;
+    } catch (error) {
+      logger.error('Cache delete error:', { pattern, error });
+      return 0;
+    }
+  }
+
+  async invalidatePattern(pattern: string): Promise<void> {
+    await this.del(pattern);
+  }
+}
+
+// 🎯 FIRMA CACHE SERVICE
+interface CacheableFirmaList {
+  firmalar: any[];
+  pagination: any;
+  meta: any;
+  timestamp: number;
+}
+
+interface CacheableFirma {
+  firma: any;
+  timestamp: number;
+}
+
+export class FirmaCacheService {
+  private cache = VercelKVCache.getInstance();
+  
+  // Cache keys generator
+  private keys = {
+    list: (page: number, limit: number, search?: string) => 
+      `firmalar:list:p${page}:l${limit}${search ? `:s${encodeURIComponent(search)}` : ''}`,
+    
+    count: (search?: string) => 
+      `firmalar:count${search ? `:s${encodeURIComponent(search)}` : ''}`,
+    
+    firma: (id: number) => `firmalar:item:${id}`,
+    
+    patterns: {
+      all: 'firmalar:*',
+      lists: 'firmalar:list:*',
+      items: 'firmalar:item:*',
+      counts: 'firmalar:count:*'
+    }
+  };
+
+  // TTL constants
+  private ttl = {
+    list: 300,    // 5 minutes
+    count: 600,   // 10 minutes  
+    firma: 1800   // 30 minutes
+  };
+
+  async getFirmaList(
+    page: number, 
+    limit: number, 
+    search?: string
+  ): Promise<CacheableFirmaList | null> {
+    const key = this.keys.list(page, limit, search);
+    return await this.cache.get<CacheableFirmaList>(key);
+  }
+
+  async setFirmaList(
+    page: number,
+    limit: number, 
+    data: CacheableFirmaList,
+    search?: string
+  ): Promise<void> {
+    const key = this.keys.list(page, limit, search);
+    await this.cache.set(key, {
+      ...data,
+      timestamp: Date.now()
+    }, this.ttl.list);
+  }
+
+  async getFirmaCount(search?: string): Promise<number | null> {
+    const key = this.keys.count(search);
+    return await this.cache.get<number>(key);
+  }
+
+  async setFirmaCount(count: number, search?: string): Promise<void> {
+    const key = this.keys.count(search);
+    await this.cache.set(key, count, this.ttl.count);
+  }
+
+  async getFirma(id: number): Promise<CacheableFirma | null> {
+    const key = this.keys.firma(id);
+    return await this.cache.get<CacheableFirma>(key);
+  }
+
+  async setFirma(id: number, firma: any): Promise<void> {
+    const key = this.keys.firma(id);
+    await this.cache.set(key, {
+      firma,
+      timestamp: Date.now()
+    }, this.ttl.firma);
+  }
+
+  // Invalidation methods
+  async invalidateAll(): Promise<void> {
+    await this.cache.invalidatePattern(this.keys.patterns.all);
+  }
+
+  async invalidateLists(): Promise<void> {
+    await this.cache.invalidatePattern(this.keys.patterns.lists);
+    await this.cache.invalidatePattern(this.keys.patterns.counts);
+  }
+
+  async invalidateFirma(id: number): Promise<void> {
+    await this.cache.del(this.keys.firma(id));
+    // Also invalidate lists since they contain this firma
+    await this.invalidateLists();
+  }
+
+  // Smart invalidation for CUD operations
+  async onFirmaCreated(): Promise<void> {
+    // New firma affects lists and counts
+    await this.invalidateLists();
+  }
+
+  async onFirmaUpdated(id: number): Promise<void> {
+    // Updated firma affects specific item and lists
+    await this.invalidateFirma(id);
+  }
+
+  async onFirmaDeleted(id: number): Promise<void> {
+    // Deleted firma affects everything
+    await this.invalidateFirma(id);
+  }
+}
+
+// 📊 CACHE METRICS & MONITORING
+export class CacheMetrics {
+  private static metrics = {
+    hits: 0,
+    misses: 0,
+    errors: 0,
+    totalRequests: 0
+  };
+
+  static recordHit() {
+    this.metrics.hits++;
+    this.metrics.totalRequests++;
+  }
+
+  static recordMiss() {
+    this.metrics.misses++;
+    this.metrics.totalRequests++;
+  }
+
+  static recordError() {
+    this.metrics.errors++;
+  }
+
+  static getMetrics() {
+    const hitRate = this.metrics.totalRequests > 0 
+      ? (this.metrics.hits / this.metrics.totalRequests) * 100 
+      : 0;
+
+    return {
+      ...this.metrics,
+      hitRate: parseFloat(hitRate.toFixed(2))
+    };
+  }
+
+  static reset() {
+    this.metrics = { hits: 0, misses: 0, errors: 0, totalRequests: 0 };
+  }
+}
+
+// 🛡️ CIRCUIT BREAKER FOR CACHE RELIABILITY
+class CacheCircuitBreaker {
+  private failures = 0;
+  private lastFailure = 0;
+  private readonly threshold = 5;
+  private readonly timeout = 30000; // 30 seconds
+
+  async execute<T>(operation: () => Promise<T>): Promise<T | null> {
+    if (this.isOpen()) {
+      logger.warn('Cache circuit breaker is OPEN, skipping cache operation');
+      return null; // Circuit open, skip cache
+    }
+
+    try {
+      const result = await operation();
+      this.onSuccess();
+      return result;
+    } catch (error) {
+      this.onFailure();
+      throw error;
+    }
+  }
+
+  private isOpen(): boolean {
+    return this.failures >= this.threshold && 
+           (Date.now() - this.lastFailure) < this.timeout;
+  }
+
+  private onSuccess() {
+    this.failures = 0;
+  }
+
+  private onFailure() {
+    this.failures++;
+    this.lastFailure = Date.now();
+    logger.warn(`Cache circuit breaker failure count: ${this.failures}`);
+  }
+}
+
+export const cacheCircuitBreaker = new CacheCircuitBreaker();
 
 // Cached database queries
 export const getFirmaBySlug = unstable_cache(
@@ -189,7 +479,7 @@ export const searchFirmalar = unstable_cache(
 export async function invalidateCache(tags: string[]) {
   // In Next.js 14, you would use revalidateTag
   // This is a placeholder for the actual implementation
-  console.log('Invalidating cache for tags:', tags);
+  logger.info('Invalidating cache for tags:', tags);
 }
 
 export async function invalidateFirmaCache(firmaId?: number) {

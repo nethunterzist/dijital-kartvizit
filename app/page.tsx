@@ -1,24 +1,22 @@
 import Navbar from './components/Navbar';
-import Hero from './components/Hero';
+import NewHero from './components/NewHero';
+import InstantCardCreator from './components/InstantCardCreator';
+import HowItWorksSection from "./components/HowItWorksSection";
+import PricingSection from './components/PricingSection';
+import VideoFaqSection from "./components/VideoFaqSection";
 import FeedbackCarousel from './components/FeedbackCarousel';
 import Footer from './components/Footer';
-import TabbedFeatureSection from "./components/TabbedFeatureSection";
-import HowItWorksSection from "./components/HowItWorksSection";
-import VideoFaqSection from "./components/VideoFaqSection";
-import VideoFeatureSection from "./components/VideoFeatureSection";
-import SocialMediaBubbles from "./components/SocialMediaBubbles";
 
 export default function HomePage() {
   return (
     <main className="min-h-screen w-full">
       <Navbar />
-      <Hero />
-      <VideoFeatureSection />
+      <NewHero />
+      <InstantCardCreator />
       <HowItWorksSection />
-      <TabbedFeatureSection />
+      <PricingSection />
       <VideoFaqSection />
       <FeedbackCarousel />
-      <SocialMediaBubbles />
       <Footer />
     </main>
   );

@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
 import { prisma } from "@/app/lib/db";
+import { logger } from "@/app/lib/logger";
 
 // Kullanıcı tipini genişlet
 declare module "next-auth" {
@@ -48,7 +49,7 @@ const handler = NextAuth({
           });
           
           if (!admin) {
-            console.log('Kullanıcı bulunamadı:', credentials.username);
+            logger.info('Kullanıcı bulunamadı:', credentials.username);
             return null;
           }
           
@@ -56,12 +57,12 @@ const handler = NextAuth({
           const isValid = await bcrypt.compare(credentials.password, admin.password);
           
           if (!isValid) {
-            console.log('Geçersiz şifre');
+            logger.info('Geçersiz şifre');
             return null;
           }
           
           // Giriş başarılı
-          console.log('Giriş başarılı:', admin.username);
+          logger.info('Giriş başarılı:', admin.username);
           return {
             id: String(admin.id),
             name: admin.username,
@@ -69,14 +70,14 @@ const handler = NextAuth({
             image: null
           };
         } catch (error) {
-          console.error('Giriş hatası:', error);
+          logger.error('Giriş hatası:', error);
           return null;
         }
       }
     })
   ],
   pages: {
-    signIn: "/admin/login",
+    signIn: "/login",
   },
   callbacks: {
     async jwt({ token, user }) {

@@ -268,7 +268,7 @@ export const nightPulseTemplate = `
             background: rgba(255, 235, 59, 0.2);
             border: 1px solid #FFEB3B;
             border-radius: 15px;
-            padding: 4px 8px;
+            padding: 6px 8px;
             color: #FFEB3B;
             cursor: pointer;
             margin-left: 8px;
@@ -276,6 +276,9 @@ export const nightPulseTemplate = `
             font-weight: 600;
             transition: all 0.2s;
             -webkit-tap-highlight-color: transparent;
+            display: inline-flex;
+            align-items: center;
+            vertical-align: middle;
         }
         .copy-btn:active {
             box-shadow: 0 0 15px rgba(255, 235, 59, 0.4);
@@ -388,13 +391,13 @@ export const nightPulseTemplate = `
             <h2 class="popup-title">Vergi Bilgileri</h2>
             <div class="tax-info">
                 <div><strong>Firma Ünvanı:</strong> {{tax.firma_unvan}}
-                    <button class="copy-btn" onclick="copyToClipboard('{{tax.firma_unvan}}', event)">Kopyala</button>
+                    <button class="copy-btn" onclick="copyToClipboard('{{tax.firma_unvan}}', event)"><i class="fas fa-copy"></i></button>
                 </div>
                 <div><strong>Vergi Numarası:</strong> {{tax.firma_vergi_no}}
-                    <button class="copy-btn" onclick="copyToClipboard('{{tax.firma_vergi_no}}', event)">Kopyala</button>
+                    <button class="copy-btn" onclick="copyToClipboard('{{tax.firma_vergi_no}}', event)"><i class="fas fa-copy"></i></button>
                 </div>
                 <div><strong>Vergi Dairesi:</strong> {{tax.vergi_dairesi}}
-                    <button class="copy-btn" onclick="copyToClipboard('{{tax.vergi_dairesi}}', event)">Kopyala</button>
+                    <button class="copy-btn" onclick="copyToClipboard('{{tax.vergi_dairesi}}', event)"><i class="fas fa-copy"></i></button>
                 </div>
             </div>
         </div>
@@ -470,20 +473,15 @@ export const nightPulseTemplate = `
         if (!text) return;
         navigator.clipboard.writeText(text).then(function() {
             const btn = event.currentTarget;
-            const originalText = btn.textContent;
-            btn.textContent = 'Kopyalandı!';
-            btn.style.background = 'rgba(0, 230, 118, 0.3)';
-            btn.style.borderColor = '#00E676';
-            btn.style.color = '#00E676';
-            btn.style.boxShadow = '0 0 15px rgba(0, 230, 118, 0.5)';
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i>';
+            btn.style.background = '#48bb78';
             setTimeout(() => { 
-                btn.textContent = originalText;
-                btn.style.background = 'rgba(255, 235, 59, 0.2)';
-                btn.style.borderColor = '#FFEB3B';
-                btn.style.color = '#FFEB3B';
-                btn.style.boxShadow = 'none';
+                btn.innerHTML = originalHTML;
+                btn.style.background = btn.style.background.replace('#48bb78', '');
             }, 1000);
         });
+    };
     }
     function showBankPopup(e) {
         e.preventDefault();

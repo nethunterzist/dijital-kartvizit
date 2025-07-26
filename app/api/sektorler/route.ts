@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/app/lib/db';
+import { logger } from '@/app/lib/logger';
 
 export async function GET(req: NextRequest) {
   try {
@@ -10,7 +11,7 @@ export async function GET(req: NextRequest) {
     });
     return NextResponse.json({ sektorler });
   } catch (error) {
-    console.error('Sektörler getirilirken hata oluştu:', error);
+    logger.error('Sektörler getirilirken hata oluştu:', error);
     return NextResponse.json(
       { message: 'Sektörler getirilirken bir hata oluştu' },
       { status: 500 }

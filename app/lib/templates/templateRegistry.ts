@@ -3,7 +3,7 @@ export interface TemplateInfo {
   name: string;
   description: string;
   preview: string;
-  style: 'classic' | 'modern' | 'minimal' | 'corporate' | 'colorful' | 'luxury';
+  style: 'classic' | 'modern' | 'minimal' | 'corporate' | 'colorful' | 'luxury' | 'artistic' | 'tech' | 'nature' | 'vintage' | 'industrial';
   colorScheme: string;
   features: string[];
 }
@@ -44,15 +44,6 @@ export const TEMPLATES: TemplateInfo[] = [
     style: 'colorful',
     colorScheme: 'Çok Renkli',
     features: ['Canlı Renkler', 'Animasyonlar', 'Dinamik Geçişler', 'Eğlenceli']
-  },
-  {
-    id: 6,
-    name: 'Luxury',
-    description: 'Lüks tasarım - Altın çizgiler ve büyük profil fotoğrafı',
-    preview: '/img/template-previews/luxury.jpg',
-    style: 'luxury',
-    colorScheme: 'Beyaz & Altın',
-    features: ['Altın Çizgiler', 'Büyük Profil', 'Kare İkonlar', 'Premium Görünüm']
   },
   {
     id: 7,
@@ -188,6 +179,186 @@ export const TEMPLATES: TemplateInfo[] = [
     style: 'modern',
     colorScheme: 'Siyah & Kırmızı',
     features: ['Kırmızı Tema', 'Güçlü', 'Etkileyici', 'Koyu']
+  },
+  {
+    id: 22,
+    name: 'Retro Dalga',
+    description: '80\'ler synthwave - Neon estetiği ve fütüristik atmosfer',
+    preview: '/img/template-previews/retro-dalga.jpg',
+    style: 'tech',
+    colorScheme: 'Neon Pembe & Cyan',
+    features: ['Synthwave', 'Neon Efektler', 'Retro Fütürizm', 'Parlama']
+  },
+  {
+    id: 23,
+    name: 'Doğal Esinti',
+    description: 'Organik ve ekolojik - Sürdürülebilirlik odaklı tasarım',
+    preview: '/img/template-previews/dogal-esinti.jpg',
+    style: 'nature',
+    colorScheme: 'Yeşil & Toprak Tonları',
+    features: ['Organik', 'Ekolojik', 'Dokulu Arka Plan', 'Doğal']
+  },
+  {
+    id: 24,
+    name: 'Brütalist Beton',
+    description: 'Cesur minimalizm - Ham ve fonksiyonel tasarım',
+    preview: '/img/template-previews/brutalist-beton.jpg',
+    style: 'minimal',
+    colorScheme: 'Siyah & Beyaz',
+    features: ['Brütalist', 'Keskin Köşeler', 'Kalın Kenarlıklar', 'Ham']
+  },
+  {
+    id: 25,
+    name: 'Zanaatkar Dokunuşu',
+    description: 'El yapımı hissi - Kişisel ve samimi tasarım',
+    preview: '/img/template-previews/zanaatkar-dokunusu.jpg',
+    style: 'artistic',
+    colorScheme: 'Krem & Gül Kurusu',
+    features: ['El Yazısı', 'Kişisel', 'Samimi', 'Organik Şekiller']
+  },
+  {
+    id: 26,
+    name: 'Gelecek Vizyonu',
+    description: 'Fütüristik teknoloji - Yapay zeka ve bilim kurgu estetiği',
+    preview: '/img/template-previews/gelecek-vizyonu.jpg',
+    style: 'tech',
+    colorScheme: 'Uzay Mavisi & Turkuaz',
+    features: ['Fütüristik', 'Altıgen Motifler', 'Teknolojik', 'Geometrik']
+  },
+  {
+    id: 27,
+    name: 'Altın Varak',
+    description: 'Lüks ve prestij - Zarif serif fontlar ve altın detaylar',
+    preview: '/img/template-previews/altin-varak.jpg',
+    style: 'luxury',
+    colorScheme: 'Siyah & Antik Altın',
+    features: ['Lüks', 'Serif Font', 'Altın Çizgiler', 'Prestijli']
+  },
+  {
+    id: 28,
+    name: 'Finans Zirvesi',
+    description: 'Kurumsal güvenilirlik - Profesyonel pinstripe deseni',
+    preview: '/img/template-previews/finans-zirvesi.jpg',
+    style: 'corporate',
+    colorScheme: 'Lacivert & Gümüş',
+    features: ['Kurumsal', 'Pinstripe', 'Profesyonel', 'Güvenilir']
+  },
+  {
+    id: 29,
+    name: 'Art Deco Esintisi',
+    description: 'Şık geometrik - Art Deco motifler ve altın detaylar',
+    preview: '/img/template-previews/art-deco.jpg',
+    style: 'vintage',
+    colorScheme: 'Antrasit & Art Deco Altını',
+    features: ['Art Deco', 'Geometrik', 'Simetrik', 'Şık']
+  },
+  {
+    id: 30,
+    name: 'Sakin Bahçe',
+    description: 'Zen minimalizm - Asimetrik yerleşim ve negatif alan',
+    preview: '/img/template-previews/sakin-bahce.jpg',
+    style: 'minimal',
+    colorScheme: 'Taş Grisi & Mavi-Gri',
+    features: ['Zen', 'Asimetrik', 'Negatif Alan', 'Sakin']
+  },
+  {
+    id: 31,
+    name: 'Kod Satırı',
+    description: 'Hacker estetiği - Monospace font ve yanıp sönen imleç',
+    preview: '/img/template-previews/kod-satiri.jpg',
+    style: 'tech',
+    colorScheme: 'GitHub Siyahı & Yeşil',
+    features: ['Hacker', 'Monospace', 'Yanıp Sönen İmleç', 'Geliştirici']
+  },
+  {
+    id: 32,
+    name: 'Akademik Mavi',
+    description: 'Eğitim ve resmi - Klasik serif font ve Oxford mavisi',
+    preview: '/img/template-previews/akademik-mavi.jpg',
+    style: 'classic',
+    colorScheme: 'Oxford Mavisi & Beyaz',
+    features: ['Akademik', 'Serif Font', 'Resmi', 'Eğitim']
+  },
+  {
+    id: 33,
+    name: 'Suluboya Paleti',
+    description: 'Sanatsal yumuşaklık - Suluboya dokusu ve el yazısı',
+    preview: '/img/template-previews/suluboya-paleti.jpg',
+    style: 'artistic',
+    colorScheme: 'Pastel Çok Renkli',
+    features: ['Suluboya', 'Sanatsal', 'El Yazısı', 'Organik']
+  },
+  {
+    id: 34,
+    name: 'Endüstriyel Çelik',
+    description: 'Maskülen güç - Fırçalanmış metal dokusu',
+    preview: '/img/template-previews/endustriyel-celik.jpg',
+    style: 'industrial',
+    colorScheme: 'Metalik Gri & Turuncu',
+    features: ['Endüstriyel', 'Metal Dokusu', 'Maskülen', 'Güçlü']
+  },
+  {
+    id: 35,
+    name: 'Karanlık Mod+',
+    description: 'Modern kullanıcı odaklı - Material Design ilhamlı',
+    preview: '/img/template-previews/karanlik-mod-plus.jpg',
+    style: 'modern',
+    colorScheme: 'Siyah & Lavanta Moru',
+    features: ['Material Design', 'Karanlık Mod', 'Modern', 'Kullanıcı Odaklı']
+  },
+  {
+    id: 36,
+    name: 'Gazete Kağıdı',
+    description: 'Vintage entelektüel - Gazete düzeni ve sütunlar',
+    preview: '/img/template-previews/gazete-kagidi.jpg',
+    style: 'vintage',
+    colorScheme: 'Eskitilmiş Kağıt & Siyah',
+    features: ['Vintage', 'Gazete Düzeni', 'Sütunlar', 'Entelektüel']
+  },
+  {
+    id: 37,
+    name: 'Pop Art Patlaması',
+    description: 'Canlı enerji - Çizgi roman tarzı ve halftone desenler',
+    preview: '/img/template-previews/pop-art.jpg',
+    style: 'artistic',
+    colorScheme: 'Parlak Sarı & Canlı Renkler',
+    features: ['Pop Art', 'Çizgi Roman', 'Halftone', 'Enerjik']
+  },
+  {
+    id: 38,
+    name: 'Mermer Zarafeti',
+    description: 'Klas sofistikasyon - Beyaz mermer dokusu ve bronz vurgular',
+    preview: '/img/template-previews/mermer-zarafeti.jpg',
+    style: 'luxury',
+    colorScheme: 'Beyaz Mermer & Bronz',
+    features: ['Mermer Dokusu', 'Sofistike', 'Klas', 'Zarif']
+  },
+  {
+    id: 39,
+    name: 'Okyanus Derinliği',
+    description: 'Sakin akışkan - Su altı kabarcıkları ve dalga animasyonları',
+    preview: '/img/template-previews/okyanus-derinligi.jpg',
+    style: 'nature',
+    colorScheme: 'Derin Okyanus & Köpük Beyazı',
+    features: ['Okyanus', 'Kabarcık Animasyonu', 'Sakin', 'Akışkan']
+  },
+  {
+    id: 40,
+    name: 'Kırsal Ahşap',
+    description: 'Rustik samimiyet - Ahşap dokusu ve damgalı font',
+    preview: '/img/template-previews/kirsal-ahsap.jpg',
+    style: 'nature',
+    colorScheme: 'Koyu Ahşap & Beyaz',
+    features: ['Rustik', 'Ahşap Dokusu', 'Samimi', 'Doğal']
+  },
+  {
+    id: 41,
+    name: 'Gökkuşağı Geçişi',
+    description: 'Dahil edici modern - Animasyonlu gökkuşağı gradienti',
+    preview: '/img/template-previews/gokkusagi-gecisi.jpg',
+    style: 'colorful',
+    colorScheme: 'Gökkuşağı Renkleri',
+    features: ['Gökkuşağı', 'Dahil Edici', 'Animasyonlu', 'Modern']
   }
 ];
 

@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { logger } from '@/app/lib/logger';
 
 // Firma tipi tanımı
 interface Firma {
@@ -20,9 +21,9 @@ export default function FirmaSayfasi({ firma }: { firma: Firma }) {
             'X-Increment-View': 'true'
           }
         });
-        console.log('Görüntülenme sayısı artırıldı');
+        logger.info('Görüntülenme sayısı artırıldı', { firmaId: firma.id, firmaAdi: firma.firma_adi });
       } catch (error) {
-        console.error('Görüntülenme sayısı artırılırken hata:', error);
+        logger.error('Görüntülenme sayısı artırılırken hata', { error, firmaId: firma.id, firmaAdi: firma.firma_adi });
       }
     };
     

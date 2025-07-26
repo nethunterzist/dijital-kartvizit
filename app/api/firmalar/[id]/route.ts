@@ -6,6 +6,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { parseForm, processImages } from '@/app/lib/multerHelper';
 import { generateQRCode } from '@/app/lib/qrCodeGenerator';
+import { logger } from '@/app/lib/logger';
 
 // SocialMediaData interface tanımı eklendi
 interface SocialMediaData {
@@ -70,7 +71,7 @@ export async function GET(
     const incrementView = headers.get('X-Increment-View') === 'true';
     
     if (incrementView) {
-      console.log(`Görüntülenme sayacı artırılıyor - Firma ID: ${id}`);
+      logger.info(`Görüntülenme sayacı artırılıyor - Firma ID: ${id}`);
       
       try {
         await prisma.firmalar.update({
@@ -78,15 +79,34 @@ export async function GET(
           data: { goruntulenme: { increment: 1 } }
         });
         
-        console.log('Görüntülenme sayacı artırıldı');
+        logger.info('Görüntülenme sayacı artırıldı');
       } catch (error) {
-        console.error('Görüntülenme sayacı artırılırken hata:', error);
+        logger.error('Görüntülenme sayacı artırılırken hata:', error);
       }
     }
     
-    // Firmayı getir
+    // Firmayı ilişkili verilerle birlikte getir (Yeni normalize edilmiş yapı)
     const firma = await prisma.firmalar.findUnique({
-      where: { id }
+      where: { id },
+      include: {
+        iletisim_bilgileri: {
+          where: { aktif: true },
+          orderBy: { sira: 'asc' }
+        },
+        sosyal_medya_hesaplari: {
+          where: { aktif: true },
+          orderBy: { sira: 'asc' }
+        },
+        banka_hesaplari: {
+          where: { aktif: true },
+          orderBy: { sira: 'asc' },
+          include: {
+            hesaplar: {
+              where: { aktif: true }
+            }
+          }
+        }
+      }
     });
     
     if (!firma) {
@@ -95,10 +115,52 @@ export async function GET(
         { status: 404 }
       );
     }
+
+    // Eski format ile uyumluluk için verileri dönüştür
+    const transformedFirma = {
+      ...firma,
+      // İletişim verilerini eski formata çevir
+      communication_data: JSON.stringify(
+        firma.iletisim_bilgileri.reduce((acc: any, item) => {
+          const key = item.tip + 'lar';
+          if (!acc[key]) acc[key] = [];
+          acc[key].push({
+            value: item.deger,
+            label: item.etiket
+          });
+          return acc;
+        }, {})
+      ),
+      // Sosyal medya verilerini eski formata çevir
+      social_media_data: JSON.stringify(
+        firma.sosyal_medya_hesaplari.reduce((acc: any, item) => {
+          const key = item.platform + 'lar';
+          if (!acc[key]) acc[key] = [];
+          acc[key].push({
+            url: item.url,
+            label: item.etiket
+          });
+          return acc;
+        }, {})
+      ),
+      // Banka hesaplarını eski formata çevir
+      bank_accounts: JSON.stringify(
+        firma.banka_hesaplari.map(banka => ({
+          bank_name: banka.banka_adi,
+          bank_label: banka.banka_adi,
+          bank_logo: banka.banka_logo,
+          account_holder: banka.hesap_sahibi,
+          accounts: banka.hesaplar.map(hesap => ({
+            iban: hesap.iban,
+            currency: hesap.para_birimi
+          }))
+        }))
+      )
+    };
     
-    return NextResponse.json({ firma });
+    return NextResponse.json({ firma: transformedFirma });
   } catch (error) {
-    console.error('Firma getirilirken hata oluştu:', error);
+    logger.error('Firma getirilirken hata oluştu:', error);
     return NextResponse.json(
       { message: 'Firma getirilirken bir hata oluştu' },
       { status: 500 }
@@ -113,7 +175,7 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  console.log("PUT [id] request received, Firma ID:", params.id);
+  logger.info("PUT [id] request received, Firma ID:", params.id);
   const id = parseInt(params.id);
 
   if (isNaN(id)) {
@@ -133,14 +195,14 @@ export async function PUT(
           data[key] = value;
         }
       }
-      console.log("FormData başarıyla ayrıştırıldı:", Object.keys(data));
+      logger.info("FormData başarıyla ayrıştırıldı:", Object.keys(data));
     } catch (formError) {
       // FormData ayrıştırılamazsa JSON olarak dene
       try {
         data = await request.json();
-        console.log("JSON body başarıyla ayrıştırıldı:", Object.keys(data));
+        logger.info("JSON body başarıyla ayrıştırıldı:", Object.keys(data));
       } catch (jsonError) {
-        console.error("PUT [id] istek gövdesi ayrıştırılamadı:", formError, jsonError);
+        logger.error("PUT [id] istek gövdesi ayrıştırılamadı:", { formError, jsonError });
         return NextResponse.json({ 
           error: 'İstek gövdesi ayrıştırılamadı',
           details: {
@@ -161,7 +223,7 @@ export async function PUT(
     const oldSlug = existingFirma.slug;
     const newSlug = data.slug || oldSlug;
 
-    // Firmayı güncelle
+    // Firmayı güncelle (sadece temel alanlar, normalize edilmiş veriler ayrı işlenecek)
     const updatedFirma = await prisma.firmalar.update({
       where: { id },
       data: {
@@ -174,28 +236,29 @@ export async function PUT(
         firma_unvan: data.firma_unvan || existingFirma.firma_unvan,
         firma_vergi_no: data.firma_vergi_no || existingFirma.firma_vergi_no,
         vergi_dairesi: data.vergi_dairesi || existingFirma.vergi_dairesi,
-        updated_at: new Date(),
-        communication_data: data.communication_data || existingFirma.communication_data,
-        social_media_data: data.social_media_data || existingFirma.social_media_data,
-        bank_accounts: data.bank_accounts || existingFirma.bank_accounts
+        updated_at: new Date()
       }
     });
 
-    console.log("Firma veritabanı güncellendi:", updatedFirma.id);
+    // TODO: Normalize edilmiş verileri güncelleme işlemi burada yapılacak
+    // İletişim bilgileri, sosyal medya hesapları ve banka hesapları
+    // Şimdilik sadece temel firma bilgileri güncelleniyor
+
+    logger.info("Firma veritabanı güncellendi:", updatedFirma.id);
 
     // HTML yeniden oluşturmayı dene (isteğe bağlı)
     try {
       if (typeof generateHtmlForFirma === 'function') {
         await generateHtmlForFirma(updatedFirma);
-        console.log(`HTML yeniden oluşturuldu: ${updatedFirma.slug}`);
+        logger.info(`HTML yeniden oluşturuldu: ${updatedFirma.slug}`);
       }
     } catch (htmlError) {
-      console.error('HTML oluşturma hatası:', htmlError);
+      logger.error('HTML oluşturma hatası:', htmlError);
     }
 
     return NextResponse.json(updatedFirma);
   } catch (error) {
-    console.error('PUT [id] genel hata:', error);
+    logger.error('PUT [id] genel hata:', error);
     return NextResponse.json({ error: 'Firma güncellenirken beklenmeyen bir hata oluştu', details: String(error) }, { status: 500 });
   }
 }
@@ -217,7 +280,7 @@ export async function DELETE(
       );
     }
     
-    console.log(`ID ${id} olan firmayı silme isteği alındı`);
+    logger.info(`ID ${id} olan firmayı silme isteği alındı`);
     
     // Firma var mı kontrol et
     const firma = await prisma.firmalar.findUnique({
@@ -248,7 +311,7 @@ export async function DELETE(
     });
     
   } catch (error) {
-    console.error('Firma silme hatası:', error);
+    logger.error('Firma silme hatası:', error);
     return NextResponse.json(
       { message: 'Firma silinirken bir hata oluştu' },
       { status: 500 }
@@ -279,7 +342,7 @@ function processMultipleFormData(formData: FormData, fieldName: string): string 
 
 // processSocialMediaAccounts fonksiyonu (tip düzeltmesi yapıldı)
 const processSocialMediaAccounts = (formData: FormData): SocialMediaData => {
-    console.log("=== processSocialMediaAccounts (PUT için güncellenmiş) ===");
+    logger.info("=== processSocialMediaAccounts (PUT için güncellenmiş) ===");
     const formKeys = Array.from(formData.keys());
     // SocialMediaData tipinde başlatıldı
     let socialMediaData: SocialMediaData = {

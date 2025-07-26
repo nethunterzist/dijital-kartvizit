@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { FaFacebookF, FaInstagram, FaYoutube, FaXTwitter } from "react-icons/fa6";
+import { Icon, CustomIcons } from '@/app/lib/icons';
 
 export default function Footer() {
   const [modal, setModal] = useState<null | 'terms' | 'privacy'>(null);
@@ -14,23 +14,23 @@ export default function Footer() {
               {/* Logo placeholder */}
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="4" fill="#2563eb"/><rect x="6" y="6" width="12" height="12" rx="2" fill="#fff"/></svg>
             </span>
-            <span className="font-bold text-2xl text-gray-900">Sanalkartvizitim</span>
+            <span className="font-bold text-2xl text-gray-900">Dijitalkartvizitim</span>
           </div>
-          <p className="text-gray-500 text-base max-w-xl mb-4">Sanalkartvizitim, dijital kartvizit ve QR çözümleriyle işinizi modern, hızlı ve güvenli şekilde dijitalleştirir. Tüm iletişim ve tanıtım araçlarınızı tek bir platformda birleştirir.</p>
+          <p className="text-gray-500 text-base max-w-xl mb-4">Dijitalkartvizitim, dijital kartvizit ve QR çözümleriyle işinizi modern, hızlı ve güvenli şekilde dijitalleştirir. Tüm iletişim ve tanıtım araçlarınızı tek bir platformda birleştirir.</p>
         </div>
         {/* Sosyal Medya İkonları */}
         <div className="flex gap-6 justify-center mb-8">
-          <a href="#" className="text-gray-900 hover:text-red-600 text-2xl transition" aria-label="YouTube"><FaYoutube /></a>
-          <a href="#" className="text-gray-900 hover:text-pink-600 text-2xl transition" aria-label="Instagram"><FaInstagram /></a>
-          <a href="#" className="text-gray-900 hover:text-blue-600 text-2xl transition" aria-label="Facebook"><FaFacebookF /></a>
-          <a href="#" className="text-gray-900 hover:text-black text-2xl transition" aria-label="X"><FaXTwitter /></a>
+          <a href="#" className="text-gray-900 hover:text-red-600 text-2xl transition" aria-label="YouTube"><Icon name="youtube" size={24} /></a>
+          <a href="#" className="text-gray-900 hover:text-pink-600 text-2xl transition" aria-label="Instagram"><Icon name="instagram" size={24} /></a>
+          <a href="#" className="text-gray-900 hover:text-blue-600 text-2xl transition" aria-label="Facebook"><Icon name="facebook" size={24} /></a>
+          <a href="#" className="text-gray-900 hover:text-black text-2xl transition" aria-label="X"><CustomIcons.x size={24} className="text-current" /></a>
         </div>
       </div>
       {/* Alt çizgi */}
       <div className="w-full border-t border-gray-200 my-4" />
       {/* Alt Bilgi ve Linkler */}
       <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between text-gray-700 text-sm px-2">
-        <div className="mb-2 md:mb-0">© 2025 Sanalkartvizitim. Tüm hakları saklıdır.</div>
+        <div className="mb-2 md:mb-0">© 2025 Dijitalkartvizitim. Tüm hakları saklıdır.</div>
         <div className="flex gap-4">
           <button onClick={() => setModal('terms')} className="hover:text-blue-600 transition bg-transparent border-0 p-0 m-0 cursor-pointer">Kullanım Koşulları</button>
           <span className="hidden md:inline">|</span>
@@ -45,17 +45,17 @@ export default function Footer() {
             {modal === 'terms' && (
               <div>
                 <h3 className="text-xl font-bold mb-4">Kullanım Koşulları</h3>
-                <p className="text-gray-700 text-sm mb-2">Sanalkartvizitim platformunu kullanarak aşağıdaki koşulları kabul etmiş olursunuz. Lütfen bu koşulları dikkatlice okuyunuz.</p>
+                <p className="text-gray-700 text-sm mb-2">Dijitalkartvizitim platformunu kullanarak aşağıdaki koşulları kabul etmiş olursunuz. Lütfen bu koşulları dikkatlice okuyunuz.</p>
                 <ol className="list-decimal pl-5 text-gray-700 text-sm mb-2 space-y-2">
-                  <li><b>Hizmet Tanımı:</b> Sanalkartvizitim, dijital kartvizit oluşturma, paylaşma ve yönetme hizmeti sunar. Platformda sunulan tüm özellikler, kullanıcıların profesyonel ve kurumsal iletişimlerini kolaylaştırmak amacıyla geliştirilmiştir.</li>
+                  <li><b>Hizmet Tanımı:</b> Dijitalkartvizitim, dijital kartvizit oluşturma, paylaşma ve yönetme hizmeti sunar. Platformda sunulan tüm özellikler, kullanıcıların profesyonel ve kurumsal iletişimlerini kolaylaştırmak amacıyla geliştirilmiştir.</li>
                   <li><b>Kullanıcı Sorumluluğu:</b> Kullanıcılar, platformda oluşturdukları ve paylaştıkları tüm içeriklerden kendileri sorumludur. Yanıltıcı, yasa dışı, zararlı veya üçüncü şahıs haklarını ihlal eden içeriklerin paylaşılması yasaktır.</li>
                   <li><b>Hesap Güvenliği:</b> Kullanıcılar, hesap bilgilerinin gizliliğinden ve güvenliğinden sorumludur. Hesaplarının izinsiz kullanımı durumunda derhal platform yönetimine bildirimde bulunmalıdır.</li>
-                  <li><b>Fikri Mülkiyet:</b> Platformda sunulan tüm yazılım, tasarım, marka ve içeriklerin tüm hakları Sanalkartvizitim'e aittir. İzinsiz kopyalanamaz, çoğaltılamaz veya dağıtılamaz.</li>
-                  <li><b>Hizmetin Sürekliliği:</b> Sanalkartvizitim, hizmetin kesintisiz ve hatasız sunulması için azami çaba gösterir; ancak teknik nedenlerle geçici erişim kesintileri yaşanabilir.</li>
+                  <li><b>Fikri Mülkiyet:</b> Platformda sunulan tüm yazılım, tasarım, marka ve içeriklerin tüm hakları Dijitalkartvizitim'e aittir. İzinsiz kopyalanamaz, çoğaltılamaz veya dağıtılamaz.</li>
+                  <li><b>Hizmetin Sürekliliği:</b> Dijitalkartvizitim, hizmetin kesintisiz ve hatasız sunulması için azami çaba gösterir; ancak teknik nedenlerle geçici erişim kesintileri yaşanabilir.</li>
                   <li><b>Ücretlendirme ve Değişiklikler:</b> Platformda sunulan bazı hizmetler ücretli olabilir. Fiyatlandırma ve hizmet koşulları önceden bildirilmek kaydıyla değiştirilebilir.</li>
-                  <li><b>Üçüncü Taraf Bağlantıları:</b> Platformda üçüncü taraf sitelere veya servislere yönlendiren bağlantılar bulunabilir. Bu sitelerin içerik ve güvenliğinden Sanalkartvizitim sorumlu değildir.</li>
+                  <li><b>Üçüncü Taraf Bağlantıları:</b> Platformda üçüncü taraf sitelere veya servislere yönlendiren bağlantılar bulunabilir. Bu sitelerin içerik ve güvenliğinden Dijitalkartvizitim sorumlu değildir.</li>
                   <li><b>Hesap İptali:</b> Kullanıcılar diledikleri zaman hesaplarını kapatabilir. Hesap kapatıldığında, kullanıcıya ait veriler yasal zorunluluklar dışında silinir.</li>
-                  <li><b>Değişiklik Hakkı:</b> Sanalkartvizitim, kullanım koşullarını ve politikalarını önceden bildirimde bulunmaksızın güncelleme hakkını saklı tutar. Güncel koşullar platformda yayımlandığı andan itibaren geçerlidir.</li>
+                  <li><b>Değişiklik Hakkı:</b> Dijitalkartvizitim, kullanım koşullarını ve politikalarını önceden bildirimde bulunmaksızın güncelleme hakkını saklı tutar. Güncel koşullar platformda yayımlandığı andan itibaren geçerlidir.</li>
                   <li><b>İletişim:</b> Her türlü soru ve talepleriniz için iletişim formu veya destek e-posta adresi üzerinden bize ulaşabilirsiniz.</li>
                 </ol>
                 <p className="text-gray-600 text-xs">Bu koşullar, yürürlükteki yasalara tabidir. Platformu kullanmaya devam ederek bu koşulları kabul etmiş sayılırsınız.</p>
@@ -64,7 +64,7 @@ export default function Footer() {
             {modal === 'privacy' && (
               <div>
                 <h3 className="text-xl font-bold mb-4">Gizlilik Politikası</h3>
-                <p className="text-gray-700 text-sm mb-2">Sanalkartvizitim olarak kişisel verilerinizin gizliliğine ve güvenliğine büyük önem veriyoruz. Aşağıda, verilerinizin nasıl işlendiği ve korunduğu detaylı şekilde açıklanmıştır.</p>
+                <p className="text-gray-700 text-sm mb-2">Dijitalkartvizitim olarak kişisel verilerinizin gizliliğine ve güvenliğine büyük önem veriyoruz. Aşağıda, verilerinizin nasıl işlendiği ve korunduğu detaylı şekilde açıklanmıştır.</p>
                 <ol className="list-decimal pl-5 text-gray-700 text-sm mb-2 space-y-2">
                   <li><b>Toplanan Veriler:</b> Ad, soyad, e-posta, telefon, firma bilgileri, profil fotoğrafı, sosyal medya linkleri ve diğer kartvizit içerikleri gibi bilgiler toplanabilir.</li>
                   <li><b>Veri Kullanımı:</b> Toplanan veriler, yalnızca hizmetin sunulması, kullanıcı deneyiminin iyileştirilmesi ve yasal yükümlülüklerin yerine getirilmesi amacıyla kullanılır.</li>
@@ -73,7 +73,7 @@ export default function Footer() {
                   <li><b>Çerezler ve Takip Teknolojileri:</b> Platformda kullanıcı deneyimini geliştirmek için çerezler ve benzeri teknolojiler kullanılabilir. Çerez tercihlerinizi tarayıcı ayarlarından yönetebilirsiniz.</li>
                   <li><b>Veri Saklama Süresi:</b> Kişisel verileriniz, hizmetten yararlandığınız sürece ve yasal saklama süreleri boyunca muhafaza edilir. Hesap silindiğinde verileriniz makul süre içinde silinir veya anonimleştirilir.</li>
                   <li><b>Haklarınız:</b> Kişisel verilerinizle ilgili erişim, düzeltme, silme, işleme kısıtlama ve itiraz haklarına sahipsiniz. Bu haklarınızı kullanmak için bizimle iletişime geçebilirsiniz.</li>
-                  <li><b>Üçüncü Taraf Servisler:</b> Platformda üçüncü taraf servisler veya entegrasyonlar kullanılabilir. Bu servislerin gizlilik politikalarından Sanalkartvizitim sorumlu değildir.</li>
+                  <li><b>Üçüncü Taraf Servisler:</b> Platformda üçüncü taraf servisler veya entegrasyonlar kullanılabilir. Bu servislerin gizlilik politikalarından Dijitalkartvizitim sorumlu değildir.</li>
                   <li><b>Politika Değişiklikleri:</b> Gizlilik politikası zaman zaman güncellenebilir. Güncel politika platformda yayımlandığı andan itibaren geçerlidir.</li>
                   <li><b>İletişim:</b> Gizlilik ve veri koruma ile ilgili tüm sorularınız için destek ekibimize ulaşabilirsiniz.</li>
                 </ol>
@@ -93,4 +93,4 @@ export default function Footer() {
       </button>
     </footer>
   );
-} 
+}

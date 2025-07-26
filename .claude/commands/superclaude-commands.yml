@@ -1,0 +1,432 @@
+# SuperClaude Commands Configuration
+# Dijital Kartvizit Projesi için 18 ana komut
+
+commands:
+  # Analysis Commands
+  analyze:
+    description: "Kapsamlı kod tabanı analizi"
+    usage: "/analyze [--code|--arch|--security|--performance] [--c7|--seq]"
+    flags:
+      - "--code: Kod kalitesi analizi"
+      - "--arch: Mimari analizi"
+      - "--security: Güvenlik analizi"
+      - "--performance: Performans analizi"
+      - "--c7: Context7 MCP kullan"
+      - "--seq: Sequential MCP kullan"
+    when_to_use:
+      - "Kod tabanını anlama"
+      - "Sorunları tespit etme"
+      - "Araştırma yapma"
+    examples:
+      - "/analyze --code --c7 (kütüphane pattern araştırması)"
+      - "/analyze --security --seq (güvenlik analizi)"
+      - "/analyze --performance --pup (performans metrikleri)"
+    project_specific:
+      - "Kartvizit oluşturma akışı analizi"
+      - "Ödeme sistemi güvenlik analizi"
+      - "Database performans analizi"
+
+  troubleshoot:
+    description: "Sistematik problem araştırması"
+    usage: "/troubleshoot [--investigate|--seq|--evidence]"
+    flags:
+      - "--investigate: Detaylı araştırma"
+      - "--seq: Sequential analiz"
+      - "--evidence: Kanıt toplama"
+    when_to_use:
+      - "Karmaşık hataları debug etme"
+      - "Kök neden analizi"
+      - "Sistem davranışı araştırması"
+    examples:
+      - "/troubleshoot --investigate --seq"
+      - "/troubleshoot --evidence (kanıt tabanlı analiz)"
+    project_specific:
+      - "Ödeme akışı sorunları"
+      - "QR kod generation hataları"
+      - "Cloudinary upload sorunları"
+
+  scan:
+    description: "Güvenlik, kalite ve compliance taraması"
+    usage: "/scan [--security|--owasp|--deps|--validate]"
+    flags:
+      - "--security: Güvenlik taraması"
+      - "--owasp: OWASP Top 10 kontrolü"
+      - "--deps: Bağımlılık güvenliği"
+      - "--validate: Doğrulama testleri"
+    when_to_use:
+      - "Güvenlik denetimleri"
+      - "Güvenlik açığı değerlendirmesi"
+      - "Compliance kontrolü"
+    examples:
+      - "/scan --security --owasp"
+      - "/scan --deps --validate"
+    project_specific:
+      - "Payment security validation"
+      - "User data protection audit"
+      - "KVKK compliance check"
+
+  # Development Commands
+  build:
+    description: "Özellik implementasyonu ve proje oluşturma"
+    usage: "/build [--init|--feature|--react|--api|--magic|--tdd]"
+    flags:
+      - "--init: Proje başlatma"
+      - "--feature: Yeni özellik"
+      - "--react: React bileşeni"
+      - "--api: API endpoint"
+      - "--magic: Magic MCP kullan"
+      - "--tdd: Test-driven development"
+    when_to_use:
+      - "Özellik geliştirme"
+      - "Proje oluşturma"
+      - "Bileşen implementasyonu"
+    examples:
+      - "/build --feature --react --magic"
+      - "/build --api --tdd"
+    project_specific:
+      - "Yeni kartvizit template"
+      - "Ödeme API endpoint"
+      - "Admin panel bileşeni"
+
+  design:
+    description: "Mimari tasarım ve sistem planlama"
+    usage: "/design [--api|--ddd|--microservices|--seq|--ultrathink]"
+    flags:
+      - "--api: API tasarımı"
+      - "--ddd: Domain-driven design"
+      - "--microservices: Mikroservis mimarisi"
+      - "--seq: Sequential analiz"
+      - "--ultrathink: Derin mimari düşünce"
+    when_to_use:
+      - "Sistem mimarisi"
+      - "API tasarımı"
+      - "Planlama"
+    examples:
+      - "/design --api --seq --ultrathink"
+      - "/design --microservices --ddd"
+    project_specific:
+      - "SaaS platform mimarisi"
+      - "Payment gateway integration"
+      - "Multi-tenant design"
+
+  test:
+    description: "Kapsamlı test ve doğrulama"
+    usage: "/test [--coverage|--e2e|--pup|--validate]"
+    flags:
+      - "--coverage: Test coverage"
+      - "--e2e: End-to-end testing"
+      - "--pup: Puppeteer kullan"
+      - "--validate: Doğrulama testleri"
+    when_to_use:
+      - "Kalite güvencesi"
+      - "Test coverage"
+      - "Doğrulama"
+    examples:
+      - "/test --e2e --pup"
+      - "/test --coverage --validate"
+    project_specific:
+      - "Kartvizit oluşturma flow testi"
+      - "Ödeme süreci validasyonu"
+      - "Mobile responsiveness testing"
+
+  # Quality Commands
+  improve:
+    description: "Kod kalitesi ve performans optimizasyonu"
+    usage: "/improve [--quality|--performance|--security|--iterate]"
+    flags:
+      - "--quality: Kod kalitesi"
+      - "--performance: Performans"
+      - "--security: Güvenlik"
+      - "--iterate: Iteratif iyileştirme"
+    when_to_use:
+      - "Refactoring"
+      - "Optimizasyon"
+      - "Kalite iyileştirmeleri"
+    examples:
+      - "/improve --quality --iterate"
+      - "/improve --performance --security"
+    project_specific:
+      - "Component optimization"
+      - "Database query optimization"
+      - "Bundle size reduction"
+
+  cleanup:
+    description: "Teknik borç ve bakım"
+    usage: "/cleanup [--code|--all|--dry-run]"
+    flags:
+      - "--code: Kod temizliği"
+      - "--all: Kapsamlı temizlik"
+      - "--dry-run: Önizleme modu"
+    when_to_use:
+      - "Kullanılmayan kod kaldırma"
+      - "Teknik borç temizliği"
+      - "Kod organizasyonu"
+    examples:
+      - "/cleanup --code --dry-run"
+      - "/cleanup --all"
+    project_specific:
+      - "Unused imports removal"
+      - "Dead code elimination"
+      - "File structure optimization"
+
+  # Operations Commands
+  deploy:
+    description: "Production deployment ve operasyonlar"
+    usage: "/deploy [--env|--validate|--monitor|--checkpoint]"
+    flags:
+      - "--env: Environment belirtme"
+      - "--validate: Deployment doğrulama"
+      - "--monitor: Monitoring kurulumu"
+      - "--checkpoint: Checkpoint oluşturma"
+    when_to_use:
+      - "Production deployment"
+      - "Operasyonel görevler"
+      - "Environment yönetimi"
+    examples:
+      - "/deploy --env prod --validate --monitor"
+      - "/deploy --checkpoint"
+    project_specific:
+      - "Vercel deployment"
+      - "Environment variables setup"
+      - "Database migration"
+
+  migrate:
+    description: "Veri ve şema migrasyonları"
+    usage: "/migrate [--database|--validate|--dry-run|--rollback]"
+    flags:
+      - "--database: Veritabanı migrasyonu"
+      - "--validate: Migration doğrulama"
+      - "--dry-run: Önizleme modu"
+      - "--rollback: Geri alma"
+    when_to_use:
+      - "Veritabanı değişiklikleri"
+      - "Veri migrasyonları"
+      - "Schema güncellemeleri"
+    examples:
+      - "/migrate --database --validate --dry-run"
+      - "/migrate --rollback"
+    project_specific:
+      - "Prisma schema changes"
+      - "Data normalization"
+      - "Production data migration"
+
+  # Documentation Commands
+  document:
+    description: "Dokümantasyon oluşturma ve güncelleme"
+    usage: "/document [--api|--user|--dev|--examples|--visual]"
+    flags:
+      - "--api: API dokümantasyonu"
+      - "--user: Kullanıcı dokümantasyonu"
+      - "--dev: Geliştirici dokümantasyonu"
+      - "--examples: Örnek kodlar"
+      - "--visual: Görsel dokümantasyon"
+    when_to_use:
+      - "Dokümantasyon yazma"
+      - "API referansı"
+      - "Kullanıcı kılavuzu"
+    examples:
+      - "/document --api --examples"
+      - "/document --user --visual"
+    project_specific:
+      - "API endpoint documentation"
+      - "Component usage guide"
+      - "Deployment procedures"
+
+  explain:
+    description: "Kod ve konsept açıklamaları"
+    usage: "/explain [--code|--concept|--pattern|--c7]"
+    flags:
+      - "--code: Kod açıklaması"
+      - "--concept: Konsept açıklaması"
+      - "--pattern: Pattern açıklaması"
+      - "--c7: Official docs ile"
+    when_to_use:
+      - "Kod anlama"
+      - "Konsept öğrenme"
+      - "Pattern açıklaması"
+    examples:
+      - "/explain --code --pattern"
+      - "/explain --concept --c7"
+    project_specific:
+      - "Next.js App Router patterns"
+      - "Prisma relationship patterns"
+      - "Payment flow explanation"
+
+  # Monitoring Commands
+  monitor:
+    description: "Sistem izleme ve metrik toplama"
+    usage: "/monitor [--performance|--errors|--usage|--realtime]"
+    flags:
+      - "--performance: Performans izleme"
+      - "--errors: Hata izleme"
+      - "--usage: Kullanım metrikleri"
+      - "--realtime: Gerçek zamanlı izleme"
+    when_to_use:
+      - "Sistem izleme"
+      - "Performans takibi"
+      - "Hata analizi"
+    examples:
+      - "/monitor --performance --realtime"
+      - "/monitor --errors --usage"
+    project_specific:
+      - "Card creation metrics"
+      - "Payment success rates"
+      - "API response times"
+
+  backup:
+    description: "Veri yedekleme ve geri yükleme"
+    usage: "/backup [--create|--restore|--schedule|--validate]"
+    flags:
+      - "--create: Yedek oluşturma"
+      - "--restore: Geri yükleme"
+      - "--schedule: Zamanlanmış yedekleme"
+      - "--validate: Yedek doğrulama"
+    when_to_use:
+      - "Veri yedekleme"
+      - "Disaster recovery"
+      - "Data protection"
+    examples:
+      - "/backup --create --validate"
+      - "/backup --restore --schedule"
+    project_specific:
+      - "Database backup"
+      - "User data protection"
+      - "Configuration backup"
+
+  # Utility Commands
+  optimize:
+    description: "Sistem ve kod optimizasyonu"
+    usage: "/optimize [--bundle|--images|--database|--cache]"
+    flags:
+      - "--bundle: Bundle optimizasyonu"
+      - "--images: Görsel optimizasyonu"
+      - "--database: Veritabanı optimizasyonu"
+      - "--cache: Cache optimizasyonu"
+    when_to_use:
+      - "Performans optimizasyonu"
+      - "Resource optimization"
+      - "Speed improvements"
+    examples:
+      - "/optimize --bundle --images"
+      - "/optimize --database --cache"
+    project_specific:
+      - "Next.js bundle optimization"
+      - "Cloudinary image optimization"
+      - "Prisma query optimization"
+
+  validate:
+    description: "Sistem ve veri doğrulama"
+    usage: "/validate [--data|--config|--security|--compliance]"
+    flags:
+      - "--data: Veri doğrulama"
+      - "--config: Konfigürasyon doğrulama"
+      - "--security: Güvenlik doğrulama"
+      - "--compliance: Uyumluluk doğrulama"
+    when_to_use:
+      - "Veri bütünlüğü kontrolü"
+      - "Konfigürasyon doğrulama"
+      - "Compliance kontrolü"
+    examples:
+      - "/validate --data --security"
+      - "/validate --config --compliance"
+    project_specific:
+      - "Payment data validation"
+      - "User input validation"
+      - "KVKK compliance validation"
+
+  profile:
+    description: "Performans profiling ve analiz"
+    usage: "/profile [--cpu|--memory|--network|--database]"
+    flags:
+      - "--cpu: CPU profiling"
+      - "--memory: Memory profiling"
+      - "--network: Network analizi"
+      - "--database: Database profiling"
+    when_to_use:
+      - "Performans bottleneck tespiti"
+      - "Resource usage analizi"
+      - "Optimization planning"
+    examples:
+      - "/profile --cpu --memory"
+      - "/profile --database --network"
+    project_specific:
+      - "Card rendering performance"
+      - "API endpoint profiling"
+      - "Database query analysis"
+
+  security:
+    description: "Güvenlik analizi ve sertleştirme"
+    usage: "/security [--audit|--harden|--compliance|--penetration]"
+    flags:
+      - "--audit: Güvenlik denetimi"
+      - "--harden: Sistem sertleştirme"
+      - "--compliance: Uyumluluk kontrolü"
+      - "--penetration: Penetration testing"
+    when_to_use:
+      - "Güvenlik değerlendirmesi"
+      - "Vulnerability assessment"
+      - "Security hardening"
+    examples:
+      - "/security --audit --compliance"
+      - "/security --harden --penetration"
+    project_specific:
+      - "Payment security audit"
+      - "User data protection"
+      - "API security hardening"
+
+# Universal Flags (tüm komutlarda kullanılabilir)
+universal_flags:
+  planning:
+    - "--plan: Execution plan göster"
+    - "--dry-run: Değişiklikleri önizle"
+    - "--force: Güvenlik kontrollerini atla"
+    - "--interactive: Adım adım rehberli süreç"
+
+  thinking_modes:
+    - "--think: Multi-file analiz (4K tokens)"
+    - "--think-hard: Derin mimari analiz (10K tokens)"
+    - "--ultrathink: Kritik sistem yeniden tasarımı (32K tokens)"
+
+  compression:
+    - "--uc: UltraCompressed mode (~70% token azaltma)"
+    - "--profile: Detaylı performans profiling"
+    - "--watch: Sürekli izleme"
+
+  mcp_control:
+    - "--c7: Context7 documentation lookup"
+    - "--seq: Sequential complex analysis"
+    - "--magic: Magic UI component generation"
+    - "--pup: Puppeteer browser automation"
+    - "--all-mcp: Tüm MCP sunucularını etkinleştir"
+    - "--no-mcp: Tüm MCP sunucularını devre dışı bırak"
+
+# Task Management Integration
+task_management:
+  auto_trigger_rules:
+    complex_operations: "3+ adım → Auto-trigger TodoList"
+    high_risk: "Database değişiklikleri, deployments → REQUIRE todos"
+    long_tasks: "30 dakikadan uzun → AUTO-TRIGGER todos"
+    multi_file: "6+ dosya → AUTO-TRIGGER koordinasyon için"
+
+  todo_commands:
+    - "TodoRead(): Mevcut todo'ları oku"
+    - "TodoWrite(): Yeni todo'lar oluştur"
+    - "TodoUpdate(): Todo durumunu güncelle"
+    - "TodoComplete(): Todo'yu tamamla"
+
+# Project-Specific Command Shortcuts
+project_shortcuts:
+  card_development:
+    - "/build-card: Yeni kartvizit template oluştur"
+    - "/test-card: Kartvizit oluşturma flow testi"
+    - "/optimize-card: Kartvizit rendering optimizasyonu"
+
+  payment_system:
+    - "/build-payment: Ödeme sistemi geliştirme"
+    - "/test-payment: Ödeme flow testi"
+    - "/secure-payment: Ödeme güvenlik analizi"
+
+  admin_panel:
+    - "/build-admin: Admin panel bileşeni"
+    - "/test-admin: Admin panel testi"
+    - "/secure-admin: Admin güvenlik kontrolü"

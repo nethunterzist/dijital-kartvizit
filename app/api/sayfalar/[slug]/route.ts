@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Handlebars from 'handlebars';
 import prisma from '@/app/lib/db';
+import { logger } from '@/app/lib/logger';
 
 // HTML şablonunu kod içinde string olarak tut
 const pageTemplate = `
@@ -86,65 +87,80 @@ export async function GET(
 ) {
   try {
     const slug = params.slug;
-    console.log(`[${slug}] HTML/JSON içeriği getirme isteği alındı`);
+    logger.info(`[${slug}] HTML/JSON içeriği getirme isteği alındı`, { slug });
     
-    // Firma verisini çek
-    const firma = await prisma.firmalar.findFirst({ where: { slug } });
+    // Firma verisini ilişkili verilerle birlikte çek (Yeni normalize edilmiş yapı)
+    const firma = await prisma.firmalar.findFirst({ 
+      where: { slug },
+      include: {
+        iletisim_bilgileri: {
+          where: { aktif: true },
+          orderBy: { sira: 'asc' }
+        },
+        sosyal_medya_hesaplari: {
+          where: { aktif: true },
+          orderBy: { sira: 'asc' }
+        },
+        banka_hesaplari: {
+          where: { aktif: true },
+          orderBy: { sira: 'asc' },
+          include: {
+            hesaplar: {
+              where: { aktif: true }
+            }
+          }
+        }
+      }
+    });
+    
     if (!firma) {
       return NextResponse.json({ error: 'Firma bulunamadı' }, { status: 404 });
     }
 
-    // Website alanını dizi olarak hazırla
+    // Website bilgilerini iletişim bilgilerinden çek
     let websiteArray: string[] = [];
-    if (firma.website) {
-      if (typeof firma.website === 'string' && firma.website.startsWith('[')) {
-        try { websiteArray = JSON.parse(firma.website); } catch { websiteArray = [firma.website]; }
-      } else { websiteArray = [firma.website]; }
-    }
-    // Sosyal medya ve iletişim alanlarını diziye çevir
+    const websiteItems = firma.iletisim_bilgileri.filter(item => item.tip === 'website');
+    websiteArray = websiteItems.map(item => item.deger);
+
+    // Sosyal medya verilerini yeni normalize edilmiş yapıdan çek
     let socialMediaArray: any[] = [];
-    if (firma.social_media_data) {
-      try {
-        const smObj = JSON.parse(firma.social_media_data);
-        socialMediaArray = [];
-        for (const key in smObj) {
-          if (Array.isArray(smObj[key])) {
-            smObj[key].forEach((item: any) => {
-              const platform = key.replace('lar', '').replace('ler', '');
-              const meta = SOCIAL_MEDIA_META[platform] || {};
-              const value = item.url || item;
-              socialMediaArray.push({
-                icon: meta.icon || '',
-                label: (typeof item.label === 'string' && item.label.trim() !== '') ? item.label : (meta.label || platform),
-                url: value.startsWith('http') ? value : (meta.urlPrefix ? meta.urlPrefix + value : value)
-              });
-            });
-          }
-        }
-      } catch { socialMediaArray = []; }
-    }
+    firma.sosyal_medya_hesaplari.forEach((item) => {
+      const meta = SOCIAL_MEDIA_META[item.platform] || {};
+      socialMediaArray.push({
+        icon: meta.icon || '',
+        label: item.etiket || meta.label || item.platform,
+        url: item.url.startsWith('http') ? item.url : (meta.urlPrefix ? meta.urlPrefix + item.url : item.url),
+        platform: item.platform
+      });
+    });
+
+    // İletişim verilerini yeni normalize edilmiş yapıdan çek
     let communicationArray: any[] = [];
-    if (firma.communication_data) {
-      try {
-        const commObj = JSON.parse(firma.communication_data);
-        communicationArray = [];
-        for (const key in commObj) {
-          if (Array.isArray(commObj[key])) {
-            commObj[key].forEach((item: any) => {
-              const tip = key.replace('lar', '').replace('ler', '');
-              const meta = COMM_META[tip] || {};
-              const value = item.value || item;
-              communicationArray.push({
-                icon: meta.icon || '',
-                label: (typeof item.label === 'string' && item.label.trim() !== '') ? item.label : (meta.label || tip),
-                url: meta.urlPrefix ? meta.urlPrefix + value : '',
-                value
-              });
-            });
-          }
-        }
-      } catch { communicationArray = []; }
-    }
+    firma.iletisim_bilgileri.forEach((item) => {
+      const meta = COMM_META[item.tip] || {};
+      communicationArray.push({
+        icon: meta.icon || '',
+        label: item.etiket || meta.label || item.tip,
+        url: meta.urlPrefix ? meta.urlPrefix + item.deger : '',
+        value: item.deger,
+        tip: item.tip
+      });
+    });
+
+    // Banka hesaplarını yeni normalize edilmiş yapıdan çek
+    let bankaHesaplari: any[] = [];
+    firma.banka_hesaplari.forEach((banka) => {
+      bankaHesaplari.push({
+        banka_adi: banka.banka_adi,
+        banka_logo: banka.banka_logo,
+        hesap_sahibi: banka.hesap_sahibi,
+        hesaplar: banka.hesaplar.map(hesap => ({
+          iban: hesap.iban,
+          para_birimi: hesap.para_birimi,
+          hesap_turu: hesap.hesap_turu
+        }))
+      });
+    });
 
     // Accept header'ına göre response tipi belirle
     const accept = request.headers.get('accept') || '';
@@ -155,6 +171,7 @@ export async function GET(
         yetkili_adi: firma.yetkili_adi,
         yetkili_pozisyon: firma.yetkili_pozisyon,
         slug: firma.slug,
+        template_id: firma.template_id || 2,
         website: websiteArray,
         firma_logo: firma.firma_logo,
         social_media: socialMediaArray,
@@ -162,7 +179,7 @@ export async function GET(
         firma_hakkinda: firma.firma_hakkinda,
         firma_hakkinda_baslik: firma.firma_hakkinda_baslik,
         katalog: firma.katalog ? { icon: EXTRA_META.katalog.icon, label: EXTRA_META.katalog.label, url: firma.katalog } : undefined,
-        iban: firma.bank_accounts ? { icon: EXTRA_META.iban.icon, label: EXTRA_META.iban.label, value: firma.bank_accounts } : undefined,
+        iban: bankaHesaplari.length > 0 ? { icon: EXTRA_META.iban.icon, label: EXTRA_META.iban.label, value: bankaHesaplari } : undefined,
         tax: (firma.firma_unvan || firma.firma_vergi_no || firma.vergi_dairesi) ? {
           icon: EXTRA_META.tax.icon,
           label: EXTRA_META.tax.label,
@@ -194,7 +211,7 @@ export async function GET(
       });
     }
   } catch (error) {
-    console.error('Sayfa içeriği oluşturulurken hata:', error);
+    logger.error('Sayfa içeriği oluşturulurken hata', { error: error instanceof Error ? error.message : String(error), slug: params.slug, stack: error instanceof Error ? error.stack : undefined });
     return NextResponse.json({ error: 'Sayfa içeriği oluşturulurken bir hata oluştu' }, { status: 500 });
   }
 }

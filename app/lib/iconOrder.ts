@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { logger } from './logger';
 
 interface IconItem {
   id: string;
@@ -50,7 +51,7 @@ export function getIconOrder(): IconItem[] {
     }
     return DEFAULT_ICON_ORDER;
   } catch (error) {
-    console.error('İkon sıralaması okunurken hata:', error);
+    logger.error('İkon sıralaması okunurken hata', { error });
     return DEFAULT_ICON_ORDER;
   }
 }

@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeftIcon, EyeIcon } from '@heroicons/react/24/outline';
+import Image from 'next/image';
+import { Icon } from '@/app/lib/icons';
 import { TEMPLATES } from '@/app/lib/templates/templateRegistry';
 import { getTemplateByType } from '@/app/lib/cardTemplate';
 import { getIconOrderClient, getOrderedIconsClient } from '@/app/lib/iconOrder.client';
@@ -328,9 +329,18 @@ export default function TemalarPage() {
       .replace(/\{\{#unless[\s\S]*?\{\{\/unless\}\}/g, '')
       .replace(/\{\{[^}]*\}\}/g, ''); // Kalan tüm değişkenleri temizle
 
-    // Responsive CSS ekle - Mobil dostu, hover efektleri kaldırıldı
+    // Responsive CSS ekle - Mobil dostu, hover efektleri kaldırıldı + Font İzolasyonu
     const responsiveCSS = `
       <style>
+        /* Font İzolasyonu - Template fontları admin panelini etkilemesin */
+        .template-preview-container {
+          font-family: inherit !important;
+        }
+        
+        .template-preview-container * {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+        }
+        
         /* Mobil dostu responsive düzenlemeler */
         .container { 
           max-width: 100%; 
@@ -525,127 +535,43 @@ export default function TemalarPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Modern Sidebar */}
-      <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg border-r border-gray-200">
-        {/* Logo/Brand */}
-        <div className="flex items-center justify-center h-16 px-6 border-b border-gray-200">
-          <h1 className="text-xl font-bold text-gray-900">Yönetim Paneli</h1>
-        </div>
-
-        {/* Navigation */}
-        <nav className="mt-8 px-4 space-y-2">
-          <Link
-            href="/admin"
-            className="flex items-center px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded-lg transition-colors"
-          >
-            <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z" />
-            </svg>
-            Genel Bakış
-          </Link>
-          
-          <Link
-            href="/admin/firmalar"
-            className="flex items-center px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded-lg transition-colors"
-          >
-            <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-            </svg>
-            Firmalar
-          </Link>
-          
-          <Link
-            href="/admin/firmalar/yeni"
-            className="flex items-center px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded-lg transition-colors"
-          >
-            <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            Yeni Firma Ekle
-          </Link>
-
-          <Link
-            href="/admin/temalar"
-            className="flex items-center px-4 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg shadow-sm"
-          >
-            <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
-            </svg>
-            Temalar
-          </Link>
-
-          <Link
-            href="/admin/ayarlar"
-            className="flex items-center px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded-lg transition-colors"
-          >
-            <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4" />
-            </svg>
-            Sıralama
-          </Link>
-        </nav>
-
-        {/* Footer */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-gray-500">© 2025 Sanal Kartvizit</span>
-            <Link 
-              href="/login"
-              className="text-xs text-red-600 hover:text-red-800 font-medium"
-            >
-              Çıkış
-            </Link>
-          </div>
-        </div>
-      </div>
-
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Main Content */}
-      <div className="ml-64">
+      <main className="p-4">
         {/* Header */}
-        <header className="bg-white shadow-sm border-b border-gray-200">
-          <div className="px-8 py-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Kartvizit Temaları</h1>
-                <p className="text-sm text-gray-600 mt-1">Mevcut kartvizit tasarımlarını görüntüleyin ve önizleyin</p>
-              </div>
-              <Link 
-                href="/admin" 
-                className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
-              >
-                <ArrowLeftIcon className="w-4 h-4 mr-2" />
-                Geri Dön
-              </Link>
+        <div className="bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 rounded-xl mb-6">
+          <div className="px-6 py-6">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Kartvizit Temaları</h1>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Mevcut kartvizit tasarımlarını görüntüleyin ve önizleyin</p>
             </div>
           </div>
-        </header>
+        </div>
 
-        {/* Main Content */}
-        <main className="p-8">
-          <div className="flex gap-8">
-            {/* Template List */}
+          <div className="flex gap-8 min-h-screen">
+            {/* Template List - Scrollable */}
             <div className="w-80 flex-shrink-0">
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Mevcut Temalar</h2>
-                <div className="space-y-3">
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Mevcut Temalar</h2>
+                <div className="space-y-3 max-h-[calc(100vh-200px)] overflow-y-auto pr-2 
+                            scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-gray-100 dark:scrollbar-track-gray-700 
+                            hover:scrollbar-thumb-gray-400 dark:hover:scrollbar-thumb-gray-500">
                   {TEMPLATES.map((template) => (
                     <div
                       key={template.id}
                       className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
                         selectedTemplate === template.id
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                          : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'
                       }`}
                       onClick={() => handleTemplateSelect(template.id)}
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="font-medium text-gray-900">{template.name}</h3>
-                          <p className="text-sm text-gray-600 mt-1">{template.description}</p>
+                          <h3 className="font-medium text-gray-900 dark:text-white">{template.name}</h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{template.description}</p>
                         </div>
-                        <EyeIcon className="w-5 h-5 text-gray-400" />
+                        <Icon name="eye" className="w-5 h-5 text-gray-400 dark:text-gray-500" />
                       </div>
                       
                       {/* Template özellikleri */}
@@ -653,7 +579,7 @@ export default function TemalarPage() {
                         {template.features.map((feature, index) => (
                           <span
                             key={index}
-                            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+                            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
                           >
                             {feature}
                           </span>
@@ -665,14 +591,15 @@ export default function TemalarPage() {
               </div>
             </div>
 
-            {/* Preview Area */}
+            {/* Preview Area - Sticky */}
             <div className="flex-1">
-              {selectedTemplate ? (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-lg font-semibold text-gray-900">
-                      {TEMPLATES.find(t => t.id === selectedTemplate)?.name} Önizlemesi
-                    </h2>
+              <div className="sticky top-8">
+                {selectedTemplate ? (
+                  <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                    <div className="flex items-center justify-between mb-6">
+                      <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                        {TEMPLATES.find(t => t.id === selectedTemplate)?.name} Önizlemesi
+                      </h2>
                     <div className="flex items-center space-x-4">
                       <button
                         onClick={() => {
@@ -735,14 +662,14 @@ export default function TemalarPage() {
                             newWindow.document.close();
                           }
                         }}
-                        className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                        className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
                       >
                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                         </svg>
                         Tarayıcıda Göster
                       </button>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
                         Template ID: {selectedTemplate}
                       </div>
                     </div>
@@ -754,10 +681,74 @@ export default function TemalarPage() {
                       {/* Phone Frame */}
                       <div className="w-80 h-[600px] bg-black rounded-[2.5rem] p-2 shadow-2xl">
                         <div className="w-full h-full bg-white rounded-[2rem] overflow-hidden relative">
-                          {/* Preview Content */}
-                          <div 
-                            className="w-full h-full overflow-y-auto"
-                            dangerouslySetInnerHTML={{ __html: previewHtml }}
+                          {/* Preview Content - Isolated with iframe */}
+                          <iframe
+                            className="w-full h-full border-0"
+                            srcDoc={`
+                              <!DOCTYPE html>
+                              <html>
+                              <head>
+                                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+                                <style>
+                                  body { 
+                                    margin: 0; 
+                                    padding: 0; 
+                                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                                    overflow-x: hidden;
+                                  }
+                                  * {
+                                    box-sizing: border-box;
+                                  }
+                                </style>
+                              </head>
+                              <body>
+                                ${previewHtml}
+                                <script>
+                                  function showTaxPopup(e) {
+                                    e.preventDefault();
+                                    const popup = document.getElementById('tax-popup');
+                                    if (popup) popup.style.display = 'flex';
+                                  }
+                                  function closeTaxPopup() {
+                                    const popup = document.getElementById('tax-popup');
+                                    if (popup) popup.style.display = 'none';
+                                  }
+                                  function showAboutPopup(e) {
+                                    e.preventDefault();
+                                    const popup = document.getElementById('about-popup');
+                                    if (popup) popup.style.display = 'flex';
+                                  }
+                                  function closeAboutPopup() {
+                                    const popup = document.getElementById('about-popup');
+                                    if (popup) popup.style.display = 'none';
+                                  }
+                                  function showBankPopup(e) {
+                                    e.preventDefault();
+                                    const popup = document.getElementById('bank-popup');
+                                    if (popup) popup.style.display = 'flex';
+                                  }
+                                  function closeBankPopup() {
+                                    const popup = document.getElementById('bank-popup');
+                                    if (popup) popup.style.display = 'none';
+                                  }
+                                  function copyToClipboard(text, event) {
+                                    event.preventDefault();
+                                    if (!text) return;
+                                    navigator.clipboard.writeText(text).then(function() {
+                                      const btn = event.currentTarget;
+                                      const originalText = btn.textContent;
+                                      btn.textContent = 'Kopyalandı!';
+                                      setTimeout(() => { 
+                                        btn.textContent = originalText;
+                                      }, 1000);
+                                    });
+                                  }
+                                </script>
+                              </body>
+                              </html>
+                            `}
+                            title="Template Preview"
                           />
                         </div>
                       </div>
@@ -769,39 +760,39 @@ export default function TemalarPage() {
                   </div>
                   
                   {/* Template Info */}
-                  <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                    <h3 className="font-medium text-gray-900 mb-2">Template Özellikleri:</h3>
+                  <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <h3 className="font-medium text-gray-900 dark:text-white mb-2">Template Özellikleri:</h3>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <span className="font-medium text-gray-700">Tasarım Stili:</span>
-                        <span className="ml-2 text-gray-600">
+                        <span className="font-medium text-gray-700 dark:text-gray-300">Tasarım Stili:</span>
+                        <span className="ml-2 text-gray-600 dark:text-gray-400">
                           {TEMPLATES.find(t => t.id === selectedTemplate)?.style}
                         </span>
                       </div>
                       <div>
-                        <span className="font-medium text-gray-700">Renk Şeması:</span>
-                        <span className="ml-2 text-gray-600">
+                        <span className="font-medium text-gray-700 dark:text-gray-300">Renk Şeması:</span>
+                        <span className="ml-2 text-gray-600 dark:text-gray-400">
                           {TEMPLATES.find(t => t.id === selectedTemplate)?.colorScheme}
                         </span>
                       </div>
                     </div>
                   </div>
-                </div>
-              ) : (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-                    <EyeIcon className="w-8 h-8 text-gray-400" />
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Template Seçin</h3>
-                  <p className="text-gray-600">
-                    Önizlemek istediğiniz template'i sol taraftan seçin
-                  </p>
-                </div>
-              )}
+                ) : (
+                  <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                      <Icon name="eye" className="w-8 h-8 text-gray-400 dark:text-gray-500" />
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Template Seçin</h3>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      Önizlemek istediğiniz template'i sol taraftan seçin
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </main>
-      </div>
     </div>
   );
 }

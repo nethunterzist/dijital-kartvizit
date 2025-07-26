@@ -1,0 +1,171 @@
+# SuperClaude MCP Server Configuration
+# Dijital Kartvizit Projesi için MCP entegrasyonları
+
+mcp_servers:
+  context7:
+    name: "Context7"
+    purpose: "Official library documentation & examples"
+    capabilities:
+      - "Next.js documentation lookup"
+      - "React patterns research"
+      - "TypeScript reference"
+      - "Prisma ORM documentation"
+      - "Tailwind CSS utilities"
+      - "API documentation lookup"
+      - "Framework pattern research"
+      - "Version compatibility checking"
+    when_to_use:
+      - "External library integration"
+      - "API documentation lookup"
+      - "Framework pattern research"
+      - "Version compatibility checking"
+      - "Official documentation explanations"
+    command_examples:
+      - "/analyze --c7 (research library patterns)"
+      - "/build --react --c7 (React with official docs)"
+      - "/explain --c7 (official documentation explanations)"
+    best_for: "Research-first methodology, evidence-based implementation"
+    token_cost: "Low-Medium"
+    cache_ttl: "1 hour"
+    project_specific:
+      - "Next.js 14 App Router patterns"
+      - "Prisma schema best practices"
+      - "Cloudinary integration docs"
+      - "NextAuth.js configuration"
+
+  sequential:
+    name: "Sequential"
+    purpose: "Multi-step problem solving & architectural thinking"
+    capabilities:
+      - "Complex system design"
+      - "Root cause analysis"
+      - "Performance investigation"
+      - "Architecture review"
+      - "Database schema analysis"
+      - "Security audit workflows"
+    when_to_use:
+      - "Complex system design"
+      - "Root cause analysis"
+      - "Performance investigation"
+      - "Architecture review"
+      - "Multi-step debugging"
+    command_examples:
+      - "/analyze --seq (deep system analysis)"
+      - "/troubleshoot --seq (systematic investigation)"
+      - "/design --seq --ultrathink (architectural planning)"
+    best_for: "Complex technical analysis, systematic reasoning"
+    token_cost: "Medium-High"
+    cache_ttl: "Session duration"
+    project_specific:
+      - "Payment flow analysis"
+      - "Card generation pipeline"
+      - "Database relationship optimization"
+      - "Serverless architecture review"
+
+  magic:
+    name: "Magic"
+    purpose: "UI component generation & design system integration"
+    capabilities:
+      - "React component generation"
+      - "Tailwind CSS styling"
+      - "Design system implementation"
+      - "UI pattern consistency"
+      - "Responsive design"
+      - "Accessibility compliance"
+    when_to_use:
+      - "React component building"
+      - "Design system implementation"
+      - "UI pattern consistency"
+      - "Rapid prototyping"
+      - "Responsive design"
+    command_examples:
+      - "/build --react --magic (component generation)"
+      - "/design --magic (UI design systems)"
+      - "/improve --accessibility --magic (accessible components)"
+    best_for: "Consistent design implementation, quality components"
+    token_cost: "Medium"
+    cache_ttl: "2 hours"
+    project_specific:
+      - "Card template components"
+      - "Admin panel UI"
+      - "Payment form components"
+      - "Mobile-responsive layouts"
+
+  puppeteer:
+    name: "Puppeteer"
+    purpose: "E2E testing, performance validation, browser automation"
+    capabilities:
+      - "End-to-end testing"
+      - "Performance monitoring"
+      - "Visual validation"
+      - "User interaction testing"
+      - "Screenshot generation"
+      - "Form testing"
+    when_to_use:
+      - "End-to-end testing"
+      - "Performance monitoring"
+      - "Visual validation"
+      - "User interaction testing"
+      - "Payment flow testing"
+    command_examples:
+      - "/test --e2e --pup (E2E testing)"
+      - "/analyze --performance --pup (performance metrics)"
+      - "/scan --validate --pup (visual validation)"
+    best_for: "Quality assurance, performance validation, UX testing"
+    token_cost: "Low (action-based)"
+    cache_ttl: "No cache"
+    project_specific:
+      - "Card creation flow testing"
+      - "Payment process validation"
+      - "Mobile responsiveness testing"
+      - "QR code generation testing"
+
+mcp_control_flags:
+  enable_all: "--all-mcp"
+  disable_all: "--no-mcp"
+  individual:
+    context7: "--c7"
+    sequential: "--seq"
+    magic: "--magic"
+    puppeteer: "--pup"
+
+parallel_execution:
+  enabled: true
+  description: "Independent MCP calls run simultaneously"
+  optimization: "Reduces total response time for multi-MCP operations"
+
+project_integration:
+  critical_workflows:
+    card_creation:
+      primary_mcp: "magic"
+      secondary_mcp: "context7"
+      use_case: "Component generation with official patterns"
+    
+    payment_integration:
+      primary_mcp: "sequential"
+      secondary_mcp: "puppeteer"
+      use_case: "Complex flow analysis and testing"
+    
+    performance_optimization:
+      primary_mcp: "puppeteer"
+      secondary_mcp: "sequential"
+      use_case: "Performance monitoring and systematic analysis"
+    
+    architecture_review:
+      primary_mcp: "sequential"
+      secondary_mcp: "context7"
+      use_case: "System design with official documentation"
+
+auto_activation_rules:
+  file_type_detection:
+    "tsx|jsx": "→magic (frontend components)"
+    "api|route": "→sequential (backend analysis)"
+    "prisma|schema": "→context7 (database patterns)"
+    "test|spec": "→puppeteer (testing workflows)"
+  
+  keyword_triggers:
+    "component|ui|design": "→magic"
+    "performance|optimize|slow": "→puppeteer + sequential"
+    "architecture|design|system": "→sequential + context7"
+    "test|e2e|validation": "→puppeteer"
+    "documentation|docs|reference": "→context7"

@@ -1,108 +1,95 @@
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { RateLimiterMemory } from "rate-limiter-flexible";
 
-// Rate limiting için basit in-memory store (production'da Redis kullanın)
-const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+// Rate limiter configurations
+const apiLimiter = new RateLimiterMemory({
+  keyPrefix: 'api',
+  points: 100, // Number of requests
+  duration: 60, // Per 60 seconds (1 minute)
+  blockDuration: 60, // Block for 1 minute if exceeded
+});
 
-function rateLimit(ip: string, limit: number = 100, windowMs: number = 15 * 60 * 1000): boolean {
-  const now = Date.now();
-  const key = ip;
-  
-  const record = rateLimitStore.get(key);
-  
-  if (!record || now > record.resetTime) {
-    rateLimitStore.set(key, { count: 1, resetTime: now + windowMs });
-    return true;
+const authLimiter = new RateLimiterMemory({
+  keyPrefix: 'auth',
+  points: 5, // Number of login attempts
+  duration: 900, // Per 15 minutes
+  blockDuration: 900, // Block for 15 minutes if exceeded
+});
+
+async function rateLimit(req: any, limiter: RateLimiterMemory, identifier: string) {
+  try {
+    await limiter.consume(identifier);
+    return null;
+  } catch (rateLimiterRes: any) {
+    const secs = Math.round((rateLimiterRes?.msBeforeNext || 60000) / 1000) || 1;
+    return NextResponse.json(
+      { 
+        error: { 
+          message: 'Rate limit exceeded', 
+          retryAfter: secs 
+        } 
+      },
+      { 
+        status: 429,
+        headers: {
+          'Retry-After': String(secs),
+          'X-RateLimit-Limit': limiter.points.toString(),
+          'X-RateLimit-Remaining': '0',
+          'X-RateLimit-Reset': new Date(Date.now() + (rateLimiterRes?.msBeforeNext || 60000)).toISOString(),
+        }
+      }
+    );
   }
-  
-  if (record.count >= limit) {
-    return false;
-  }
-  
-  record.count++;
-  return true;
 }
 
 export default withAuth(
-  function middleware(req: NextRequest) {
-    // Rate limiting
-    const ip = req.ip || req.headers.get('x-forwarded-for') || 'unknown';
-    
-    // API routes için rate limiting
-    if (req.nextUrl.pathname.startsWith('/api/')) {
-      if (!rateLimit(ip, 100, 15 * 60 * 1000)) { // 15 dakikada 100 istek
-        return new NextResponse(
-          JSON.stringify({ error: 'Too many requests' }),
-          { 
-            status: 429,
-            headers: {
-              'Content-Type': 'application/json',
-              'Retry-After': '900' // 15 dakika
-            }
-          }
-        );
-      }
-    }
+  async function middleware(req) {
+    const ip = req.ip || req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'anonymous';
+    const pathname = req.nextUrl.pathname;
 
-    // Admin routes için daha sıkı rate limiting
-    if (req.nextUrl.pathname.startsWith('/api/admin/')) {
-      if (!rateLimit(`admin-${ip}`, 50, 15 * 60 * 1000)) { // 15 dakikada 50 istek
-        return new NextResponse(
-          JSON.stringify({ error: 'Too many admin requests' }),
-          { 
-            status: 429,
-            headers: {
-              'Content-Type': 'application/json',
-              'Retry-After': '900'
-            }
-          }
-        );
-      }
-    }
-
-    // Security headers
-    const response = NextResponse.next();
-    
-    response.headers.set('X-Frame-Options', 'DENY');
-    response.headers.set('X-Content-Type-Options', 'nosniff');
-    response.headers.set('Referrer-Policy', 'origin-when-cross-origin');
-    response.headers.set('X-XSS-Protection', '1; mode=block');
-    
-    // CSRF protection için
-    if (req.method === 'POST' || req.method === 'PUT' || req.method === 'DELETE') {
-      const origin = req.headers.get('origin');
-      const host = req.headers.get('host');
+    // HTTPS Redirect (production only)
+    if (process.env.NODE_ENV === 'production') {
+      const isHttps = req.headers.get('x-forwarded-proto') === 'https' || 
+                     req.headers.get('x-forwarded-ssl') === 'on' ||
+                     req.nextUrl.protocol === 'https:';
       
-      if (origin && host && !origin.includes(host)) {
-        return new NextResponse(
-          JSON.stringify({ error: 'CSRF protection: Invalid origin' }),
-          { 
-            status: 403,
-            headers: { 'Content-Type': 'application/json' }
-          }
-        );
+      if (!isHttps && !pathname.startsWith('/api/health')) {
+        const httpsUrl = new URL(req.url);
+        httpsUrl.protocol = 'https:';
+        return NextResponse.redirect(httpsUrl, 301);
       }
     }
 
-    return response;
+    // Rate limiting for API routes
+    if (pathname.startsWith('/api/')) {
+      const rateLimitResponse = await rateLimit(req, apiLimiter, ip);
+      if (rateLimitResponse) return rateLimitResponse;
+    }
+
+    // Stricter rate limiting for auth endpoints
+    if (pathname.startsWith('/api/auth/') || pathname === '/login') {
+      const rateLimitResponse = await rateLimit(req, authLimiter, ip);
+      if (rateLimitResponse) return rateLimitResponse;
+    }
+
+    return NextResponse.next();
   },
   {
     pages: {
       signIn: "/login",
     },
   }
-);
+)
 
 export const config = {
   matcher: [
-    // Admin routes require authentication
+    // Admin routes için auth + rate limiting
     "/admin/:path*",
-    "/api/admin/:path*",
-    "/api/firmalar/:path*",
     "/api/upload/:path*",
     "/api/settings/:path*",
-    // Apply rate limiting to all API routes
-    "/api/:path*"
+    // Rate limiting için tüm API routes
+    "/api/:path*",
+    "/login"
   ]
 };

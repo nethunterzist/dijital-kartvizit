@@ -1,4 +1,5 @@
 import QRCode from 'qrcode';
+import { logger } from './logger';
 
 export async function generateQRCode(url: string): Promise<string> {
   try {
@@ -12,7 +13,7 @@ export async function generateQRCode(url: string): Promise<string> {
     });
     return qrCodeDataURL;
   } catch (error) {
-    console.error('QR Code generation error:', error);
+    logger.error('QR Code generation error', { error, url });
     throw new Error('QR Code generation failed');
   }
 }
@@ -29,7 +30,7 @@ export async function generateQRCodeBuffer(url: string): Promise<Buffer> {
     });
     return buffer;
   } catch (error) {
-    console.error('QR Code buffer generation error:', error);
+    logger.error('QR Code buffer generation error', { error, url });
     throw new Error('QR Code buffer generation failed');
   }
 }

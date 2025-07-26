@@ -1,5 +1,5 @@
 import React from "react";
-import { FaPlay } from "react-icons/fa";
+import { Icon } from '@/app/lib/icons';
 
 const videoData = [
   {
@@ -60,4 +60,4 @@ export default function VideoFeatureSection() {
       </div>
     </section>
   );
-} 
+}
