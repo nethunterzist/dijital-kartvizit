@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { getTemplateById } from '@/app/lib/templates/templateRegistry';
 
 interface FormData {
   firmaAdi: string;
@@ -345,7 +346,7 @@ export default function OdemePage() {
 
                     <div className="bg-blue-50 p-4 rounded-lg">
                       <h3 className="font-medium text-blue-900 mb-2">Seçilen Tasarım</h3>
-                      <p className="text-blue-700">Template {selectedTemplate}</p>
+                      <p className="text-blue-700">{getTemplateById(selectedTemplate)?.name || `Template ${selectedTemplate}`}</p>
                     </div>
 
                     <button
@@ -531,14 +532,14 @@ export default function OdemePage() {
                       <button
                         type="button"
                         onClick={() => setCurrentStep(1)}
-                        className="flex-1 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-all"
+                        className="flex-1 py-4 border border-gray-300 rounded-lg font-bold text-lg text-gray-700 hover:bg-gray-50 transition-all"
                       >
                         ← Geri
                       </button>
                       <button
                         type="submit"
                         disabled={!isFormValid() || isProcessing}
-                        className={`flex-2 py-4 rounded-lg font-bold text-lg transition-all ${
+                        className={`flex-1 py-4 rounded-lg font-bold text-lg transition-all ${
                           isFormValid() && !isProcessing
                             ? 'bg-gradient-to-r from-green-600 to-blue-600 text-white hover:shadow-lg transform hover:-translate-y-0.5'
                             : 'bg-gray-200 text-gray-500 cursor-not-allowed'
@@ -582,7 +583,7 @@ export default function OdemePage() {
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Template:</span>
-                      <span className="text-gray-900">Template {selectedTemplate}</span>
+                      <span className="text-gray-900">{getTemplateById(selectedTemplate)?.name || `Template ${selectedTemplate}`}</span>
                     </div>
                   </div>
                 </div>
