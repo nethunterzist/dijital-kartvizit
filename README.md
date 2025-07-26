@@ -62,25 +62,43 @@ Uygulama [http://localhost:3000](http://localhost:3000) adresinde çalışacakt�
 
 ## 🚀 Production Deployment
 
-### Vercel Deployment
+### Supabase + Vercel Deployment
 
-1. Vercel hesabınızı GitHub'a bağlayın
-2. Bu repository'yi import edin
-3. Environment variables'ları ayarlayın:
-   - `DATABASE_URL`: PostgreSQL connection string
-   - `NEXTAUTH_SECRET`: Güçlü rastgele anahtar
-   - `NEXTAUTH_URL`: Production URL'niz
-   - `CLOUDINARY_*`: Cloudinary ayarları (opsiyonel)
+1. **Supabase Database Kurulumu:**
+   - [supabase.com](https://supabase.com) hesabı oluşturun
+   - Yeni proje oluşturun: `dijital-kartvizit`
+   - Region: `Europe (Frankfurt)`
+   - Database connection string'i alın
+
+2. **Vercel Deployment:**
+   - Vercel hesabınızı GitHub'a bağlayın
+   - Bu repository'yi import edin
+   - Environment variables'ları ayarlayın
+
+3. **Database Migration:**
+   - `npx prisma db push`
+   - `npx prisma generate`
 
 ### Environment Variables
 
 ```env
-DATABASE_URL="postgresql://username:password@host:port/database"
+# Supabase Database
+DATABASE_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres?sslmode=require"
+
+# Authentication
 NEXTAUTH_SECRET="your-super-secret-key-min-64-chars"
 NEXTAUTH_URL="https://yourdomain.com"
+
+# Supabase API (opsiyonel)
+SUPABASE_URL="https://[PROJECT-REF].supabase.co"
+SUPABASE_ANON_KEY="eyJ..."
+SUPABASE_SERVICE_ROLE_KEY="eyJ..."
+
+# File Upload (opsiyonel)
 CLOUDINARY_CLOUD_NAME="your-cloud-name"
 CLOUDINARY_API_KEY="your-api-key"
 CLOUDINARY_API_SECRET="your-api-secret"
+
 NODE_ENV="production"
 ```
 
