@@ -5,12 +5,10 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 const menuItems = [
-  { label: 'Özellikler', href: '#sosyal-medya' },
-  { label: 'QR Kod', href: '#banka' },
-  { label: 'İletişim', href: '#iletisim' },
-  { label: 'Diğer Bilgiler', href: '#diger-bilgiler' },
-  { label: 'Destek', href: '#support' },
-  { label: 'Giriş', href: '/login' },
+  { label: 'Kartvizit Oluştur', href: '#kartvizit-olustur' },
+  { label: 'Fiyatlar', href: '#fiyatlar' },
+  { label: 'Müşteri Yorumları', href: '#yorumlar' },
+  { label: 'SSS', href: '#sss' },
 ];
 
 export default function Navbar() {
@@ -41,4 +39,4 @@ export default function Navbar() {
       )}
     </nav>
   );
-} 
+}

@@ -11,10 +11,18 @@ export default function HomePage() {
     <main className="min-h-screen w-full">
       <Navbar />
       <NewHero />
-      <InstantCardCreator />
-      <PricingSection />
-      <VideoFaqSection />
-      <FeedbackCarousel />
+      <section id="kartvizit-olustur">
+        <InstantCardCreator />
+      </section>
+      <section id="fiyatlar">
+        <PricingSection />
+      </section>
+      <section id="sss">
+        <VideoFaqSection />
+      </section>
+      <section id="yorumlar">
+        <FeedbackCarousel />
+      </section>
       <Footer />
     </main>
   );
