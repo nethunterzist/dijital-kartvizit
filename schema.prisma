@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 model admins {
@@ -153,4 +153,53 @@ model ilceler {
   firmalar firmalar[]
   
   @@index([il_id])
+}
+
+// Sipariş yönetimi tablosu
+model siparisler {
+  id              Int      @id @default(autoincrement())
+  siparis_no      String   @unique
+  paket_id        String   // 'starter', 'business', 'enterprise'
+  paket_adi       String   // Paket adı
+  template_id     Int      // Seçilen template ID
+  template_adi    String   // Template adı
+  tutar           Int      // Sipariş tutarı (kuruş cinsinden)
+  
+  // Fatura bilgileri
+  fatura_adi      String   // Ad Soyad / Firma Adı
+  vergi_no        String?  // Vergi numarası / TC kimlik
+  fatura_adresi   String   // Fatura adresi
+  email           String   // E-posta
+  telefon         String   // Telefon
+  
+  // Kartvizit bilgileri (URL'den gelen)
+  firma_adi       String?  // Firma adı
+  yetkili_adi     String?  // Yetkili adı
+  yetkili_pozisyon String? // Pozisyon
+  iletisim_telefon String? // İletişim telefonu
+  iletisim_eposta String?  // İletişim e-postası
+  website         String?  // Website
+  instagram       String?  // Instagram
+  linkedin        String?  // LinkedIn
+  facebook        String?  // Facebook
+  
+  // Sipariş durumu
+  durum           String   @default("beklemede") // 'beklemede', 'odeme_onaylandi', 'kartvizit_olusturuluyor', 'tamamlandi', 'iptal'
+  odeme_durumu    String   @default("beklemede") // 'beklemede', 'onaylandi', 'reddedildi'
+  
+  // Notlar ve açıklamalar
+  admin_notu      String?  // Admin notu
+  musteri_notu    String?  // Müşteri notu
+  
+  // Tarihler
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+  odeme_tarihi    DateTime? // Ödeme onay tarihi
+  tamamlanma_tarihi DateTime? // Sipariş tamamlanma tarihi
+  
+  @@index([siparis_no])
+  @@index([durum])
+  @@index([odeme_durumu])
+  @@index([email])
+  @@index([created_at])
 }

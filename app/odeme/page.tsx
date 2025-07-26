@@ -3,16 +3,12 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { getTemplateById } from '@/app/lib/templates/templateRegistry';
 
-interface FormData {
-  firmaAdi: string;
-  yetkiliAdi: string;
-  yetkiliPozisyon: string;
-  telefon: string;
-  eposta: string;
-  website: string;
-  instagram: string;
-  linkedin: string;
-  facebook: string;
+interface BillingData {
+  billingName: string;
+  taxNumber: string;
+  billingAddress: string;
+  email: string;
+  phone: string;
 }
 
 interface Package {
@@ -76,31 +72,17 @@ const packages: Package[] = [
 export default function OdemePage() {
   const searchParams = useSearchParams();
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
-  const [formData, setFormData] = useState<FormData>({
-    firmaAdi: '',
-    yetkiliAdi: '',
-    yetkiliPozisyon: '',
-    telefon: '',
-    eposta: '',
-    website: '',
-    instagram: '',
-    linkedin: '',
-    facebook: ''
-  });
   const [selectedTemplate, setSelectedTemplate] = useState(2);
-  const [paymentData, setPaymentData] = useState({
-    cardNumber: '',
-    expiryDate: '',
-    cvv: '',
-    cardHolder: '',
-    email: '',
-    phone: '',
+  const [billingData, setBillingData] = useState<BillingData>({
     billingName: '',
     taxNumber: '',
-    billingAddress: ''
+    billingAddress: '',
+    email: '',
+    phone: ''
   });
-  const [currentStep, setCurrentStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [orderNumber, setOrderNumber] = useState('');
+  const [showThankYou, setShowThankYou] = useState(false);
 
   useEffect(() => {
     // URL parametrelerinden verileri al
@@ -115,88 +97,77 @@ export default function OdemePage() {
     if (template) {
       setSelectedTemplate(parseInt(template));
     }
-
-    // Form verilerini URL'den al (eğer varsa)
-    const urlFormData = {
-      firmaAdi: searchParams.get('firmaAdi') || '',
-      yetkiliAdi: searchParams.get('yetkiliAdi') || '',
-      yetkiliPozisyon: searchParams.get('yetkiliPozisyon') || '',
-      telefon: searchParams.get('telefon') || '',
-      eposta: searchParams.get('eposta') || '',
-      website: searchParams.get('website') || '',
-      instagram: searchParams.get('instagram') || '',
-      linkedin: searchParams.get('linkedin') || '',
-      facebook: searchParams.get('facebook') || ''
-    };
-    
-    setFormData(urlFormData);
   }, [searchParams]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleBillingChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setBillingData(prev => ({
       ...prev,
       [name]: value
     }));
   };
 
-  const handlePaymentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    let formattedValue = value;
-
-    // Kart numarası formatı
-    if (name === 'cardNumber') {
-      formattedValue = value.replace(/\s/g, '').replace(/(.{4})/g, '$1 ').trim();
-      if (formattedValue.length > 19) formattedValue = formattedValue.slice(0, 19);
-    }
-
-    // Son kullanma tarihi formatı
-    if (name === 'expiryDate') {
-      formattedValue = value.replace(/\D/g, '').replace(/(\d{2})(\d)/, '$1/$2');
-      if (formattedValue.length > 5) formattedValue = formattedValue.slice(0, 5);
-    }
-
-    // CVV formatı
-    if (name === 'cvv') {
-      formattedValue = value.replace(/\D/g, '');
-      if (formattedValue.length > 3) formattedValue = formattedValue.slice(0, 3);
-    }
-
-    setPaymentData(prev => ({
-      ...prev,
-      [name]: formattedValue
-    }));
-  };
-
-  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setPaymentData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  const generateOrderNumber = () => {
+    const timestamp = Date.now().toString().slice(-6);
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    return `DK${timestamp}${random}`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
 
-    // Simüle edilmiş ödeme işlemi
-    setTimeout(() => {
+    try {
+      // Kartvizit bilgilerini URL'den al
+      const cardData = {
+        firmaAdi: searchParams.get('firmaAdi') || '',
+        yetkiliAdi: searchParams.get('yetkiliAdi') || '',
+        yetkiliPozisyon: searchParams.get('yetkiliPozisyon') || '',
+        telefon: searchParams.get('telefon') || '',
+        eposta: searchParams.get('eposta') || '',
+        website: searchParams.get('website') || '',
+        instagram: searchParams.get('instagram') || '',
+        linkedin: searchParams.get('linkedin') || '',
+        facebook: searchParams.get('facebook') || ''
+      };
+
+      // API'ye sipariş gönder
+      const response = await fetch('/api/siparisler', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          packageId: selectedPackage!.id,
+          packageName: selectedPackage!.name,
+          templateId: selectedTemplate,
+          price: selectedPackage!.price,
+          billingData,
+          cardData
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setOrderNumber(result.orderNumber);
+        setShowThankYou(true);
+      } else {
+        alert('Sipariş oluşturulamadı: ' + result.error);
+      }
+    } catch (error) {
+      console.error('Sipariş hatası:', error);
+      alert('Bir hata oluştu. Lütfen tekrar deneyin.');
+    } finally {
       setIsProcessing(false);
-      alert('Ödeme başarıyla tamamlandı! Kartvizitiniz oluşturuluyor...');
-      // Burada gerçek ödeme entegrasyonu yapılacak
-    }, 3000);
+    }
   };
 
   const isFormValid = () => {
-    return formData.firmaAdi && formData.yetkiliAdi && formData.yetkiliPozisyon &&
-           (formData.telefon || formData.eposta) &&
-           paymentData.cardNumber.replace(/\s/g, '').length === 16 &&
-           paymentData.expiryDate.length === 5 &&
-           paymentData.cvv.length === 3 &&
-           paymentData.cardHolder &&
-           paymentData.email &&
-           paymentData.phone;
+    return billingData.billingName.trim() && 
+           billingData.billingAddress.trim() && 
+           billingData.email.trim() && 
+           billingData.phone.trim();
   };
 
   if (!selectedPackage) {
@@ -213,358 +184,291 @@ export default function OdemePage() {
     );
   }
 
+  if (showThankYou) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 py-8">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
+            {/* Success Icon */}
+            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <i className="fas fa-check text-green-600 text-3xl"></i>
+            </div>
+
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">Siparişiniz Alındı!</h1>
+            <p className="text-xl text-gray-600 mb-8">
+              Teşekkür ederiz! Siparişiniz başarıyla oluşturuldu.
+            </p>
+
+            {/* Order Details */}
+            <div className="bg-gray-50 rounded-xl p-6 mb-8">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Sipariş Detayları</h2>
+              <div className="grid md:grid-cols-2 gap-4 text-left">
+                <div>
+                  <span className="text-gray-600">Sipariş Numarası:</span>
+                  <span className="font-bold text-gray-900 ml-2">{orderNumber}</span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Paket:</span>
+                  <span className="font-bold text-gray-900 ml-2">{selectedPackage.name}</span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Tasarım:</span>
+                  <span className="font-bold text-gray-900 ml-2">
+                    {getTemplateById(selectedTemplate)?.name || `Template ${selectedTemplate}`}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Tutar:</span>
+                  <span className="font-bold text-green-600 ml-2">₺{selectedPackage.price}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Payment Instructions */}
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-8">
+              <h3 className="text-lg font-bold text-blue-900 mb-4">
+                <i className="fas fa-university mr-2"></i>
+                Ödeme Bilgileri
+              </h3>
+              <div className="text-left space-y-3">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-blue-700 font-medium">Banka:</span>
+                    <span className="text-blue-900 ml-2">Türkiye İş Bankası</span>
+                  </div>
+                  <div>
+                    <span className="text-blue-700 font-medium">Hesap Sahibi:</span>
+                    <span className="text-blue-900 ml-2">Dijital Kartvizit Ltd. Şti.</span>
+                  </div>
+                  <div>
+                    <span className="text-blue-700 font-medium">IBAN:</span>
+                    <span className="text-blue-900 ml-2 font-mono">TR64 0006 4000 0011 2345 6789 01</span>
+                  </div>
+                  <div>
+                    <span className="text-blue-700 font-medium">Açıklama:</span>
+                    <span className="text-blue-900 ml-2">{orderNumber}</span>
+                  </div>
+                </div>
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-4">
+                  <p className="text-yellow-800 text-sm">
+                    <i className="fas fa-exclamation-triangle mr-2"></i>
+                    <strong>Önemli:</strong> Ödeme yaparken açıklama kısmına mutlaka sipariş numaranızı ({orderNumber}) yazınız.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Customer Service */}
+            <div className="bg-green-50 border border-green-200 rounded-xl p-6 mb-8">
+              <h3 className="text-lg font-bold text-green-900 mb-4">
+                <i className="fas fa-headset mr-2"></i>
+                Müşteri Hizmetleri
+              </h3>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600">+90 555 123 45 67</div>
+                  <div className="text-green-700">Telefon Desteği</div>
+                  <div className="text-sm text-green-600">Pazartesi - Cuma: 09:00 - 18:00</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600">destek@dijitalkartvizit.com</div>
+                  <div className="text-green-700">E-posta Desteği</div>
+                  <div className="text-sm text-green-600">24 saat içinde yanıt</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Next Steps */}
+            <div className="bg-gray-50 rounded-xl p-6 mb-8">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Sonraki Adımlar</h3>
+              <div className="space-y-3 text-left">
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">1</div>
+                  <div>
+                    <div className="font-medium text-gray-900">Ödeme Yapın</div>
+                    <div className="text-gray-600 text-sm">Yukarıdaki IBAN'a sipariş numaranızı belirterek ödeme yapın</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">2</div>
+                  <div>
+                    <div className="font-medium text-gray-900">Müşteri Hizmetleri Araması</div>
+                    <div className="text-gray-600 text-sm">Ödemeniz onaylandıktan sonra 24 saat içinde sizi arayacağız</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">3</div>
+                  <div>
+                    <div className="font-medium text-gray-900">Kartvizit Oluşturma</div>
+                    <div className="text-gray-600 text-sm">Birlikte kartvizitinizi tasarlayacak ve tüm detayları belirleyeceğiz</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold">4</div>
+                  <div>
+                    <div className="font-medium text-gray-900">Teslim</div>
+                    <div className="text-gray-600 text-sm">Kartvizitiniz hazır olduğunda size teslim edilecek</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-4 justify-center">
+              <a 
+                href="/" 
+                className="px-6 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Ana Sayfaya Dön
+              </a>
+              <button 
+                onClick={() => window.print()} 
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+              >
+                <i className="fas fa-print mr-2"></i>
+                Yazdır
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Ödeme Sayfası</h1>
-          <p className="text-gray-600">Dijital kartvizitinizi oluşturmak için son adım!</p>
-        </div>
-
-        {/* Progress Bar */}
-        <div className="max-w-md mx-auto mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div className={`flex items-center justify-center w-10 h-10 rounded-full font-bold text-sm ${
-              currentStep >= 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500'
-            }`}>
-              1
-            </div>
-            <div className={`flex-1 h-2 mx-4 rounded-full ${
-              currentStep >= 2 ? 'bg-blue-600' : 'bg-gray-200'
-            }`}></div>
-            <div className={`flex items-center justify-center w-10 h-10 rounded-full font-bold text-sm ${
-              currentStep >= 2 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500'
-            }`}>
-              2
-            </div>
-          </div>
-          <div className="flex justify-between text-sm text-gray-600">
-            <span>Bilgi Kontrolü</span>
-            <span>Ödeme</span>
-          </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Sipariş Tamamla</h1>
+          <p className="text-gray-600">Fatura bilgilerinizi girin ve siparişinizi tamamlayın</p>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Sol Taraf - Form */}
+          {/* Sol Taraf - Fatura Formu */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-2xl shadow-lg p-8">
-              {currentStep === 1 && (
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Bilgilerinizi Kontrol Edin</h2>
-                  
-                  <div className="space-y-6">
-                    <div className="grid md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Firma Adı *
-                        </label>
-                        <input
-                          type="text"
-                          name="firmaAdi"
-                          value={formData.firmaAdi}
-                          onChange={handleInputChange}
-                          placeholder="Örn: Tech Şirket A.Ş."
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Ad Soyad *
-                        </label>
-                        <input
-                          type="text"
-                          name="yetkiliAdi"
-                          value={formData.yetkiliAdi}
-                          onChange={handleInputChange}
-                          placeholder="Örn: Ahmet Yılmaz"
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Pozisyon/Unvan *
-                      </label>
-                      <input
-                        type="text"
-                        name="yetkiliPozisyon"
-                        value={formData.yetkiliPozisyon}
-                        onChange={handleInputChange}
-                        placeholder="Örn: Genel Müdür"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                        required
-                      />
-                    </div>
-
-                    <div className="grid md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Telefon
-                        </label>
-                        <input
-                          type="tel"
-                          name="telefon"
-                          value={formData.telefon}
-                          onChange={handleInputChange}
-                          placeholder="Örn: +90 555 123 45 67"
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          E-posta
-                        </label>
-                        <input
-                          type="email"
-                          name="eposta"
-                          value={formData.eposta}
-                          onChange={handleInputChange}
-                          placeholder="Örn: ahmet@techsirket.com"
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Website
-                      </label>
-                      <input
-                        type="url"
-                        name="website"
-                        value={formData.website}
-                        onChange={handleInputChange}
-                        placeholder="Örn: www.techsirket.com"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                      />
-                    </div>
-
-
-                    <div className="bg-blue-50 p-4 rounded-lg">
-                      <h3 className="font-medium text-blue-900 mb-2">Seçilen Tasarım</h3>
-                      <p className="text-blue-700">{getTemplateById(selectedTemplate)?.name || `Template ${selectedTemplate}`}</p>
-                    </div>
-
-                    <button
-                      onClick={() => setCurrentStep(2)}
-                      disabled={!formData.firmaAdi || !formData.yetkiliAdi || !formData.yetkiliPozisyon || (!formData.telefon && !formData.eposta)}
-                      className={`w-full py-4 rounded-lg font-bold text-lg transition-all ${
-                        (formData.firmaAdi && formData.yetkiliAdi && formData.yetkiliPozisyon && (formData.telefon || formData.eposta))
-                          ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg transform hover:-translate-y-0.5'
-                          : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                      }`}
-                    >
-                      Ödeme Adımına Geç →
-                    </button>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Fatura Bilgileri</h2>
+              
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Ad Soyad / Firma Adı *
+                    </label>
+                    <input
+                      type="text"
+                      name="billingName"
+                      value={billingData.billingName}
+                      onChange={handleBillingChange}
+                      placeholder="Fatura adı"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Vergi Numarası / TC Kimlik
+                    </label>
+                    <input
+                      type="text"
+                      name="taxNumber"
+                      value={billingData.taxNumber}
+                      onChange={handleBillingChange}
+                      placeholder="Vergi no veya TC kimlik"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    />
                   </div>
                 </div>
-              )}
 
-              {currentStep === 2 && (
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Ödeme Bilgileri</h2>
-                  
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Kart Numarası *
-                      </label>
-                      <input
-                        type="text"
-                        name="cardNumber"
-                        value={paymentData.cardNumber}
-                        onChange={handlePaymentChange}
-                        placeholder="1234 5678 9012 3456"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                        required
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Son Kullanma Tarihi *
-                        </label>
-                        <input
-                          type="text"
-                          name="expiryDate"
-                          value={paymentData.expiryDate}
-                          onChange={handlePaymentChange}
-                          placeholder="MM/YY"
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          CVV *
-                        </label>
-                        <input
-                          type="text"
-                          name="cvv"
-                          value={paymentData.cvv}
-                          onChange={handlePaymentChange}
-                          placeholder="123"
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Kart Sahibi *
-                      </label>
-                      <input
-                        type="text"
-                        name="cardHolder"
-                        value={paymentData.cardHolder}
-                        onChange={handlePaymentChange}
-                        placeholder="AHMET YILMAZ"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                        required
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          E-posta *
-                        </label>
-                        <input
-                          type="email"
-                          name="email"
-                          value={paymentData.email}
-                          onChange={handlePaymentChange}
-                          placeholder="ornek@email.com"
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Telefon *
-                        </label>
-                        <input
-                          type="tel"
-                          name="phone"
-                          value={paymentData.phone}
-                          onChange={handlePaymentChange}
-                          placeholder="+90 555 123 45 67"
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    {/* Fatura Bilgileri */}
-                    <div className="border-t pt-6">
-                      <h3 className="text-lg font-bold text-gray-900 mb-4">Fatura Bilgileri</h3>
-                      
-                      <div className="grid grid-cols-2 gap-6 mb-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Ad Soyad / Firma Adı *
-                          </label>
-                          <input
-                            type="text"
-                            name="billingName"
-                            value={paymentData.billingName || ''}
-                            onChange={handlePaymentChange}
-                            placeholder="Fatura adı"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Vergi Numarası / TC Kimlik
-                          </label>
-                          <input
-                            type="text"
-                            name="taxNumber"
-                            value={paymentData.taxNumber || ''}
-                            onChange={handlePaymentChange}
-                            placeholder="Vergi no veya TC kimlik"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Fatura Adresi *
-                        </label>
-                        <textarea
-                          name="billingAddress"
-                          value={paymentData.billingAddress || ''}
-                          onChange={handleTextareaChange}
-                          placeholder="Fatura adresi"
-                          rows={3}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    {/* Müşteri Hizmetleri Uyarısı */}
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <div className="flex items-start gap-3">
-                        <div className="flex-shrink-0">
-                          <i className="fas fa-info-circle text-blue-600 text-lg mt-0.5"></i>
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-blue-900 mb-1">Önemli Bilgi</h4>
-                          <p className="text-blue-800 text-sm">
-                            Ödeme işleminiz tamamlandıktan sonra, müşteri hizmetlerimiz sizleri arayarak 
-                            kartvizitinizi beraber oluşturacaksınız. Bu süreçte tüm detayları birlikte 
-                            belirleyeceğiz ve kartvizitinizi kişiselleştireceğiz.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-4">
-                      <button
-                        type="button"
-                        onClick={() => setCurrentStep(1)}
-                        className="flex-1 py-4 border border-gray-300 rounded-lg font-bold text-lg text-gray-700 hover:bg-gray-50 transition-all"
-                      >
-                        ← Geri
-                      </button>
-                      <button
-                        type="submit"
-                        disabled={!isFormValid() || isProcessing}
-                        className={`flex-1 py-4 rounded-lg font-bold text-lg transition-all ${
-                          isFormValid() && !isProcessing
-                            ? 'bg-gradient-to-r from-green-600 to-blue-600 text-white hover:shadow-lg transform hover:-translate-y-0.5'
-                            : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                        }`}
-                      >
-                        {isProcessing ? (
-                          <span className="flex items-center justify-center gap-2">
-                            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                            İşleniyor...
-                          </span>
-                        ) : (
-                          <span className="flex items-center justify-center gap-2">
-                            <i className="fas fa-credit-card"></i>
-                            ₺{selectedPackage.price} Öde
-                          </span>
-                        )}
-                      </button>
-                    </div>
-                  </form>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    E-posta *
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={billingData.email}
+                    onChange={handleBillingChange}
+                    placeholder="ornek@email.com"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    required
+                  />
                 </div>
-              )}
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Telefon *
+                  </label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={billingData.phone}
+                    onChange={handleBillingChange}
+                    placeholder="+90 555 123 45 67"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Fatura Adresi *
+                  </label>
+                  <textarea
+                    name="billingAddress"
+                    value={billingData.billingAddress}
+                    onChange={handleBillingChange}
+                    placeholder="Fatura adresi"
+                    rows={4}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+                    required
+                  />
+                </div>
+
+                {/* Ödeme Bilgisi */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0">
+                      <i className="fas fa-info-circle text-blue-600 text-lg mt-0.5"></i>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-blue-900 mb-1">Ödeme Yöntemi</h4>
+                      <p className="text-blue-800 text-sm">
+                        Siparişinizi onayladıktan sonra, IBAN bilgilerimiz ve ödeme numaranız size gönderilecektir. 
+                        Ödemenizi havale/EFT ile yapabilirsiniz. Ödemeniz onaylandıktan sonra müşteri hizmetlerimiz 
+                        sizinle iletişime geçerek kartvizitinizi birlikte oluşturacaktır.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={!isFormValid() || isProcessing}
+                  className={`w-full py-4 rounded-lg font-bold text-lg transition-all ${
+                    isFormValid() && !isProcessing
+                      ? 'bg-gradient-to-r from-green-600 to-blue-600 text-white hover:shadow-lg transform hover:-translate-y-0.5'
+                      : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                  }`}
+                >
+                  {isProcessing ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Sipariş Oluşturuluyor...
+                    </span>
+                  ) : (
+                    <span className="flex items-center justify-center gap-2">
+                      <i className="fas fa-check-circle"></i>
+                      Siparişi Onayla
+                    </span>
+                  )}
+                </button>
+              </form>
             </div>
           </div>
 
-          {/* Sağ Taraf - Özet */}
+          {/* Sağ Taraf - Sipariş Özeti */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-8">
               <h3 className="text-xl font-bold text-gray-900 mb-4">Sipariş Özeti</h3>
