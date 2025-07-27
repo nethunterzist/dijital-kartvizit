@@ -127,8 +127,13 @@ export const config = {
     "/admin/:path*",
     "/api/upload/:path*",
     "/api/settings/:path*",
-    // Rate limiting için tüm API routes
-    "/api/:path*",
+    // Rate limiting için tüm API routes (test-db hariç)
+    "/api/auth/:path*",
+    "/api/firmalar/:path*",
+    "/api/siparisler/:path*",
+    "/api/regenerate-html/:path*",
+    "/api/save-html/:path*",
+    "/api/qr-codes/:path*",
     "/login"
   ]
 };
