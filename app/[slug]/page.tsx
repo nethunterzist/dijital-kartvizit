@@ -110,40 +110,57 @@ export default async function KartvizitPage({ params }: { params: { slug: string
         console.log('📋 Slug:', slug);
         console.log('⏰ Timestamp:', new Date().toISOString());
         
-        // API'den veriyi çek - dinamik port algılama
-        const baseUrl = getServerBaseUrl();
-        const apiUrl = `${baseUrl}/api/sayfalar/${slug}`;
+        // Direct database access instead of internal API call
+        console.log('💾 Direct database query başlıyor...');
+        const { default: prisma } = await import('@/app/lib/db');
         
-        console.log('🌐 API URL oluşturuluyor:', apiUrl);
-        console.log('🔗 Base URL:', baseUrl);
-        
-        // API'den JSON verisi al
-        console.log('📡 API isteği gönderiliyor...');
-        const response = await fetch(apiUrl, { 
-            cache: 'no-store', 
-            headers: { 
-                'Accept': 'application/json'
-            } 
+        const firma = await prisma.firmalar.findFirst({
+            where: { 
+                slug: { 
+                    equals: slug, 
+                    mode: 'insensitive' 
+                } 
+            },
+            include: {
+                iletisim_bilgileri: {
+                    where: { aktif: true },
+                    orderBy: { sira: 'asc' }
+                },
+                sosyal_medya_hesaplari: {
+                    where: { aktif: true },
+                    orderBy: { sira: 'asc' }
+                },
+                banka_hesaplari: {
+                    where: { aktif: true },
+                    orderBy: { sira: 'asc' },
+                    include: {
+                        hesaplar: {
+                            where: { aktif: true }
+                        }
+                    }
+                }
+            }
         });
         
-        console.log('📥 API yanıtı alındı');
-        console.log('📊 Response Status:', response.status);
-        console.log('📋 Response Headers:', Object.fromEntries(response.headers.entries()));
-        
-        if (!response.ok) {
-            console.log('❌ API yanıtı başarısız, notFound() çağrılıyor');
-            console.log('🔍 Response Status:', response.status);
-            console.log('🔍 Response Text:', await response.text());
-            console.log('🔍 Full URL attempted:', apiUrl);
-            console.log('🔍 Environment:', process.env.NODE_ENV);
-            console.log('🔍 Vercel URL:', process.env.VERCEL_URL);
-            console.log('🔍 Public Base URL:', process.env.NEXT_PUBLIC_BASE_URL);
+        if (!firma) {
+            console.log('❌ Firma bulunamadı, notFound() çağrılıyor');
             return notFound();
         }
 
-        // JSON verisini parse et
-        console.log('🔄 JSON parse ediliyor...');
-        const data = await response.json();
+        console.log('✅ Firma bulundu:', firma.firma_adi);
+        
+        // Transform data for template (same logic as API)
+        const data = {
+            firma_adi: firma.firma_adi,
+            yetkili_adi: firma.yetkili_adi,
+            yetkili_pozisyon: firma.yetkili_pozisyon,
+            slug: firma.slug,
+            template_id: firma.template_id || 2,
+            firma_logo: firma.firma_logo,
+            profil_foto: firma.profil_foto,
+            firma_hakkinda: firma.firma_hakkinda,
+            firma_hakkinda_baslik: firma.firma_hakkinda_baslik || 'Hakkımızda',
+        };
         console.log('✅ API JSON verisi alındı');
         console.log('📊 Data:', data);
         console.log('🎨 Template ID:', data.template_id);
