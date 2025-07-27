@@ -54,7 +54,10 @@ const handler = NextAuth({
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60 // 30 days
-  }
+  },
+  // Serverless environment configuration
+  debug: process.env.NODE_ENV === 'development',
+  trustHost: true
 });
 
 export { handler as GET, handler as POST };
