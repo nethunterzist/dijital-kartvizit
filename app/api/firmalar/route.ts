@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/app/lib/logger';
-import { prisma } from '@/app/lib/db';
+import prisma from '@/app/lib/db';
 
 // API yanıt helper fonksiyonları
 function successResponse(data: any, message?: string, status = 200) {

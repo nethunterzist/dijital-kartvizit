@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/app/lib/db';
+import prisma from '@/app/lib/db';
 import { generateHtmlForFirma } from '@/app/lib/htmlGenerator';
 import { generateVCard, VCardData } from '@/app/lib/vcardGenerator';
 import * as fs from 'fs';
