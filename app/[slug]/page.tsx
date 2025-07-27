@@ -148,18 +148,117 @@ export default async function KartvizitPage({ params }: { params: { slug: string
         }
 
         console.log('✅ Firma bulundu:', firma.firma_adi);
+        console.log('📊 Database firm data:');
+        console.log('  - İletişim bilgileri sayısı:', firma.iletisim_bilgileri?.length || 0);
+        console.log('  - Sosyal medya hesapları sayısı:', firma.sosyal_medya_hesaplari?.length || 0);
+        console.log('  - Banka hesapları sayısı:', firma.banka_hesaplari?.length || 0);
         
-        // Transform data for template (same logic as API)
+        // Transform data for template (SAME LOGIC AS API ROUTE)
+        
+        // Sosyal medya platformları için meta data
+        const SOCIAL_MEDIA_META: Record<string, { icon: string, label: string, urlPrefix: string }> = {
+            instagram: { icon: '/img/instagram.png', label: 'Instagram', urlPrefix: 'https://instagram.com/' },
+            youtube: { icon: '/img/youtube.png', label: 'YouTube', urlPrefix: 'https://youtube.com/' },
+            facebook: { icon: '/img/facebook.png', label: 'Facebook', urlPrefix: 'https://facebook.com/' },
+            twitter: { icon: '/img/twitter.png', label: 'Twitter', urlPrefix: 'https://twitter.com/' },
+            tiktok: { icon: '/img/tiktok.png', label: 'TikTok', urlPrefix: 'https://tiktok.com/@' },
+            linkedin: { icon: '/img/linkedin.png', label: 'LinkedIn', urlPrefix: 'https://linkedin.com/in/' },
+            whatsapp: { icon: '/img/whatsapp.png', label: 'WhatsApp', urlPrefix: 'https://wa.me/' }
+        };
+
+        const COMM_META: Record<string, { icon: string, label: string, urlPrefix?: string }> = {
+            telefon: { icon: '/img/tel.png', label: 'Telefon', urlPrefix: 'tel:' },
+            gsm: { icon: '/img/tel.png', label: 'GSM', urlPrefix: 'tel:' },
+            email: { icon: '/img/mail.png', label: 'E-posta', urlPrefix: 'mailto:' },
+            mail: { icon: '/img/mail.png', label: 'E-posta', urlPrefix: 'mailto:' },
+            eposta: { icon: '/img/mail.png', label: 'E-posta', urlPrefix: 'mailto:' },
+            whatsapp: { icon: '/img/wp.png', label: 'WhatsApp', urlPrefix: 'https://wa.me/' },
+            telegram: { icon: '/img/telegram.png', label: 'Telegram', urlPrefix: 'https://t.me/' },
+            harita: { icon: '/img/adres.png', label: 'Harita' },
+            website: { icon: '/img/web.png', label: 'Website', urlPrefix: 'https://' },
+            adres: { icon: '/img/adres.png', label: 'Adres' }
+        };
+
+        const EXTRA_META = {
+            about: { icon: '/img/about.png', label: 'Hakkımızda' },
+            tax: { icon: '/img/tax.png', label: 'Vergi Bilgileri' },
+            katalog: { icon: '/img/pdf.png', label: 'Katalog' },
+            iban: { icon: '/img/iban.png', label: 'IBAN Bilgileri' }
+        };
+
+        // Website bilgilerini iletişim bilgilerinden çek
+        let websiteArray: string[] = [];
+        const websiteItems = firma.iletisim_bilgileri.filter(item => item.tip === 'website');
+        websiteArray = websiteItems.map(item => item.deger);
+        console.log('🌐 Website array:', websiteArray);
+
+        // Sosyal medya verilerini normalize et
+        let socialMediaArray: any[] = [];
+        firma.sosyal_medya_hesaplari.forEach((item) => {
+            const meta = SOCIAL_MEDIA_META[item.platform] || {};
+            socialMediaArray.push({
+                icon: meta.icon || '',
+                label: item.etiket || meta.label || item.platform,
+                url: item.url.startsWith('http') ? item.url : (meta.urlPrefix ? meta.urlPrefix + item.url : item.url),
+                platform: item.platform
+            });
+        });
+        console.log('📱 Social media array:', socialMediaArray);
+
+        // İletişim verilerini normalize et
+        let communicationArray: any[] = [];
+        firma.iletisim_bilgileri.forEach((item) => {
+            const meta = COMM_META[item.tip] || {};
+            communicationArray.push({
+                icon: meta.icon || '',
+                label: item.etiket || meta.label || item.tip,
+                url: meta.urlPrefix ? meta.urlPrefix + item.deger : '',
+                value: item.deger,
+                tip: item.tip
+            });
+        });
+        console.log('📞 Communication array:', communicationArray);
+
+        // Banka hesaplarını normalize et
+        let bankaHesaplari: any[] = [];
+        firma.banka_hesaplari.forEach((banka) => {
+            bankaHesaplari.push({
+                banka_adi: banka.banka_adi,
+                banka_logo: banka.banka_logo,
+                hesap_sahibi: banka.hesap_sahibi,
+                hesaplar: banka.hesaplar.map(hesap => ({
+                    iban: hesap.iban,
+                    para_birimi: hesap.para_birimi,
+                    hesap_turu: hesap.hesap_turu
+                }))
+            });
+        });
+        console.log('🏦 Banka hesapları array:', bankaHesaplari);
+        
+        // Complete data object for template
         const data = {
             firma_adi: firma.firma_adi,
             yetkili_adi: firma.yetkili_adi,
             yetkili_pozisyon: firma.yetkili_pozisyon,
             slug: firma.slug,
             template_id: firma.template_id || 2,
+            website: websiteArray.length > 0 ? websiteArray : [],
             firma_logo: firma.firma_logo,
-            profil_foto: firma.profil_foto,
+            social_media: socialMediaArray.length > 0 ? socialMediaArray : [],
+            communication: communicationArray.length > 0 ? communicationArray : [],
             firma_hakkinda: firma.firma_hakkinda,
             firma_hakkinda_baslik: firma.firma_hakkinda_baslik || 'Hakkımızda',
+            katalog: firma.katalog ? { icon: EXTRA_META.katalog.icon, label: EXTRA_META.katalog.label, url: firma.katalog } : null,
+            iban: bankaHesaplari.length > 0 ? { icon: EXTRA_META.iban.icon, label: EXTRA_META.iban.label, value: JSON.stringify(bankaHesaplari) } : null,
+            tax: (firma.firma_unvan || firma.firma_vergi_no || firma.vergi_dairesi) ? {
+                icon: EXTRA_META.tax.icon,
+                label: EXTRA_META.tax.label,
+                firma_unvan: firma.firma_unvan,
+                firma_vergi_no: firma.firma_vergi_no,
+                vergi_dairesi: firma.vergi_dairesi
+            } : null,
+            about: firma.firma_hakkinda ? { icon: EXTRA_META.about.icon, label: EXTRA_META.about.label, content: firma.firma_hakkinda } : null,
+            profil_foto: firma.profil_foto
         };
         console.log('✅ API JSON verisi alındı');
         console.log('📊 Data:', data);

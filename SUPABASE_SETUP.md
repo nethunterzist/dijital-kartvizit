@@ -83,13 +83,42 @@ curl http://localhost:3000/api/health
 
 ## 7. Production Deployment
 
-Vercel'de environment variables'ları ayarlayın:
-- DATABASE_URL
-- SUPABASE_URL
-- SUPABASE_ANON_KEY
-- SUPABASE_SERVICE_ROLE_KEY
-- NEXTAUTH_SECRET
-- NEXTAUTH_URL (production URL)
+### Vercel Environment Variables Setup:
+
+Vercel Dashboard → Project Settings → Environment Variables:
+
+**CRITICAL: Set for Production, Preview, AND Development environments**
+
+```bash
+DATABASE_URL=postgres://postgres.rlhqnrfhjumbkxghyocd:3x8uwLJT9NDfKdL@aws-0-eu-central-1.pooler.supabase.com:5432/postgres
+SUPABASE_URL=https://rlhqnrfhjumbkxghyocd.supabase.co
+SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsaHFucmZoanVtYmt4Z2h5b2NkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM1NjQ0MTUsImV4cCI6MjA2OTE0MDQxNX0.H4zO6N35FEJh0Ua1pufu36qQRHqAvfVsjzCqUX-_F1k
+NEXTAUTH_SECRET=Re4l7gbgNto8Mc2aNVyJBCYnRJu5tuf0vuvlKqMNE3lRWsvpSnDTDMCcJeLlwvQL
+NEXTAUTH_URL=https://sanalkartvizitim.vercel.app
+```
+
+### 🚨 Critical Production Issue Fixed (27 Temmuz 2025)
+
+**Problem:** All dynamic pages (`/[slug]`) returned 404 errors in production while working perfectly in localhost.
+
+**Root Cause:** Environment variables were missing in Vercel, causing:
+- Database connection failures
+- Internal API call failures  
+- Serverless function instability
+
+**Resolution Steps:**
+1. ✅ Added all environment variables to Vercel Dashboard
+2. ✅ Set variables for Production, Preview, and Development environments
+3. ✅ Replaced internal API calls with direct database access
+4. ✅ Implemented case-insensitive slug matching
+5. ✅ Added production debug tools
+
+**Verification:**
+- `/api/env-debug` - Environment variables status
+- `/api/test-slug` - Database connectivity test
+- `/api/health` - System health check
+
+**Important:** Always verify environment variables are set BEFORE deploying to production!
 
 ## 🔧 Troubleshooting
 
