@@ -52,7 +52,8 @@ async function middleware(req: any) {
     '/api/firmalar', // GET requests for listing firms
     '/api/sayfalar', // GET requests for firm pages
     '/api/health',
-    '/api/monitoring'
+    '/api/monitoring',
+    '/api/test-db' // Database test endpoint
   ];
   
   // Check if this is a public API endpoint with GET method
