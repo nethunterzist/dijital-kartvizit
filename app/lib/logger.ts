@@ -1,60 +1,26 @@
-import winston from 'winston';
+// Serverless-friendly logger for Vercel deployment
+const isDevelopment = process.env.NODE_ENV === 'development';
 
-// Log levels: error, warn, info, http, verbose, debug, silly
-const levels = {
-  error: 0,
-  warn: 1,
-  info: 2,
-  http: 3,
-  debug: 4,
+// Simple console-based logger for serverless environments
+const createLogger = () => {
+  const log = (level: string, message: string, meta?: any) => {
+    const timestamp = new Date().toISOString();
+    const metaStr = meta ? ` ${JSON.stringify(meta)}` : '';
+    console.log(`[${timestamp}] ${level.toUpperCase()}: ${message}${metaStr}`);
+  };
+
+  return {
+    error: (message: string, meta?: any) => log('error', message, meta),
+    warn: (message: string, meta?: any) => log('warn', message, meta),
+    info: (message: string, meta?: any) => log('info', message, meta),
+    http: (message: string, meta?: any) => log('http', message, meta),
+    debug: (message: string, meta?: any) => {
+      if (isDevelopment) log('debug', message, meta);
+    },
+  };
 };
 
-const level = () => {
-  const env = process.env.NODE_ENV || 'development';
-  const isDevelopment = env === 'development';
-  return isDevelopment ? 'debug' : 'warn';
-};
-
-const colors = {
-  error: 'red',
-  warn: 'yellow',
-  info: 'green',
-  http: 'magenta',
-  debug: 'white',
-};
-
-winston.addColors(colors);
-
-const format = winston.format.combine(
-  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
-  winston.format.colorize({ all: true }),
-  winston.format.printf(
-    (info) => `${info.timestamp} ${info.level}: ${info.message}`,
-  ),
-);
-
-// Only use file transports on server-side
-const transports: winston.transport[] = [
-  new winston.transports.Console(),
-];
-
-// Add file transports only on server-side (Node.js environment)
-if (typeof window === 'undefined') {
-  transports.push(
-    new winston.transports.File({
-      filename: 'logs/error.log',
-      level: 'error',
-    }),
-    new winston.transports.File({ filename: 'logs/all.log' })
-  );
-}
-
-const Logger = winston.createLogger({
-  level: level(),
-  levels,
-  format,
-  transports,
-});
+const Logger = createLogger();
 
 // Custom logging functions
 export const logger = {
