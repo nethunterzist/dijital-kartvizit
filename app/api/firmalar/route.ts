@@ -1,121 +1,77 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/app/lib/db';
 
-export async function GET(req: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    console.log('🔍 Firmalar API çağrısı alındı');
+    console.log('🔍 Firmalar API çağrısı...');
     
-    const { searchParams } = new URL(req.url);
+    // Get all firmalar for admin panel
+    const firmalar = await prisma.firmalar.findMany({
+      select: {
+        id: true,
+        firma_adi: true,
+        slug: true,
+        yetkili_adi: true,
+        yetkili_pozisyon: true,
+        template_id: true,
+        onay: true,
+        goruntulenme: true,
+        created_at: true,
+        updated_at: true
+      },
+      orderBy: { created_at: 'desc' }
+    });
     
-    // Parse parameters
-    const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
-    const limit = Math.min(1000, Math.max(1, parseInt(searchParams.get('limit') || '1000')));
-    const search = searchParams.get('search')?.trim() || undefined;
-
-    console.log('💾 Fetching firmalar from database', { page, limit, search });
+    console.log('✅ Firmalar fetched:', firmalar.length);
     
-    const skip = (page - 1) * limit;
-    const whereClause = search ? {
-      OR: [
-        { firma_adi: { contains: search, mode: 'insensitive' as const } },
-        { slug: { contains: search, mode: 'insensitive' as const } },
-        { yetkili_adi: { contains: search, mode: 'insensitive' as const } }
-      ]
-    } : {};
-
-    // Parallel database queries
-    const [firmalar, totalCount] = await Promise.all([
-      prisma.firmalar.findMany({
-        where: whereClause,
-        skip,
-        take: limit,
-        select: {
-          id: true,
-          firma_adi: true,
-          slug: true,
-          profil_foto: true,
-          firma_logo: true,
-          yetkili_adi: true,
-          yetkili_pozisyon: true,
-          created_at: true,
-          updated_at: true,
-          goruntulenme: true,
-          template_id: true,
-          onay: true,
-        },
-        orderBy: { created_at: 'desc' }
-      }),
-      prisma.firmalar.count({ where: whereClause })
-    ]);
-
-    // Transform data
-    const transformedFirmalar = firmalar.map(firma => ({
-      ...firma,
-      goruntulenme: firma.goruntulenme || 0,
-    }));
-
-    // Calculate pagination metadata
-    const totalPages = Math.ceil(totalCount / limit);
-    const hasNextPage = page < totalPages;
-    const hasPrevPage = page > 1;
-
-    const responseData = {
-      data: transformedFirmalar,
+    return NextResponse.json({
+      data: firmalar,
       pagination: {
-        page,
-        limit,
-        total: totalCount,
-        totalPages,
-        hasNextPage,
-        hasPrevPage
+        page: 1,
+        limit: 1000,
+        total: firmalar.length,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPrevPage: false
       },
       meta: {
         count: firmalar.length,
-        search: search || null,
+        search: null,
         cached: false,
         fetchTime: new Date().toISOString()
       }
-    };
-
-    console.log('✅ Database query completed', {
-      page,
-      limit,
-      search,
-      resultCount: firmalar.length,
-      totalCount
-    });
-
-    return NextResponse.json(responseData);
-
+    }, { status: 200 });
+    
   } catch (error) {
-    console.error('❌ Firmalar getirilirken hata:', error);
+    console.error('❌ Firmalar API hatası:', error);
+    
     return NextResponse.json({
-      error: { message: 'Firmalar getirilirken bir hata oluştu' }
+      error: { message: 'Firmalar getirilirken hata oluştu' }
     }, { status: 500 });
   }
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    console.log('🔍 POST firmalar çağrısı alındı');
+    console.log('🔍 POST firmalar çağrısı...');
     
-    const data = await req.json();
-    console.log('📋 Alınan data:', Object.keys(data));
+    const data = await request.json();
+    console.log('📋 POST data keys:', Object.keys(data));
 
     // Basit firma oluşturma
     const newFirma = await prisma.firmalar.create({
       data: {
         firma_adi: data.firma_adi || data.firmaAdi,
         slug: data.slug,
-        yetkili_adi: data.yetkili_adi || data.yetkiliAdi,
-        yetkili_pozisyon: data.yetkili_pozisyon || data.yetkiliPozisyon,
+        yetkili_adi: data.yetkili_adi || data.yetkiliAdi || null,
+        yetkili_pozisyon: data.yetkili_pozisyon || data.yetkiliPozisyon || null,
         template_id: data.template_id || data.templateId ? parseInt(data.template_id || data.templateId) : 1,
         onay: false,
         goruntulenme: 0
       }
     });
 
-    console.log('✅ Firma başarıyla oluşturuldu:', newFirma.id);
+    console.log('✅ Firma oluşturuldu:', newFirma.id);
 
     return NextResponse.json({ 
       message: 'Firma başarıyla oluşturuldu', 
@@ -123,9 +79,9 @@ export async function POST(req: NextRequest) {
     });
     
   } catch (error) {
-    console.error('❌ Firma oluşturulurken hata:', error);
+    console.error('❌ Firma oluşturma hatası:', error);
     return NextResponse.json({
-      error: { message: 'Firma oluşturulurken bir hata oluştu' }
+      error: { message: 'Firma oluşturulurken hata oluştu' }
     }, { status: 500 });
   }
 }
