@@ -153,6 +153,23 @@ export const corporateSlateTemplate = `
             font-size: 24px;
             color: #003366;
             transition: all 0.3s ease;
+            /* Font Awesome loading fallback */
+            min-width: 24px;
+            min-height: 24px;
+            display: inline-block;
+        }
+        
+        /* Font Awesome loading optimization */
+        .icon-card i:before {
+            /* Ensure icons render even if Font Awesome is delayed */
+            font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands", sans-serif !important;
+            font-weight: 900;
+        }
+        
+        /* Fallback for slow Font Awesome loading */
+        .icon-card i[class*="fa-"]:not([class*="fa-loaded"]):before {
+            content: "●";
+            font-family: sans-serif;
         }
         .icon-label {
             font-size: 0.75rem;

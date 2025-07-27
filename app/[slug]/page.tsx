@@ -3,6 +3,7 @@ import { Metadata } from 'next';
 import handlebars from 'handlebars';
 import { cardTemplate } from '../lib/cardTemplate';
 import { getServerBaseUrl } from '../lib/utils/getBaseUrl';
+import FontAwesomeLoader from '../components/FontAwesomeLoader';
 
 // Handlebars helper fonksiyonunu kaydet
 handlebars.registerHelper('ifEquals', function(this: any, arg1: any, arg2: any, options: any) {
@@ -92,6 +93,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
                 description: data.firma_hakkinda ? data.firma_hakkinda.substring(0, 160) : `${data.firma_adi} dijital kartvizit sayfası`,
                 images: data.profil_foto ? [data.profil_foto] : [],
             },
+            other: {
+                'font-preload': 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css'
+            }
         };
     } catch (error) {
         console.error('Metadata oluşturulurken hata', { error, slug });
@@ -303,7 +307,9 @@ export default async function KartvizitPage({ params }: { params: { slug: string
         
         // HTML'i döndür
         return (
-            <div dangerouslySetInnerHTML={{ __html: html }} />
+            <FontAwesomeLoader>
+                <div dangerouslySetInnerHTML={{ __html: html }} />
+            </FontAwesomeLoader>
         );
     } catch (error) {
         console.error('Kartvizit sayfası oluşturulurken hata', { error, slug });
