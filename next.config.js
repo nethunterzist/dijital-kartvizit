@@ -139,6 +139,12 @@ const nextConfig = {
   
   // Webpack optimizations
   webpack: (config, { dev, isServer }) => {
+    // Fix for handlebars webpack issue
+    config.externals = config.externals || [];
+    if (isServer) {
+      config.externals.push('handlebars');
+    }
+    
     // Fix for 'self is not defined' error
     if (!isServer) {
       config.resolve.fallback = {

@@ -449,7 +449,7 @@ export const colorfulTemplate = `
                     {{#each social_media}}
                     <div class="icon-card">
                         <a href="{{this.url}}" target="_blank">
-                            <i class="{{this.icon}}"></i>
+                            <i class="{{getIconClass this.icon this.label}}"></i>
                             <span class="icon-label">{{this.label}}</span>
                         </a>
                     </div>
@@ -461,7 +461,7 @@ export const colorfulTemplate = `
                     {{#each communication}}
                     <div class="icon-card">
                         <a href="{{this.url}}" target="_blank">
-                            <i class="{{this.icon}}"></i>
+                            <i class="{{getIconClass this.icon this.label}}"></i>
                             <span class="icon-label">{{this.label}}</span>
                         </a>
                     </div>
@@ -556,22 +556,22 @@ export const colorfulTemplate = `
                     {{#each (parseBankAccounts iban.value) as |bank|}}
                         <div class="bank-card">
                             <div style="display: flex; align-items: center; margin-bottom: 18px;">
-                                {{#if bank.bank_logo}}
-                                    <img src="{{bank.bank_logo}}" alt="{{bank.bank_label}}" style="width: 50px; height: 50px; object-fit: contain; margin-right: 18px; border-radius: 12px; background: white; padding: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                                {{#if bank.banka_logo}}
+                                    <img src="{{bank.banka_logo}}" alt="{{bank.banka_adi}}" style="width: 50px; height: 50px; object-fit: contain; margin-right: 18px; border-radius: 12px; background: white; padding: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
                                 {{/if}}
                                 <div>
-                                    <div style="font-size: 1.2rem; font-weight: 700; margin-bottom: 4px; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">{{bank.bank_label}}</div>
-                                    <div style="font-size: 0.9rem; color: #666;">{{bank.account_holder}}</div>
+                                    <div style="font-size: 1.2rem; font-weight: 700; margin-bottom: 4px; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">{{bank.banka_adi}}</div>
+                                    <div style="font-size: 0.9rem; color: #666;">{{bank.hesap_sahibi}}</div>
                                 </div>
                             </div>
-                            {{#each bank.accounts}}
+                            {{#each bank.hesaplar}}
                                 <div style="display: flex; align-items: center; margin-bottom: 12px;">
                                     <span style="display: inline-flex; width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); color: white; font-weight: 700; align-items: center; justify-content: center; margin-right: 12px; font-size: 0.9rem; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); animation: pulse 2s infinite;">
-                                        {{#if this.currency}}
-                                            {{#ifEquals this.currency "TL"}}₺{{/ifEquals}}
-                                            {{#ifEquals this.currency "TRY"}}₺{{/ifEquals}}
-                                            {{#ifEquals this.currency "USD"}}&#36;{{/ifEquals}}
-                                            {{#ifEquals this.currency "EUR"}}€{{/ifEquals}}
+                                        {{#if this.para_birimi}}
+                                            {{#ifEquals this.para_birimi "TL"}}₺{{/ifEquals}}
+                                            {{#ifEquals this.para_birimi "TRY"}}₺{{/ifEquals}}
+                                            {{#ifEquals this.para_birimi "USD"}}&#36;{{/ifEquals}}
+                                            {{#ifEquals this.para_birimi "EUR"}}€{{/ifEquals}}
                                         {{else}}
                                             ₺
                                         {{/if}}

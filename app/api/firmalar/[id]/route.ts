@@ -145,24 +145,48 @@ export async function GET(
       ),
       // Banka hesaplarını eski formata çevir
       bank_accounts: JSON.stringify(
-        firma.banka_hesaplari.map(banka => ({
-          bank_name: banka.banka_adi,
-          bank_label: banka.banka_adi,
-          bank_logo: banka.banka_logo,
-          account_holder: banka.hesap_sahibi,
-          accounts: banka.hesaplar.map(hesap => ({
-            iban: hesap.iban,
-            currency: hesap.para_birimi
-          }))
-        }))
+        firma.banka_hesaplari.map(banka => {
+          // Banka adından ID'yi çıkar (ters mapping)
+          const BANKA_ID_MAP: {[key: string]: string} = {
+            'Ziraat Bankası': 'ziraat',
+            'VakıfBank': 'vakifbank', 
+            'Halkbank': 'halkbank',
+            'İş Bankası': 'isbankasi',
+            'Garanti BBVA': 'garanti',
+            'Akbank': 'akbank',
+            'Yapı Kredi': 'yapikredi',
+            'QNB Finansbank': 'qnb',
+            'TEB (Türk Ekonomi Bankası)': 'teb',
+            'Kuveyt Türk': 'kuveytturk',
+            'Albaraka Türk': 'albaraka',
+            'Türkiye Finans': 'turkiyefinans',
+            'AnadoluBank': 'anadolubank',
+            'Şekerbank': 'sekerbank',
+            'ICBC Turkey Bank': 'icbc',
+            'Odeabank': 'odeabank'
+          };
+          
+          const bankId = BANKA_ID_MAP[banka.banka_adi] || banka.banka_adi.toLowerCase().replace(/\s+/g, '');
+          
+          return {
+            bank_name: bankId, // ID olarak gönder
+            bank_label: banka.banka_adi, // Label olarak tam adı gönder
+            bank_logo: banka.banka_logo,
+            account_holder: banka.hesap_sahibi,
+            accounts: banka.hesaplar.map(hesap => ({
+              iban: hesap.iban,
+              currency: hesap.para_birimi
+            }))
+          };
+        })
       )
     };
     
-    return NextResponse.json({ firma: transformedFirma });
+    return NextResponse.json({ data: transformedFirma });
   } catch (error) {
     logger.error('Firma getirilirken hata oluştu:', error);
     return NextResponse.json(
-      { message: 'Firma getirilirken bir hata oluştu' },
+      { error: { message: 'Firma getirilirken bir hata oluştu' } },
       { status: 500 }
     );
   }
@@ -236,6 +260,7 @@ export async function PUT(
         firma_unvan: data.firma_unvan || existingFirma.firma_unvan,
         firma_vergi_no: data.firma_vergi_no || existingFirma.firma_vergi_no,
         vergi_dairesi: data.vergi_dairesi || existingFirma.vergi_dairesi,
+        template_id: data.template_id || data.templateId ? parseInt(data.template_id || data.templateId) : existingFirma.template_id,
         updated_at: new Date()
       }
     });

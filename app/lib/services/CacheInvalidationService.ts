@@ -513,6 +513,15 @@ export class CacheInvalidationService {
   }
 
   /**
+   * Quantum cache invalidation (advanced method)
+   * @param data Operation data
+   * @returns CacheInvalidationResult
+   */
+  async quantumInvalidate(data: any): Promise<CacheInvalidationResult> {
+    return await CacheInvalidationService.invalidateOnCreate(data, { strategy: 'immediate' });
+  }
+
+  /**
    * Async cache invalidation (fire and forget)
    * @param operation Invalidation operation
    * @param data Operation data
@@ -521,8 +530,8 @@ export class CacheInvalidationService {
     operation: 'create' | 'update' | 'delete',
     data: any
   ): Promise<void> {
-    // Fire and forget - don't await
-    setImmediate(async () => {
+    // Use setTimeout instead of setImmediate for browser compatibility
+    setTimeout(async () => {
       try {
         switch (operation) {
           case 'create':
@@ -538,7 +547,7 @@ export class CacheInvalidationService {
       } catch (error) {
         logger.error('Async cache invalidation failed', { operation, error });
       }
-    });
+    }, 0);
   }
 
   /**

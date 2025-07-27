@@ -405,7 +405,7 @@ export const corporateTemplate = `
                     {{#each social_media}}
                     <div class="icon-card">
                         <a href="{{this.url}}" target="_blank">
-                            <i class="{{this.icon}}"></i>
+                            <i class="{{getIconClass this.icon this.label}}"></i>
                             <span class="icon-label">{{this.label}}</span>
                         </a>
                     </div>
@@ -417,7 +417,7 @@ export const corporateTemplate = `
                     {{#each communication}}
                     <div class="icon-card">
                         <a href="{{this.url}}" target="_blank">
-                            <i class="{{this.icon}}"></i>
+                            <i class="{{getIconClass this.icon this.label}}"></i>
                             <span class="icon-label">{{this.label}}</span>
                         </a>
                     </div>
@@ -512,22 +512,22 @@ export const corporateTemplate = `
                     {{#each (parseBankAccounts iban.value) as |bank|}}
                         <div class="bank-card">
                             <div style="display: flex; align-items: center; margin-bottom: 15px;">
-                                {{#if bank.bank_logo}}
-                                    <img src="{{bank.bank_logo}}" alt="{{bank.bank_label}}" style="width: 48px; height: 48px; object-fit: contain; margin-right: 16px; border-radius: 8px; background: #ffffff; padding: 4px;">
+                                {{#if bank.banka_logo}}
+                                    <img src="{{bank.banka_logo}}" alt="{{bank.banka_adi}}" style="width: 48px; height: 48px; object-fit: contain; margin-right: 16px; border-radius: 8px; background: #ffffff; padding: 4px;">
                                 {{/if}}
                                 <div>
-                                    <div style="font-weight: 600; font-size: 1.125rem; color: #FFD700; margin-bottom: 4px;">{{bank.bank_label}}</div>
-                                    <div style="color: #cccccc; font-size: 0.875rem;">{{bank.account_holder}}</div>
+                                    <div style="font-weight: 600; font-size: 1.125rem; color: #FFD700; margin-bottom: 4px;">{{bank.banka_adi}}</div>
+                                    <div style="color: #cccccc; font-size: 0.875rem;">{{bank.hesap_sahibi}}</div>
                                 </div>
                             </div>
-                            {{#each bank.accounts}}
+                            {{#each bank.hesaplar}}
                                 <div style="display: flex; align-items: center; margin-bottom: 12px;">
                                     <span style="display: inline-flex; width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #FFD700, #FFA500); color: #000000; font-weight: 700; align-items: center; justify-content: center; margin-right: 12px; font-size: 0.875rem; box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);">
-                                        {{#if this.currency}}
-                                            {{#ifEquals this.currency "TL"}}₺{{/ifEquals}}
-                                            {{#ifEquals this.currency "TRY"}}₺{{/ifEquals}}
-                                            {{#ifEquals this.currency "USD"}}&#36;{{/ifEquals}}
-                                            {{#ifEquals this.currency "EUR"}}€{{/ifEquals}}
+                                        {{#if this.para_birimi}}
+                                            {{#ifEquals this.para_birimi "TL"}}₺{{/ifEquals}}
+                                            {{#ifEquals this.para_birimi "TRY"}}₺{{/ifEquals}}
+                                            {{#ifEquals this.para_birimi "USD"}}&#36;{{/ifEquals}}
+                                            {{#ifEquals this.para_birimi "EUR"}}€{{/ifEquals}}
                                         {{else}}
                                             ₺
                                         {{/if}}

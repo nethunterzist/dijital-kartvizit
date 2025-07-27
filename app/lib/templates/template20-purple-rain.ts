@@ -335,7 +335,70 @@ export const purpleRainTemplate = `
             </div>
 
             <div class="icons-grid">
-                <!-- Dynamic icons will be inserted here -->
+                <div class="icon-card">
+                    <a href="/{{slug}}/qr" target="_blank">
+                        <i class="fas fa-qrcode"></i>
+                        <span class="icon-label">QR Kod</span>
+                    </a>
+                </div>
+                
+                {{#if social_media}}
+                    {{#each social_media}}
+                    <div class="icon-card">
+                        <a href="{{this.url}}" target="_blank">
+                            <i class="{{getIconClass this.icon this.label}}"></i>
+                            <span class="icon-label">{{this.label}}</span>
+                        </a>
+                    </div>
+                    {{/each}}
+                {{/if}}
+                
+                {{#if communication}}
+                    {{#each communication}}
+                    <div class="icon-card">
+                        <a href="{{this.url}}" target="_blank">
+                            <i class="{{getIconClass this.icon this.label}}"></i>
+                            <span class="icon-label">{{this.label}}</span>
+                        </a>
+                    </div>
+                    {{/each}}
+                {{/if}}
+
+                {{#if katalog}}
+                <div class="icon-card">
+                    <a href="{{katalog.url}}" target="_blank">
+                        <i class="fas fa-book"></i>
+                        <span class="icon-label">{{katalog.label}}</span>
+                    </a>
+                </div>
+                {{/if}}
+                
+                {{#if iban}}
+                <div class="icon-card">
+                    <a href="#" onclick="showBankPopup(event)">
+                        <i class="fas fa-university"></i>
+                        <span class="icon-label">{{iban.label}}</span>
+                    </a>
+                </div>
+                {{/if}}
+                
+                {{#if tax}}
+                <div class="icon-card">
+                    <a href="#" onclick="showTaxPopup(event)">
+                        <i class="fas fa-file-invoice"></i>
+                        <span class="icon-label">{{tax.label}}</span>
+                    </a>
+                </div>
+                {{/if}}
+                
+                {{#if about}}
+                <div class="icon-card">
+                    <a href="#" onclick="showAboutPopup(event)">
+                        <i class="fas fa-info-circle"></i>
+                        <span class="icon-label">{{about.label}}</span>
+                    </a>
+                </div>
+                {{/if}}
             </div>
 
             {{#if firma_logo}}
@@ -382,22 +445,22 @@ export const purpleRainTemplate = `
                     {{#each (parseBankAccounts iban.value) as |bank|}}
                         <div class="bank-card">
                             <div style="display: flex; align-items: center; margin-bottom: 15px;">
-                                {{#if bank.bank_logo}}
-                                    <img src="{{bank.bank_logo}}" alt="{{bank.bank_label}}" style="width: 32px; height: 32px; object-fit: contain; margin-right: 12px;">
+                                {{#if bank.banka_logo}}
+                                    <img src="{{bank.banka_logo}}" alt="{{bank.banka_adi}}" style="width: 32px; height: 32px; object-fit: contain; margin-right: 12px;">
                                 {{/if}}
                                 <div>
-                                    <div style="font-weight: 600; font-size: 0.9rem; color: #9C27B0;">{{bank.bank_label}}</div>
-                                    <div style="color: #673AB7; font-size: 0.8rem;">{{bank.account_holder}}</div>
+                                    <div style="font-weight: 600; font-size: 0.9rem; color: #9C27B0;">{{bank.banka_adi}}</div>
+                                    <div style="color: #673AB7; font-size: 0.8rem;">{{bank.hesap_sahibi}}</div>
                                 </div>
                             </div>
-                            {{#each bank.accounts}}
+                            {{#each bank.hesaplar}}
                                 <div style="display: flex; align-items: center; margin-bottom: 8px;">
                                     <span style="display: inline-flex; width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #9C27B0, #673AB7); color: #FFFFFF; font-weight: 600; align-items: center; justify-content: center; margin-right: 8px; font-size: 0.75rem;">
-                                        {{#if this.currency}}
-                                            {{#ifEquals this.currency "TL"}}₺{{/ifEquals}}
-                                            {{#ifEquals this.currency "TRY"}}₺{{/ifEquals}}
-                                            {{#ifEquals this.currency "USD"}}&#36;{{/ifEquals}}
-                                            {{#ifEquals this.currency "EUR"}}€{{/ifEquals}}
+                                        {{#if this.para_birimi}}
+                                            {{#ifEquals this.para_birimi "TL"}}₺{{/ifEquals}}
+                                            {{#ifEquals this.para_birimi "TRY"}}₺{{/ifEquals}}
+                                            {{#ifEquals this.para_birimi "USD"}}&#36;{{/ifEquals}}
+                                            {{#ifEquals this.para_birimi "EUR"}}€{{/ifEquals}}
                                         {{else}}
                                             ₺
                                         {{/if}}
@@ -443,7 +506,6 @@ export const purpleRainTemplate = `
                 btn.style.background = btn.style.background.replace('#48bb78', '');
             }, 1000);
         });
-    };
     }
     function showBankPopup(e) {
         e.preventDefault();

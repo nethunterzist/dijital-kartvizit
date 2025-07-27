@@ -376,7 +376,55 @@ export const pastelBloomTemplate = `
 
             <!-- Icons Section -->
             <div class="icons-grid">
-                <!-- Dynamic icons will be inserted here -->
+                <!-- Communication Icons -->
+                {{#each communication}}
+                <div class="icon-card">
+                    <a href="{{this.url}}">
+                        <i class="{{getIconClass this.icon this.label}}"></i>
+                        <span class="icon-label">{{this.label}}</span>
+                    </a>
+                </div>
+                {{/each}}
+
+                <!-- Social Media Icons -->
+                {{#each social_media}}
+                <div class="icon-card">
+                    <a href="{{this.url}}" target="_blank">
+                        <i class="{{getIconClass this.icon this.label}}"></i>
+                        <span class="icon-label">{{this.label}}</span>
+                    </a>
+                </div>
+                {{/each}}
+
+                <!-- Tax Info Icon -->
+                {{#if tax}}
+                <div class="icon-card">
+                    <a href="#" onclick="showTaxPopup(event)">
+                        <i class="{{getIconClass tax.icon tax.label}}"></i>
+                        <span class="icon-label">{{tax.label}}</span>
+                    </a>
+                </div>
+                {{/if}}
+
+                <!-- About Icon -->
+                {{#if about}}
+                <div class="icon-card">
+                    <a href="#" onclick="showAboutPopup(event)">
+                        <i class="{{getIconClass about.icon about.label}}"></i>
+                        <span class="icon-label">{{about.label}}</span>
+                    </a>
+                </div>
+                {{/if}}
+
+                <!-- Bank Info Icon -->
+                {{#if iban}}
+                <div class="icon-card">
+                    <a href="#" onclick="showBankPopup(event)">
+                        <i class="{{getIconClass iban.icon iban.label}}"></i>
+                        <span class="icon-label">{{iban.label}}</span>
+                    </a>
+                </div>
+                {{/if}}
             </div>
 
             <!-- Firma Logosu -->
@@ -424,22 +472,22 @@ export const pastelBloomTemplate = `
                     {{#each (parseBankAccounts iban.value) as |bank|}}
                         <div class="bank-card">
                             <div style="display: flex; align-items: center; margin-bottom: 15px;">
-                                {{#if bank.bank_logo}}
-                                    <img src="{{bank.bank_logo}}" alt="{{bank.bank_label}}" style="width: 32px; height: 32px; object-fit: contain; margin-right: 12px;">
+                                {{#if bank.banka_logo}}
+                                    <img src="{{bank.banka_logo}}" alt="{{bank.banka_adi}}" style="width: 32px; height: 32px; object-fit: contain; margin-right: 12px;">
                                 {{/if}}
                                 <div>
-                                    <div style="font-weight: 600; font-size: 0.9rem; color: #FFB6C1;">{{bank.bank_label}}</div>
-                                    <div style="color: #888; font-size: 0.8rem;">{{bank.account_holder}}</div>
+                                    <div style="font-weight: 600; font-size: 0.9rem; color: #FFB6C1;">{{bank.banka_adi}}</div>
+                                    <div style="color: #888; font-size: 0.8rem;">{{bank.hesap_sahibi}}</div>
                                 </div>
                             </div>
-                            {{#each bank.accounts}}
+                            {{#each bank.hesaplar}}
                                 <div style="display: flex; align-items: center; margin-bottom: 8px;">
                                     <span style="display: inline-flex; width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #FFB6C1, #B2DFDB); color: #444444; font-weight: 600; align-items: center; justify-content: center; margin-right: 8px; font-size: 0.75rem;">
-                                        {{#if this.currency}}
-                                            {{#ifEquals this.currency "TL"}}₺{{/ifEquals}}
-                                            {{#ifEquals this.currency "TRY"}}₺{{/ifEquals}}
-                                            {{#ifEquals this.currency "USD"}}&#36;{{/ifEquals}}
-                                            {{#ifEquals this.currency "EUR"}}€{{/ifEquals}}
+                                        {{#if this.para_birimi}}
+                                            {{#ifEquals this.para_birimi "TL"}}₺{{/ifEquals}}
+                                            {{#ifEquals this.para_birimi "TRY"}}₺{{/ifEquals}}
+                                            {{#ifEquals this.para_birimi "USD"}}&#36;{{/ifEquals}}
+                                            {{#ifEquals this.para_birimi "EUR"}}€{{/ifEquals}}
                                         {{else}}
                                             ₺
                                         {{/if}}
@@ -485,7 +533,6 @@ export const pastelBloomTemplate = `
                 btn.style.background = btn.style.background.replace('#48bb78', '');
             }, 1000);
         });
-    };
     }
     function showBankPopup(e) {
         e.preventDefault();

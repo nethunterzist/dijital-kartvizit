@@ -34,11 +34,11 @@ export default function AdminDashboard() {
         }
         
         const data = await response.json();
-        logger.info('Genel bakış - alınan firma verileri:', data);
+        console.log('Genel bakış - alınan firma verileri:', data);
         
-        if (data && data.firmalar) {
-          setFirmaCount(data.firmalar.length);
-          const siraliList = [...data.firmalar]
+        if (data && data.data) {
+          setFirmaCount(data.data.length);
+          const siraliList = [...data.data]
             .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
             .slice(0, 5);
           setSonEklenenFirmalar(siraliList);
@@ -46,7 +46,7 @@ export default function AdminDashboard() {
           throw new Error('Firma verileri alınamadı');
         }
       } catch (err) {
-        logger.error('Firmalar alınırken hata oluştu:', err);
+        console.error('Firmalar alınırken hata oluştu:', err);
         setError('Firmalar yüklenirken bir hata oluştu');
       } finally {
         setLoading(false);
@@ -75,7 +75,7 @@ export default function AdminDashboard() {
         alert(`Link kopyalandı: ${link}`);
       })
       .catch(err => {
-        logger.error('Link kopyalanırken hata oluştu:', err);
+        console.error('Link kopyalanırken hata oluştu:', err);
       });
   };
 

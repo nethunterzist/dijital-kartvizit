@@ -28,7 +28,7 @@ export class FirmaService {
    * @param data FirmaCreateData containing all firma information
    * @returns FirmaResult with created firma or error
    */
-  static async createFirma(data: FirmaCreateData): Promise<FirmaResult> {
+  async createFirma(data: FirmaCreateData): Promise<FirmaResult> {
     try {
       const startTime = performance.now();
       

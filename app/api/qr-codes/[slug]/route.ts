@@ -130,7 +130,105 @@ export async function GET(
       }
     }
 
-    // Basit QR kod sayfası HTML'i oluştur
+    // Template stillerini ayrıştır ve QR sayfası oluştur
+    const extractStylesFromTemplate = (templateHtml: string): string => {
+      const styleMatch = templateHtml.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
+      return styleMatch ? styleMatch[1] : '';
+    };
+
+    const detectContainerStructure = (templateHtml: string): { containerClass: string; contentClass: string } => {
+      // Luxury template için özel kontrol
+      if (templateHtml.includes('class="card"') && !templateHtml.includes('main-container')) {
+        return { containerClass: 'card', contentClass: 'card' };
+      }
+      // Diğer tüm template'ler için varsayılan yapı
+      return { containerClass: 'main-container', contentClass: 'card-content' };
+    };
+
+    // Template stillerini ve yapısını al
+    const templateStyles = extractStylesFromTemplate(templateString);
+    const { containerClass, contentClass } = detectContainerStructure(templateString);
+
+    // QR kod sayfası için özel stiller
+    const qrSpecificStyles = `
+      .company-name {
+        font-size: 2rem !important;
+        font-weight: 700 !important;
+        margin-bottom: 10px !important;
+        text-align: center !important;
+      }
+      
+      .person-name {
+        font-size: 1.3rem !important;
+        font-weight: 500 !important;
+        margin-bottom: 40px !important;
+        text-align: center !important;
+        opacity: 0.9 !important;
+      }
+      
+      .qr-code-container {
+        text-align: center !important;
+        margin: 30px auto !important;
+        padding: 30px !important;
+        background: rgba(255, 255, 255, 0.1) !important;
+        border-radius: 20px !important;
+        backdrop-filter: blur(10px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        max-width: 320px !important;
+      }
+      
+      .qr-code-image {
+        max-width: 250px !important;
+        width: 100% !important;
+        height: auto !important;
+        border-radius: 15px !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+        background: white !important;
+        padding: 10px !important;
+        display: block !important;
+        margin: 0 auto !important;
+      }
+      
+      .website-section {
+        margin-top: 30px !important;
+        text-align: center !important;
+      }
+      
+      .website-link {
+        display: inline-block !important;
+        background: rgba(255, 255, 255, 0.2) !important;
+        border: 2px solid rgba(255, 255, 255, 0.3) !important;
+        border-radius: 25px !important;
+        padding: 12px 24px !important;
+        color: inherit !important;
+        text-decoration: none !important;
+        font-size: 1rem !important;
+        font-weight: 500 !important;
+        transition: all 0.3s ease !important;
+        backdrop-filter: blur(10px) !important;
+        margin: 5px !important;
+      }
+      
+      .website-link:hover {
+        background: rgba(255, 255, 255, 0.3) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2) !important;
+        text-decoration: none !important;
+      }
+      
+      /* Luxury template için özel ayarlar */
+      ${containerClass === 'card' ? `
+        .card {
+          display: flex !important;
+          flex-direction: column !important;
+          justify-content: center !important;
+          align-items: center !important;
+          text-align: center !important;
+        }
+      ` : ''}
+    `;
+
+    // Dinamik QR sayfası HTML'i oluştur
     const qrPageHTML = `
     <!DOCTYPE html>
     <html lang="tr">
@@ -139,122 +237,15 @@ export async function GET(
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>${firma.firma_adi} - QR Kod</title>
         <link rel="icon" href="https://sanalkartvizitim.com/wp-content/uploads/2024/03/fav.png" type="image/png">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
         <style>
-            * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-            }
-            
-            html, body {
-                height: 100%;
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                overflow-y: auto;
-            }
-            
-            .main-container {
-                width: 100%;
-                max-width: 450px;
-                margin: 0 auto;
-                min-height: 100vh;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                position: relative;
-            }
-            
-            .card-content {
-                padding: 40px 20px;
-                text-align: center;
-                min-height: 100vh;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                color: white;
-            }
-            
-            .company-name {
-                font-size: 2rem;
-                font-weight: 700;
-                margin-bottom: 10px;
-                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-            }
-            
-            .person-name {
-                font-size: 1.3rem;
-                font-weight: 500;
-                margin-bottom: 40px;
-                opacity: 0.9;
-            }
-            
-            .qr-code-container {
-                text-align: center;
-                margin: 30px 0;
-                padding: 30px;
-                background: rgba(255, 255, 255, 0.1);
-                border-radius: 20px;
-                backdrop-filter: blur(10px);
-                border: 1px solid rgba(255, 255, 255, 0.2);
-            }
-            
-            .qr-code-image {
-                max-width: 250px;
-                width: 100%;
-                height: auto;
-                border-radius: 15px;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-                background: white;
-                padding: 10px;
-            }
-            
-            .qr-code-title {
-                color: white;
-                font-size: 1.4rem;
-                font-weight: 600;
-                margin-bottom: 20px;
-                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-            }
-            
-            .website-section {
-                margin-top: 30px;
-                text-align: center;
-            }
-            
-            .website-title {
-                color: white;
-                font-size: 1.2rem;
-                font-weight: 600;
-                margin-bottom: 15px;
-                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-            }
-            
-            .website-link {
-                display: inline-block;
-                background: rgba(255, 255, 255, 0.2);
-                border: 2px solid rgba(255, 255, 255, 0.3);
-                border-radius: 25px;
-                padding: 12px 24px;
-                color: white;
-                text-decoration: none;
-                font-size: 1rem;
-                font-weight: 500;
-                transition: all 0.3s ease;
-                backdrop-filter: blur(10px);
-                margin: 5px;
-            }
-            
-            .website-link:hover {
-                background: rgba(255, 255, 255, 0.3);
-                transform: translateY(-2px);
-                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-                color: white;
-                text-decoration: none;
-            }
+          ${templateStyles}
+          ${qrSpecificStyles}
         </style>
     </head>
     <body>
-        <div class="main-container">
-            <div class="card-content">
+        <div class="${containerClass}">
+            ${containerClass !== contentClass ? `<div class="${contentClass}">` : ''}
                 <!-- Firma Adı -->
                 <h1 class="company-name">${firma.firma_adi}</h1>
                 
@@ -276,7 +267,7 @@ export async function GET(
                     `).join('')}
                 </div>
                 ` : ''}
-            </div>
+            ${containerClass !== contentClass ? `</div>` : ''}
         </div>
     </body>
     </html>`;

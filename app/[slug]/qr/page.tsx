@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import QRCode from 'qrcode';
+import Handlebars from 'handlebars';
+import { getQRTemplate } from '../../lib/templates/qr-templates';
 
 // URL'deki encode edilmiş karakterleri decode eden yardımcı fonksiyon
 function decodeSlug(slug: string): string {
@@ -81,46 +83,39 @@ export default async function QRPage({ params }: { params: { slug: string } }) {
         website = firma.website;
       }
     }
-    // Eğer website hala boşsa, communication dizisinde label'ı Website olan ilk değeri al
+    // Eğer website hala boşsa, communication dizisinde website olan ilk değeri al
     if (!website && Array.isArray(firma.communication)) {
-      const commWeb = firma.communication.find((c: any) => c.label === 'Website' && c.value);
+      const commWeb = firma.communication.find((c: any) => 
+        (c.tip === 'website' || c.label?.toLowerCase().includes('website')) && c.value
+      );
       if (commWeb) {
         website = commWeb.value;
       }
     }
 
+    // Template ID'ye göre QR template'ini al
+    const templateId = firma.template_id || 2;
+    const qrTemplate = getQRTemplate(templateId);
+
+    // Template verilerini hazırla
+    const templateData = {
+      firma_adi: firma.firma_adi,
+      yetkili_adi: firma.yetkili_adi,
+      qr_code_url: qrCodeDataUrl,
+      website: website,
+      website_display: website ? website.replace(/^https?:\/\//, '') : '',
+      firma_logo: firma.firma_logo
+    };
+
+    // Handlebars template'ini derle ve render et
+    const template = Handlebars.compile(qrTemplate);
+    const html = template(templateData);
+
+    // HTML'i dangerouslySetInnerHTML ile render et
     return (
-      <div className="main-container" style={{ maxWidth: 450, margin: '0 auto', minHeight: '100vh', background: 'white', boxShadow: '0 0 15px rgba(0,0,0,0.1)', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div className="background" style={{ background: `url('/img/back.jpeg') no-repeat center center`, backgroundSize: 'cover', minHeight: '100vh', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-          <div className="card-content" style={{ textAlign: 'center', width: '90%', maxWidth: 400, margin: '0 auto', padding: '32px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-            <div className="container">
-              <div className="row justify-content-center mb-2">
-                <div className="col-12 text-center">
-                  <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: 5, color: '#000' }}>{firma.firma_adi}</h1>
-                  {firma.yetkili_adi && (
-                    <h2 style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: 18, color: '#000' }}>{firma.yetkili_adi}</h2>
-                  )}
-                </div>
-              </div>
-            </div>
-            <div className="my-4 d-flex flex-column align-items-center justify-content-center" style={{ width: '100%' }}>
-              <img src={qrCodeDataUrl} alt="QR Kod" style={{ width: 220, height: 220, borderRadius: 8, background: '#fff', boxShadow: '0 2px 12px rgba(0,0,0,0.08)', margin: '0 auto' }} />
-            </div>
-            {website && (
-              <div className="mb-3" style={{ width: '100%' }}>
-                <a href={website} target="_blank" rel="noopener noreferrer" style={{ fontSize: '1.08rem', color: '#000', textDecoration: 'none', wordBreak: 'break-all', display: 'block', textAlign: 'center', fontWeight: 500 }}>{website.replace(/^https?:\/\//, '')}</a>
-              </div>
-            )}
-            {firma.firma_logo && (
-              <div className="d-flex justify-content-center mt-2">
-                <img src={firma.firma_logo} alt="Firma Logo" style={{ maxWidth: 120, maxHeight: 120, borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', background: '#fff', padding: 6 }} />
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+      <div dangerouslySetInnerHTML={{ __html: html }} />
     );
   } catch (error) {
     return notFound();
   }
-} 
+}

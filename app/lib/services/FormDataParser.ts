@@ -26,7 +26,7 @@ export class FormDataParser {
    * @param formData FormData object from request
    * @returns ParseResult with validated data or errors
    */
-  static parseBasicData(formData: FormData): ParseResult<any> {
+  parseBasicData(formData: FormData): ParseResult<any> {
     try {
       const rawData = {
         firma_adi: formData.get('firmaAdi')?.toString() || formData.get('firma_adi')?.toString() || '',
@@ -43,7 +43,7 @@ export class FormDataParser {
 
       // Slug sanitization
       if (rawData.slug) {
-        rawData.slug = this.sanitizeSlug(rawData.slug);
+        rawData.slug = FormDataParser.sanitizeSlug(rawData.slug);
       }
 
       // Basic data validation
@@ -65,7 +65,7 @@ export class FormDataParser {
       // HTML content sanitization
       if (validatedData.firma_hakkinda) {
         try {
-          validatedData.firma_hakkinda = this.sanitizeHtmlContent(validatedData.firma_hakkinda);
+          validatedData.firma_hakkinda = FormDataParser.sanitizeHtmlContent(validatedData.firma_hakkinda);
         } catch (error) {
           logger.error('HTML content sanitization failed', { error });
           return {
@@ -103,11 +103,11 @@ export class FormDataParser {
    * @param formData FormData object from request
    * @returns RelationalData object with parsed arrays
    */
-  static parseRelationalData(formData: FormData): RelationalData {
+  parseRelationalData(formData: FormData): RelationalData {
     return {
-      iletisimBilgileri: this.parseIletisimBilgileri(formData),
-      sosyalMedyaHesaplari: this.parseSosyalMedyaHesaplari(formData),
-      bankaHesaplari: this.parseBankaHesaplari(formData)
+      iletisimBilgileri: FormDataParser.parseIletisimBilgileri(formData),
+      sosyalMedyaHesaplari: FormDataParser.parseSosyalMedyaHesaplari(formData),
+      bankaHesaplari: FormDataParser.parseBankaHesaplari(formData)
     };
   }
 

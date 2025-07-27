@@ -25,11 +25,20 @@ export const authOptions: NextAuthOptions = {
           
           // Kullanıcı bulunmazsa null döndür
           if (!user) {
+            logger.info('Kullanıcı bulunamadı:', credentials.username);
             return null;
           }
           
+          logger.info('Kullanıcı bulundu:', { username: user.username, hashedPassword: user.password });
+          
           // Şifre karşılaştırması yap
           const passwordMatch = await bcrypt.compare(credentials.password, user.password);
+          
+          logger.info('Şifre karşılaştırması:', { 
+            inputPassword: credentials.password, 
+            hashedPassword: user.password, 
+            match: passwordMatch 
+          });
           
           if (passwordMatch) {
             // Eşleşirse kimlik bilgilerini döndür

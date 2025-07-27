@@ -39,7 +39,7 @@ export class FileUploadService {
    * @param formData FormData object containing files
    * @returns FileUploadResult with URLs and optimization metadata
    */
-  static async processUploads(formData: FormData): Promise<FileUploadResult> {
+  async processUploads(formData: FormData): Promise<FileUploadResult> {
     try {
       const startTime = performance.now();
       
@@ -50,9 +50,9 @@ export class FileUploadService {
 
       // Process uploads in parallel for better performance
       const uploadPromises = [
-        this.uploadOptimizedProfilePhoto(profilePhoto),
-        this.uploadOptimizedLogo(logoFile),
-        this.uploadCatalog(catalogFile)
+        FileUploadService.uploadOptimizedProfilePhoto(profilePhoto),
+        FileUploadService.uploadOptimizedLogo(logoFile),
+        FileUploadService.uploadCatalog(catalogFile)
       ];
 
       const results = await Promise.allSettled(uploadPromises);

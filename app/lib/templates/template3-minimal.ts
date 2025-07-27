@@ -343,7 +343,7 @@ export const minimalTemplate = `
                     {{#each social_media}}
                     <div class="icon-card">
                         <a href="{{this.url}}" target="_blank">
-                            <i class="{{this.icon}}"></i>
+                            <i class="{{getIconClass this.icon this.label}}"></i>
                             <span class="icon-label">{{this.label}}</span>
                         </a>
                     </div>
@@ -355,7 +355,7 @@ export const minimalTemplate = `
                     {{#each communication}}
                     <div class="icon-card">
                         <a href="{{this.url}}" target="_blank">
-                            <i class="{{this.icon}}"></i>
+                            <i class="{{getIconClass this.icon this.label}}"></i>
                             <span class="icon-label">{{this.label}}</span>
                         </a>
                     </div>
@@ -450,22 +450,22 @@ export const minimalTemplate = `
                     {{#each (parseBankAccounts iban.value) as |bank|}}
                         <div class="bank-card">
                             <div style="display: flex; align-items: center; margin-bottom: 15px;">
-                                {{#if bank.bank_logo}}
-                                    <img src="{{bank.bank_logo}}" alt="{{bank.bank_label}}" style="width: 32px; height: 32px; object-fit: contain; margin-right: 12px;">
+                                {{#if bank.banka_logo}}
+                                    <img src="{{bank.banka_logo}}" alt="{{bank.banka_adi}}" style="width: 32px; height: 32px; object-fit: contain; margin-right: 12px;">
                                 {{/if}}
                                 <div>
-                                    <div style="font-weight: 500; font-size: 0.875rem; color: #111827;">{{bank.bank_label}}</div>
-                                    <div style="color: #6b7280; font-size: 0.75rem;">{{bank.account_holder}}</div>
+                                    <div style="font-weight: 500; font-size: 0.875rem; color: #111827;">{{bank.banka_adi}}</div>
+                                    <div style="color: #6b7280; font-size: 0.75rem;">{{bank.hesap_sahibi}}</div>
                                 </div>
                             </div>
-                            {{#each bank.accounts}}
+                            {{#each bank.hesaplar}}
                                 <div style="display: flex; align-items: center; margin-bottom: 8px;">
                                     <span style="display: inline-flex; width: 28px; height: 28px; border-radius: 50%; background: #111827; color: white; font-weight: 500; align-items: center; justify-content: center; margin-right: 8px; font-size: 0.75rem;">
-                                        {{#if this.currency}}
-                                            {{#ifEquals this.currency "TL"}}₺{{/ifEquals}}
-                                            {{#ifEquals this.currency "TRY"}}₺{{/ifEquals}}
-                                            {{#ifEquals this.currency "USD"}}&#36;{{/ifEquals}}
-                                            {{#ifEquals this.currency "EUR"}}€{{/ifEquals}}
+                                        {{#if this.para_birimi}}
+                                            {{#ifEquals this.para_birimi "TL"}}₺{{/ifEquals}}
+                                            {{#ifEquals this.para_birimi "TRY"}}₺{{/ifEquals}}
+                                            {{#ifEquals this.para_birimi "USD"}}&#36;{{/ifEquals}}
+                                            {{#ifEquals this.para_birimi "EUR"}}€{{/ifEquals}}
                                         {{else}}
                                             ₺
                                         {{/if}}

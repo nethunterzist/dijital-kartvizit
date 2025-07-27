@@ -359,7 +359,70 @@ export const monotoneTemplate = `
 
             <!-- Icons Section -->
             <div class="icons-grid">
-                <!-- Dynamic icons will be inserted here -->
+                <div class="icon-card">
+                    <a href="/{{slug}}/qr" target="_blank">
+                        <i class="fas fa-qrcode"></i>
+                        <span class="icon-label">QR Kod</span>
+                    </a>
+                </div>
+                
+                {{#if social_media}}
+                    {{#each social_media}}
+                    <div class="icon-card">
+                        <a href="{{this.url}}" target="_blank">
+                            <i class="{{getIconClass this.icon this.label}}"></i>
+                            <span class="icon-label">{{this.label}}</span>
+                        </a>
+                    </div>
+                    {{/each}}
+                {{/if}}
+                
+                {{#if communication}}
+                    {{#each communication}}
+                    <div class="icon-card">
+                        <a href="{{this.url}}" target="_blank">
+                            <i class="{{getIconClass this.icon this.label}}"></i>
+                            <span class="icon-label">{{this.label}}</span>
+                        </a>
+                    </div>
+                    {{/each}}
+                {{/if}}
+
+                {{#if katalog}}
+                <div class="icon-card">
+                    <a href="{{katalog.url}}" target="_blank">
+                        <i class="fas fa-book"></i>
+                        <span class="icon-label">{{katalog.label}}</span>
+                    </a>
+                </div>
+                {{/if}}
+                
+                {{#if iban}}
+                <div class="icon-card">
+                    <a href="#" onclick="showBankPopup(event)">
+                        <i class="fas fa-university"></i>
+                        <span class="icon-label">{{iban.label}}</span>
+                    </a>
+                </div>
+                {{/if}}
+                
+                {{#if tax}}
+                <div class="icon-card">
+                    <a href="#" onclick="showTaxPopup(event)">
+                        <i class="fas fa-file-invoice"></i>
+                        <span class="icon-label">{{tax.label}}</span>
+                    </a>
+                </div>
+                {{/if}}
+                
+                {{#if about}}
+                <div class="icon-card">
+                    <a href="#" onclick="showAboutPopup(event)">
+                        <i class="fas fa-info-circle"></i>
+                        <span class="icon-label">{{about.label}}</span>
+                    </a>
+                </div>
+                {{/if}}
             </div>
 
             <!-- Firma Logosu -->
@@ -407,22 +470,22 @@ export const monotoneTemplate = `
                     {{#each (parseBankAccounts iban.value) as |bank|}}
                         <div class="bank-card">
                             <div style="display: flex; align-items: center; margin-bottom: 15px;">
-                                {{#if bank.bank_logo}}
-                                    <img src="{{bank.bank_logo}}" alt="{{bank.bank_label}}" style="width: 36px; height: 36px; object-fit: contain; margin-right: 15px; filter: grayscale(100%);">
+                                {{#if bank.banka_logo}}
+                                    <img src="{{bank.banka_logo}}" alt="{{bank.banka_adi}}" style="width: 36px; height: 36px; object-fit: contain; margin-right: 15px; filter: grayscale(100%);">
                                 {{/if}}
                                 <div>
-                                    <div style="font-weight: 400; font-size: 1rem; color: #CCCCCC;">{{bank.bank_label}}</div>
-                                    <div style="color: #888888; font-size: 0.85rem; font-weight: 300;">{{bank.account_holder}}</div>
+                                    <div style="font-weight: 400; font-size: 1rem; color: #CCCCCC;">{{bank.banka_adi}}</div>
+                                    <div style="color: #888888; font-size: 0.85rem; font-weight: 300;">{{bank.hesap_sahibi}}</div>
                                 </div>
                             </div>
-                            {{#each bank.accounts}}
+                            {{#each bank.hesaplar}}
                                 <div style="display: flex; align-items: center; margin-bottom: 10px;">
                                     <span style="display: inline-flex; width: 32px; height: 32px; border-radius: 0; background: #CCCCCC; color: #FFFFFF; font-weight: 400; align-items: center; justify-content: center; margin-right: 10px; font-size: 0.8rem;">
-                                        {{#if this.currency}}
-                                            {{#ifEquals this.currency "TL"}}₺{{/ifEquals}}
-                                            {{#ifEquals this.currency "TRY"}}₺{{/ifEquals}}
-                                            {{#ifEquals this.currency "USD"}}&#36;{{/ifEquals}}
-                                            {{#ifEquals this.currency "EUR"}}€{{/ifEquals}}
+                                        {{#if this.para_birimi}}
+                                            {{#ifEquals this.para_birimi "TL"}}₺{{/ifEquals}}
+                                            {{#ifEquals this.para_birimi "TRY"}}₺{{/ifEquals}}
+                                            {{#ifEquals this.para_birimi "USD"}}&#36;{{/ifEquals}}
+                                            {{#ifEquals this.para_birimi "EUR"}}€{{/ifEquals}}
                                         {{else}}
                                             ₺
                                         {{/if}}
@@ -468,7 +531,6 @@ export const monotoneTemplate = `
                 btn.style.background = btn.style.background.replace('#48bb78', '');
             }, 1000);
         });
-    };
     }
     function showBankPopup(e) {
         e.preventDefault();

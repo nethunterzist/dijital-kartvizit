@@ -29,6 +29,12 @@ export default function FirmalarPage() {
   const [deleteLoading, setDeleteLoading] = useState<number | null>(null);
   const itemsPerPage = 10;
   
+  // Detaylı console log'ları
+  console.log('🔍 FirmalarPage render edildi');
+  console.log('📊 Firmalar state:', { firmalar, isLoading, isError });
+  console.log('🔢 Firmalar array length:', Array.isArray(firmalar) ? firmalar.length : 'Not array');
+  console.log('📋 Firmalar data type:', typeof firmalar);
+  
   // Memoized filtered data for better performance
   const filteredFirmalar = useMemo(() => {
     if (!firmalar || !Array.isArray(firmalar)) return [];
@@ -173,7 +179,7 @@ export default function FirmalarPage() {
               <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
                 <span className="flex items-center">
                   <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-                  Toplam: {firmalar.length}
+                  Toplam: {Array.isArray(firmalar) ? firmalar.length : 0}
                 </span>
                 {searchTerm && (
                   <span className="flex items-center">
@@ -373,8 +379,27 @@ export default function FirmalarPage() {
                       Önceki
                     </button>
                     
-                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    {Array.from({ length: totalPages }, (_, i) => {
                       const page = i + 1;
+                      
+                      // Sadece mevcut sayfanın etrafındaki sayfaları göster
+                      const showPage = 
+                        page === 1 || 
+                        page === totalPages || 
+                        (page >= currentPage - 2 && page <= currentPage + 2);
+                      
+                      if (!showPage) {
+                        // Boşluk için ... göster
+                        if (page === currentPage - 3 || page === currentPage + 3) {
+                          return (
+                            <span key={page} className="px-3 py-2 text-sm text-gray-500">
+                              ...
+                            </span>
+                          );
+                        }
+                        return null;
+                      }
+                      
                       return (
                         <button
                           key={page}

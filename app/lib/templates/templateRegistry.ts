@@ -181,15 +181,6 @@ export const TEMPLATES: TemplateInfo[] = [
     features: ['Kırmızı Tema', 'Güçlü', 'Etkileyici', 'Koyu']
   },
   {
-    id: 22,
-    name: 'Retro Dalga',
-    description: '80\'ler synthwave - Neon estetiği ve fütüristik atmosfer',
-    preview: '/img/template-previews/retro-dalga.jpg',
-    style: 'tech',
-    colorScheme: 'Neon Pembe & Cyan',
-    features: ['Synthwave', 'Neon Efektler', 'Retro Fütürizm', 'Parlama']
-  },
-  {
     id: 23,
     name: 'Doğal Esinti',
     description: 'Organik ve ekolojik - Sürdürülebilirlik odaklı tasarım',
@@ -197,15 +188,6 @@ export const TEMPLATES: TemplateInfo[] = [
     style: 'nature',
     colorScheme: 'Yeşil & Toprak Tonları',
     features: ['Organik', 'Ekolojik', 'Dokulu Arka Plan', 'Doğal']
-  },
-  {
-    id: 24,
-    name: 'Brütalist Beton',
-    description: 'Cesur minimalizm - Ham ve fonksiyonel tasarım',
-    preview: '/img/template-previews/brutalist-beton.jpg',
-    style: 'minimal',
-    colorScheme: 'Siyah & Beyaz',
-    features: ['Brütalist', 'Keskin Köşeler', 'Kalın Kenarlıklar', 'Ham']
   },
   {
     id: 25,
@@ -260,15 +242,6 @@ export const TEMPLATES: TemplateInfo[] = [
     style: 'minimal',
     colorScheme: 'Taş Grisi & Mavi-Gri',
     features: ['Zen', 'Asimetrik', 'Negatif Alan', 'Sakin']
-  },
-  {
-    id: 31,
-    name: 'Kod Satırı',
-    description: 'Hacker estetiği - Monospace font ve yanıp sönen imleç',
-    preview: '/img/template-previews/kod-satiri.jpg',
-    style: 'tech',
-    colorScheme: 'GitHub Siyahı & Yeşil',
-    features: ['Hacker', 'Monospace', 'Yanıp Sönen İmleç', 'Geliştirici']
   },
   {
     id: 32,
@@ -342,24 +315,6 @@ export const TEMPLATES: TemplateInfo[] = [
     colorScheme: 'Derin Okyanus & Köpük Beyazı',
     features: ['Okyanus', 'Kabarcık Animasyonu', 'Sakin', 'Akışkan']
   },
-  {
-    id: 40,
-    name: 'Kırsal Ahşap',
-    description: 'Rustik samimiyet - Ahşap dokusu ve damgalı font',
-    preview: '/img/template-previews/kirsal-ahsap.jpg',
-    style: 'nature',
-    colorScheme: 'Koyu Ahşap & Beyaz',
-    features: ['Rustik', 'Ahşap Dokusu', 'Samimi', 'Doğal']
-  },
-  {
-    id: 41,
-    name: 'Gökkuşağı Geçişi',
-    description: 'Dahil edici modern - Animasyonlu gökkuşağı gradienti',
-    preview: '/img/template-previews/gokkusagi-gecisi.jpg',
-    style: 'colorful',
-    colorScheme: 'Gökkuşağı Renkleri',
-    features: ['Gökkuşağı', 'Dahil Edici', 'Animasyonlu', 'Modern']
-  }
 ];
 
 export const getTemplateById = (id: number): TemplateInfo | undefined => {

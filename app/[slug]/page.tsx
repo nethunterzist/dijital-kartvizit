@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import handlebars from 'handlebars';
 import { cardTemplate } from '../lib/cardTemplate';
-import { logger } from '../lib/logger';
+import { getServerBaseUrl } from '../lib/utils/getBaseUrl';
 
 // Handlebars helper fonksiyonunu kaydet
 handlebars.registerHelper('ifEquals', function(this: any, arg1: any, arg2: any, options: any) {
@@ -14,13 +14,12 @@ handlebars.registerHelper('parseBankAccounts', function(jsonStr: string) {
     try { return JSON.parse(jsonStr); } catch { return []; }
 });
 
-// Icon mapping helper'ı - resim yolunu Font Awesome class'ına çevir
+// Icon mapping helper'ı - label'a göre Font Awesome class döndürür
 handlebars.registerHelper('getIconClass', function(iconPath: string, label: string) {
-    if (!iconPath) return 'fas fa-circle';
-    
-    // Label'a göre mapping
+    // Önce label'a göre mapping yap (ana kontrol)
     const labelLower = (label || '').toLowerCase();
     
+    // Sosyal medya ikonları
     if (labelLower.includes('instagram')) return 'fab fa-instagram';
     if (labelLower.includes('facebook')) return 'fab fa-facebook';
     if (labelLower.includes('twitter')) return 'fab fa-twitter';
@@ -29,35 +28,45 @@ handlebars.registerHelper('getIconClass', function(iconPath: string, label: stri
     if (labelLower.includes('tiktok')) return 'fab fa-tiktok';
     if (labelLower.includes('whatsapp')) return 'fab fa-whatsapp';
     if (labelLower.includes('telegram')) return 'fab fa-telegram';
-    if (labelLower.includes('telefon') || labelLower.includes('phone')) return 'fas fa-phone';
-    if (labelLower.includes('e-posta') || labelLower.includes('email') || labelLower.includes('mail')) return 'fas fa-envelope';
+    
+    // İletişim ikonları
+    if (labelLower.includes('telefon') || labelLower.includes('phone') || labelLower.includes('gsm')) return 'fas fa-phone';
+    if (labelLower.includes('e-posta') || labelLower.includes('email') || labelLower.includes('mail') || labelLower.includes('eposta')) return 'fas fa-envelope';
     if (labelLower.includes('website') || labelLower.includes('web')) return 'fas fa-globe';
     if (labelLower.includes('harita') || labelLower.includes('map') || labelLower.includes('adres')) return 'fas fa-map-marker-alt';
     
-    // Icon path'e göre mapping (fallback)
-    if (iconPath.includes('instagram')) return 'fab fa-instagram';
-    if (iconPath.includes('facebook')) return 'fab fa-facebook';
-    if (iconPath.includes('twitter')) return 'fab fa-twitter';
-    if (iconPath.includes('linkedin')) return 'fab fa-linkedin';
-    if (iconPath.includes('youtube')) return 'fab fa-youtube';
-    if (iconPath.includes('tiktok')) return 'fab fa-tiktok';
-    if (iconPath.includes('wp') || iconPath.includes('whatsapp')) return 'fab fa-whatsapp';
-    if (iconPath.includes('telegram')) return 'fab fa-telegram';
-    if (iconPath.includes('tel') || iconPath.includes('phone')) return 'fas fa-phone';
-    if (iconPath.includes('mail')) return 'fas fa-envelope';
-    if (iconPath.includes('web')) return 'fas fa-globe';
-    if (iconPath.includes('adres') || iconPath.includes('map')) return 'fas fa-map-marker-alt';
+    // Özel alanlar
+    if (labelLower.includes('vergi') || labelLower.includes('tax')) return 'fas fa-file-invoice';
+    if (labelLower.includes('hakkımızda') || labelLower.includes('hakkinda') || labelLower.includes('about')) return 'fas fa-info-circle';
+    if (labelLower.includes('banka') || labelLower.includes('iban') || labelLower.includes('hesap')) return 'fas fa-university';
+    if (labelLower.includes('katalog') || labelLower.includes('pdf')) return 'fas fa-book';
     
-    return 'fas fa-circle'; // Varsayılan icon
+    // IconPath varsa ona göre mapping (fallback)
+    if (iconPath) {
+        const pathLower = iconPath.toLowerCase();
+        if (pathLower.includes('instagram')) return 'fab fa-instagram';
+        if (pathLower.includes('facebook')) return 'fab fa-facebook';
+        if (pathLower.includes('twitter')) return 'fab fa-twitter';
+        if (pathLower.includes('linkedin')) return 'fab fa-linkedin';
+        if (pathLower.includes('youtube')) return 'fab fa-youtube';
+        if (pathLower.includes('tiktok')) return 'fab fa-tiktok';
+        if (pathLower.includes('wp') || pathLower.includes('whatsapp')) return 'fab fa-whatsapp';
+        if (pathLower.includes('telegram')) return 'fab fa-telegram';
+        if (pathLower.includes('tel') || pathLower.includes('phone')) return 'fas fa-phone';
+        if (pathLower.includes('mail')) return 'fas fa-envelope';
+        if (pathLower.includes('web')) return 'fas fa-globe';
+        if (pathLower.includes('adres') || pathLower.includes('map')) return 'fas fa-map-marker-alt';
+    }
+    
+    // Varsayılan icon (en son)
+    return 'fas fa-circle';
 });
 
 // Dinamik metadatayı oluşturan fonksiyon
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
     const { slug } = params;
     try {
-        const baseUrl = process.env.VERCEL_URL 
-            ? `https://${process.env.VERCEL_URL}`
-            : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+        const baseUrl = getServerBaseUrl();
         const apiUrl = `${baseUrl}/api/sayfalar/${slug}`;
         const response = await fetch(apiUrl, { 
             cache: 'no-store', 
@@ -85,7 +94,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
             },
         };
     } catch (error) {
-        logger.error('Metadata oluşturulurken hata', { error, slug });
+        console.error('Metadata oluşturulurken hata', { error, slug });
         return {
             title: 'Kartvizit Bulunamadı',
             description: 'İstediğiniz kartvizit sayfası bulunamadı.'
@@ -97,13 +106,19 @@ export default async function KartvizitPage({ params }: { params: { slug: string
     const { slug } = params;
     
     try {
-        // API'den veriyi çek
-        const baseUrl = process.env.VERCEL_URL 
-            ? `https://${process.env.VERCEL_URL}`
-            : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+        console.log('🔍 ===== KARTVIZIT SAYFASI BAŞLADI =====');
+        console.log('📋 Slug:', slug);
+        console.log('⏰ Timestamp:', new Date().toISOString());
+        
+        // API'den veriyi çek - dinamik port algılama
+        const baseUrl = getServerBaseUrl();
         const apiUrl = `${baseUrl}/api/sayfalar/${slug}`;
         
+        console.log('🌐 API URL oluşturuluyor:', apiUrl);
+        console.log('🔗 Base URL:', baseUrl);
+        
         // API'den JSON verisi al
+        console.log('📡 API isteği gönderiliyor...');
         const response = await fetch(apiUrl, { 
             cache: 'no-store', 
             headers: { 
@@ -111,23 +126,39 @@ export default async function KartvizitPage({ params }: { params: { slug: string
             } 
         });
         
+        console.log('📥 API yanıtı alındı');
+        console.log('📊 Response Status:', response.status);
+        console.log('📋 Response Headers:', Object.fromEntries(response.headers.entries()));
+        
         if (!response.ok) {
+            console.log('❌ API yanıtı başarısız, notFound() çağrılıyor');
             return notFound();
         }
 
         // JSON verisini parse et
+        console.log('🔄 JSON parse ediliyor...');
         const data = await response.json();
-        logger.info('API JSON verisi alındı', { slug, templateId: data.template_id });
+        console.log('✅ API JSON verisi alındı');
+        console.log('📊 Data:', data);
+        console.log('🎨 Template ID:', data.template_id);
         
         // Template ID'ye göre doğru template'i al
+        console.log('🎨 Template işleme başlıyor...');
+        console.log('🔍 Template ID:', data.template_id || 2);
+        
         const { getTemplateByType } = await import('@/app/lib/cardTemplate');
         const selectedTemplate = getTemplateByType(data.template_id || 2);
         
+        console.log('✅ Template alındı, uzunluk:', selectedTemplate.length);
+        console.log('📄 Template preview:', selectedTemplate.substring(0, 200) + '...');
+        
         // Handlebars ile template'i derle
+        console.log('🔧 Handlebars template derleniyor...');
         const compiledTemplate = handlebars.compile(selectedTemplate);
         
         // Template'i veri ile doldur
-        const html = compiledTemplate({
+        console.log('📝 Template veri ile dolduruluyor...');
+        const templateData = {
             ...data,
             rehbereEkleButonu: data && `
                 <div style="display: flex; flex-direction: column; align-items: center; margin-top: 8px;">
@@ -138,14 +169,22 @@ export default async function KartvizitPage({ params }: { params: { slug: string
                     </a>
                 </div>
             `
-        });
+        };
+        
+        console.log('📊 Template data:', templateData);
+        
+        const html = compiledTemplate(templateData);
+        
+        console.log('✅ HTML oluşturuldu, uzunluk:', html.length);
+        console.log('📄 HTML preview:', html.substring(0, 300) + '...');
+        console.log('🏁 ===== KARTVIZIT SAYFASI TAMAMLANDI =====');
         
         // HTML'i döndür
         return (
             <div dangerouslySetInnerHTML={{ __html: html }} />
         );
     } catch (error) {
-        logger.error('Kartvizit sayfası oluşturulurken hata', { error, slug });
+        console.error('Kartvizit sayfası oluşturulurken hata', { error, slug });
         return notFound();
     }
 }

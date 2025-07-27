@@ -87,10 +87,20 @@ export async function GET(
 ) {
   try {
     const slug = params.slug;
+    console.log('🔍 ===== SAYFA API BAŞLADI =====');
+    console.log('📋 Request URL:', request.url);
+    console.log('📋 Slug:', slug);
+    console.log('📋 Headers:', Object.fromEntries(request.headers.entries()));
+    console.log('📋 Method:', request.method);
+    console.log('⏰ Timestamp:', new Date().toISOString());
+    
     logger.info(`[${slug}] HTML/JSON içeriği getirme isteği alındı`, { slug });
     
-    // Firma verisini ilişkili verilerle birlikte çek (Yeni normalize edilmiş yapı)
-    const firma = await prisma.firmalar.findFirst({ 
+    console.log('💾 Database sorgusu başlıyor...');
+    console.log('🔍 Aranan slug:', slug);
+    
+    // Firma verisini ilişkili verilerle birlikte çek (Hem eski hem yeni yapıyı destekle)
+    const firma = await prisma.firmalar.findFirst({
       where: { slug },
       include: {
         iletisim_bilgileri: {
@@ -113,14 +123,33 @@ export async function GET(
       }
     });
     
+    console.log('📊 Database sorgu sonucu:');
+    console.log('  - Firma bulundu mu?', !!firma);
+    if (firma) {
+      console.log('  - Firma ID:', firma.id);
+      console.log('  - Firma Adı:', firma.firma_adi);
+      console.log('  - Slug:', firma.slug);
+      console.log('  - Template ID:', firma.template_id);
+      console.log('  - İletişim bilgileri sayısı:', firma.iletisim_bilgileri?.length || 0);
+      console.log('  - Sosyal medya hesapları sayısı:', firma.sosyal_medya_hesaplari?.length || 0);
+      console.log('  - Banka hesapları sayısı:', firma.banka_hesaplari?.length || 0);
+      console.log('  - İletişim bilgileri detay:', firma.iletisim_bilgileri);
+      console.log('  - Sosyal medya hesapları detay:', firma.sosyal_medya_hesaplari);
+      console.log('  - Banka hesapları detay:', firma.banka_hesaplari);
+    }
+    
     if (!firma) {
+      console.log('❌ Firma bulunamadı, 404 döndürülüyor');
       return NextResponse.json({ error: 'Firma bulunamadı' }, { status: 404 });
     }
+
+    console.log('🔄 Veri işleme başlıyor...');
 
     // Website bilgilerini iletişim bilgilerinden çek
     let websiteArray: string[] = [];
     const websiteItems = firma.iletisim_bilgileri.filter(item => item.tip === 'website');
     websiteArray = websiteItems.map(item => item.deger);
+    console.log('🌐 Website array:', websiteArray);
 
     // Sosyal medya verilerini yeni normalize edilmiş yapıdan çek
     let socialMediaArray: any[] = [];
@@ -133,6 +162,7 @@ export async function GET(
         platform: item.platform
       });
     });
+    console.log('📱 Social media array:', socialMediaArray);
 
     // İletişim verilerini yeni normalize edilmiş yapıdan çek
     let communicationArray: any[] = [];
@@ -146,6 +176,7 @@ export async function GET(
         tip: item.tip
       });
     });
+    console.log('📞 Communication array:', communicationArray);
 
     // Banka hesaplarını yeni normalize edilmiş yapıdan çek
     let bankaHesaplari: any[] = [];
@@ -161,35 +192,46 @@ export async function GET(
         }))
       });
     });
+    console.log('🏦 Banka hesapları array:', bankaHesaplari);
 
     // Accept header'ına göre response tipi belirle
     const accept = request.headers.get('accept') || '';
+    console.log('📤 Response tipi belirleniyor...');
+    console.log('🔍 Accept header:', accept);
+    
     if (accept.includes('application/json') || accept.includes('*/')) {
-      // JSON response
-      return NextResponse.json({
+      console.log('📄 JSON response döndürülüyor');
+      
+      const responseData = {
         firma_adi: firma.firma_adi,
         yetkili_adi: firma.yetkili_adi,
         yetkili_pozisyon: firma.yetkili_pozisyon,
         slug: firma.slug,
         template_id: firma.template_id || 2,
-        website: websiteArray,
+        website: websiteArray.length > 0 ? websiteArray : [],
         firma_logo: firma.firma_logo,
-        social_media: socialMediaArray,
-        communication: communicationArray,
+        social_media: socialMediaArray.length > 0 ? socialMediaArray : [],
+        communication: communicationArray.length > 0 ? communicationArray : [],
         firma_hakkinda: firma.firma_hakkinda,
-        firma_hakkinda_baslik: firma.firma_hakkinda_baslik,
-        katalog: firma.katalog ? { icon: EXTRA_META.katalog.icon, label: EXTRA_META.katalog.label, url: firma.katalog } : undefined,
-        iban: bankaHesaplari.length > 0 ? { icon: EXTRA_META.iban.icon, label: EXTRA_META.iban.label, value: bankaHesaplari } : undefined,
+        firma_hakkinda_baslik: firma.firma_hakkinda_baslik || 'Hakkımızda',
+        katalog: firma.katalog ? { icon: EXTRA_META.katalog.icon, label: EXTRA_META.katalog.label, url: firma.katalog } : null,
+        iban: bankaHesaplari.length > 0 ? { icon: EXTRA_META.iban.icon, label: EXTRA_META.iban.label, value: JSON.stringify(bankaHesaplari) } : null,
         tax: (firma.firma_unvan || firma.firma_vergi_no || firma.vergi_dairesi) ? {
           icon: EXTRA_META.tax.icon,
           label: EXTRA_META.tax.label,
           firma_unvan: firma.firma_unvan,
           firma_vergi_no: firma.firma_vergi_no,
           vergi_dairesi: firma.vergi_dairesi
-        } : undefined,
-        about: firma.firma_hakkinda ? { icon: EXTRA_META.about.icon, label: EXTRA_META.about.label, content: firma.firma_hakkinda } : undefined,
+        } : null,
+        about: firma.firma_hakkinda ? { icon: EXTRA_META.about.icon, label: EXTRA_META.about.label, content: firma.firma_hakkinda } : null,
         profil_foto: firma.profil_foto
-      });
+      };
+      
+      console.log('✅ Final JSON response data:', responseData);
+      console.log('🏁 ===== SAYFA API TAMAMLANDI (JSON) =====');
+      
+      // JSON response - boş veriler için fallback'ler ekle
+      return NextResponse.json(responseData);
     } else {
       // HTML response
       const compiledTemplate = Handlebars.compile(pageTemplate);

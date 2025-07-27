@@ -43,3 +43,101 @@
 
 
 [31mThe provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.[39m
+2025-07-26 14:31:09:319 [31merror[39m: [31mFirmalar getirilirken hata: [39m
+[31m[31mInvalid [1m`prisma.firmalar.findMany()`[22m invocation:[31m[39m
+
+
+[31mThe provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.[39m
+2025-07-26 14:31:09:319 [31merror[39m: [31mFirmalar getirilirken hata: [39m
+[31m[31mInvalid [1m`prisma.firmalar.findMany()`[22m invocation:[31m[39m
+
+
+[31mThe provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.[39m
+2025-07-26 14:31:28:3128 [31merror[39m: [31mFirmalar getirilirken hata: [39m
+[31m[31mInvalid [1m`prisma.firmalar.findMany()`[22m invocation:[31m[39m
+
+
+[31mThe provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.[39m
+2025-07-26 14:31:28:3128 [31merror[39m: [31mFirmalar getirilirken hata: [39m
+[31m[31mInvalid [1m`prisma.firmalar.findMany()`[22m invocation:[31m[39m
+
+
+[31mThe provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.[39m
+2025-07-26 14:31:30:3130 [31merror[39m: [31mFirmalar getirilirken hata: [39m
+[31m[31mInvalid [1m`prisma.firmalar.findMany()`[22m invocation:[31m[39m
+
+
+[31mThe provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.[39m
+2025-07-26 14:32:03:323 [31merror[39m: [31mFirmalar getirilirken hata: [39m
+[31m[31mInvalid [1m`prisma.firmalar.findMany()`[22m invocation:[31m[39m
+
+
+[31mThe provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.[39m
+2025-07-26 14:32:03:323 [31merror[39m: [31mFirmalar getirilirken hata: [39m
+[31m[31mInvalid [1m`prisma.firmalar.findMany()`[22m invocation:[31m[39m
+
+
+[31mThe provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.[39m
+2025-07-26 14:33:00:330 [31merror[39m: [31mFirmalar getirilirken hata: [39m
+[31m[31mInvalid [1m`prisma.firmalar.findMany()`[22m invocation:[31m[39m
+
+
+[31mThe provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.[39m
+2025-07-26 14:34:04:344 [31merror[39m: [31mFirmalar getirilirken hata: [39m
+[31m[31mInvalid [1m`prisma.firmalar.findMany()`[22m invocation:[31m[39m
+
+
+[31mThe provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.[39m
+2025-07-26 14:34:04:344 [31merror[39m: [31mFirmalar getirilirken hata: [39m
+[31m[31mInvalid [1m`prisma.firmalar.findMany()`[22m invocation:[31m[39m
+
+
+[31mThe provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.[39m
+2025-07-26 14:34:04:344 [31merror[39m: [31mFirmalar getirilirken hata: [39m
+[31m[31mInvalid [1m`prisma.firmalar.findMany()`[22m invocation:[31m[39m
+
+
+[31mThe provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.[39m
+2025-07-26 14:34:05:345 [31merror[39m: [31mFirmalar getirilirken hata: [39m
+[31m[31mInvalid [1m`prisma.firmalar.findMany()`[22m invocation:[31m[39m
+
+
+[31mThe provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.[39m
+2025-07-26 14:34:13:3413 [31merror[39m: [31mFirmalar getirilirken hata: [39m
+[31m[31mInvalid [1m`prisma.firmalar.findMany()`[22m invocation:[31m[39m
+
+
+[31mThe provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.[39m
+2025-07-27 01:07:50:750 [31merror[39m: [31mPOST method error: authService.validateSession is not a function[39m
+2025-07-27 01:26:21:2621 [31merror[39m: [31mPOST method error: authService.validateSession is not a function[39m
+2025-07-27 01:36:38:3638 [31merror[39m: [31mPOST method error: authService.validateSession is not a function[39m
+2025-07-27 01:38:24:3824 [31merror[39m: [31mPOST method error: formDataParser.parseBasicData is not a function[39m
+2025-07-27 01:39:40:3940 [31merror[39m: [31mPOST method error: formDataParser.parseRelationalData is not a function[39m
+2025-07-27 01:39:44:3944 [31merror[39m: [31mPOST method error: formDataParser.parseRelationalData is not a function[39m
+2025-07-27 01:40:55:4055 [31merror[39m: [31mPOST method error: fileUploadService.processUploads is not a function[39m
+2025-07-27 01:42:30:4230 [31merror[39m: [31mPOST method error: firmaService.createFirma is not a function[39m
+2025-07-27 01:43:36:4336 [31merror[39m: [31mPOST method error: quantumCacheService.quantumInvalidate is not a function[39m
+2025-07-27 01:43:44:4344 [31merror[39m: [31mPOST method error: quantumCacheService.quantumInvalidate is not a function[39m
+2025-07-27 01:44:54:4454 [31merror[39m: [31mPOST method error: postProcessingService.processNewFirma is not a function[39m
+2025-07-27 01:44:54:4454 [31merror[39m: [31m💥 Quantum cache invalidation failed (non-critical): Cannot read properties of undefined (reading 'length')[39m
+2025-07-27 01:46:41:4641 [31merror[39m: [31m💥 Quantum cache invalidation failed (non-critical): Cannot read properties of undefined (reading 'length')[39m
+2025-07-27 14:09:40:940 [31merror[39m: [31mKartvizit sayfası oluşturulurken hata[39m
+2025-07-27 14:09:40:940 [31merror[39m: [31mMetadata oluşturulurken hata[39m
+2025-07-27 14:11:09:119 [31merror[39m: [31mKartvizit sayfası oluşturulurken hata[39m
+2025-07-27 14:11:09:119 [31merror[39m: [31mMetadata oluşturulurken hata[39m
+2025-07-27 14:11:09:119 [31merror[39m: [31mKartvizit sayfası oluşturulurken hata[39m
+2025-07-27 14:11:09:119 [31merror[39m: [31mMetadata oluşturulurken hata[39m
+2025-07-27 14:11:41:1141 [31merror[39m: [31mKartvizit sayfası oluşturulurken hata[39m
+2025-07-27 14:11:41:1141 [31merror[39m: [31mMetadata oluşturulurken hata[39m
+2025-07-27 14:11:41:1141 [31merror[39m: [31mKartvizit sayfası oluşturulurken hata[39m
+2025-07-27 14:11:41:1141 [31merror[39m: [31mMetadata oluşturulurken hata[39m
+2025-07-27 14:12:13:1213 [31merror[39m: [31mKartvizit sayfası oluşturulurken hata[39m
+2025-07-27 14:12:13:1213 [31merror[39m: [31mMetadata oluşturulurken hata[39m
+2025-07-27 14:12:13:1213 [31merror[39m: [31mKartvizit sayfası oluşturulurken hata[39m
+2025-07-27 14:12:13:1213 [31merror[39m: [31mMetadata oluşturulurken hata[39m
+2025-07-27 14:12:30:1230 [31merror[39m: [31mKartvizit sayfası oluşturulurken hata[39m
+2025-07-27 14:12:30:1230 [31merror[39m: [31mMetadata oluşturulurken hata[39m
+2025-07-27 14:12:36:1236 [31merror[39m: [31mMetadata oluşturulurken hata[39m
+2025-07-27 14:12:36:1236 [31merror[39m: [31mKartvizit sayfası oluşturulurken hata[39m
+2025-07-27 14:36:32:3632 [31merror[39m: [31mİlçeler getirilirken hata oluştu: Dynamic server usage: Route /api/ilceler couldn't be rendered statically because it used `nextUrl.searchParams`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error[39m
+2025-07-27 14:37:42:3742 [31merror[39m: [31mİlçeler getirilirken hata oluştu: Dynamic server usage: Route /api/ilceler couldn't be rendered statically because it used `nextUrl.searchParams`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error[39m

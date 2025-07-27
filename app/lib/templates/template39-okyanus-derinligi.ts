@@ -600,22 +600,22 @@ export const okyanusDerinligiTemplate = `
                     {{#each (parseBankAccounts iban.value) as |bank|}}
                         <div class="bank-card">
                             <div style="display: flex; align-items: center; margin-bottom: 16px;">
-                                {{#if bank.bank_logo}}
-                                    <img src="{{bank.bank_logo}}" alt="{{bank.bank_label}}" style="width: 40px; height: 40px; object-fit: contain; margin-right: 16px;">
+                                {{#if bank.banka_logo}}
+                                    <img src="{{bank.banka_logo}}" alt="{{bank.banka_adi}}" style="width: 40px; height: 40px; object-fit: contain; margin-right: 16px;">
                                 {{/if}}
                                 <div>
-                                    <div style="font-weight: 600; font-size: 1.1rem; color: #40E0FF;">{{bank.bank_label}}</div>
-                                    <div style="color: #E8F4F8; font-size: 0.9rem;">{{bank.account_holder}}</div>
+                                    <div style="font-weight: 600; font-size: 1.1rem; color: #40E0FF;">{{bank.banka_adi}}</div>
+                                    <div style="color: #E8F4F8; font-size: 0.9rem;">{{bank.hesap_sahibi}}</div>
                                 </div>
                             </div>
-                            {{#each bank.accounts}}
+                            {{#each bank.hesaplar}}
                                 <div style="display: flex; align-items: center; margin-bottom: 12px;">
                                     <span style="display: inline-flex; width: 35px; height: 35px; border-radius: 50%; background: linear-gradient(135deg, #40E0FF, #1E90FF); color: #0B1426; font-weight: 600; align-items: center; justify-content: center; margin-right: 12px; font-size: 0.9rem;">
-                                        {{#if this.currency}}
-                                            {{#ifEquals this.currency "TL"}}₺{{/ifEquals}}
-                                            {{#ifEquals this.currency "TRY"}}₺{{/ifEquals}}
-                                            {{#ifEquals this.currency "USD"}}&#36;{{/ifEquals}}
-                                            {{#ifEquals this.currency "EUR"}}€{{/ifEquals}}
+                                        {{#if this.para_birimi}}
+                                            {{#ifEquals this.para_birimi "TL"}}₺{{/ifEquals}}
+                                            {{#ifEquals this.para_birimi "TRY"}}₺{{/ifEquals}}
+                                            {{#ifEquals this.para_birimi "USD"}}&#36;{{/ifEquals}}
+                                            {{#ifEquals this.para_birimi "EUR"}}€{{/ifEquals}}
                                         {{else}}
                                             ₺
                                         {{/if}}

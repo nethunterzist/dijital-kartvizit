@@ -5,9 +5,9 @@ import { RateLimiterMemory } from "rate-limiter-flexible";
 // Rate limiter configurations
 const apiLimiter = new RateLimiterMemory({
   keyPrefix: 'api',
-  points: 100, // Number of requests
+  points: 1000, // Number of requests (increased from 100)
   duration: 60, // Per 60 seconds (1 minute)
-  blockDuration: 60, // Block for 1 minute if exceeded
+  blockDuration: 30, // Block for 30 seconds if exceeded (reduced from 60)
 });
 
 const authLimiter = new RateLimiterMemory({
@@ -43,44 +43,82 @@ async function rateLimit(req: any, limiter: RateLimiterMemory, identifier: strin
   }
 }
 
-export default withAuth(
-  async function middleware(req) {
-    const ip = req.ip || req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'anonymous';
-    const pathname = req.nextUrl.pathname;
+async function middleware(req: any) {
+  const ip = req.ip || req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'anonymous';
+  const pathname = req.nextUrl.pathname;
 
-    // HTTPS Redirect (production only)
-    if (process.env.NODE_ENV === 'production') {
-      const isHttps = req.headers.get('x-forwarded-proto') === 'https' || 
-                     req.headers.get('x-forwarded-ssl') === 'on' ||
-                     req.nextUrl.protocol === 'https:';
-      
-      if (!isHttps && !pathname.startsWith('/api/health')) {
-        const httpsUrl = new URL(req.url);
-        httpsUrl.protocol = 'https:';
-        return NextResponse.redirect(httpsUrl, 301);
-      }
-    }
-
-    // Rate limiting for API routes
+  // Public API endpoints that don't require authentication
+  const publicApiEndpoints = [
+    '/api/firmalar', // GET requests for listing firms
+    '/api/sayfalar', // GET requests for firm pages
+    '/api/health',
+    '/api/monitoring'
+  ];
+  
+  // Check if this is a public API endpoint with GET method
+  if (req.method === 'GET' && publicApiEndpoints.some(endpoint => pathname.startsWith(endpoint))) {
+    // Still apply rate limiting but skip auth
     if (pathname.startsWith('/api/')) {
       const rateLimitResponse = await rateLimit(req, apiLimiter, ip);
       if (rateLimitResponse) return rateLimitResponse;
     }
-
-    // Stricter rate limiting for auth endpoints
-    if (pathname.startsWith('/api/auth/') || pathname === '/login') {
-      const rateLimitResponse = await rateLimit(req, authLimiter, ip);
-      if (rateLimitResponse) return rateLimitResponse;
-    }
-
     return NextResponse.next();
-  },
-  {
-    pages: {
-      signIn: "/login",
-    },
   }
-)
+
+  // For protected routes, use withAuth
+  if (pathname.startsWith('/admin') || 
+      (pathname.startsWith('/api/') && !publicApiEndpoints.some(endpoint => pathname.startsWith(endpoint)))) {
+    
+    // Apply withAuth for protected routes
+    const authMiddleware = withAuth(
+      async function(req) {
+        // HTTPS Redirect (production only)
+        if (process.env.NODE_ENV === 'production') {
+          const isHttps = req.headers.get('x-forwarded-proto') === 'https' || 
+                         req.headers.get('x-forwarded-ssl') === 'on' ||
+                         req.nextUrl.protocol === 'https:';
+          
+          if (!isHttps && !pathname.startsWith('/api/health')) {
+            const httpsUrl = new URL(req.url);
+            httpsUrl.protocol = 'https:';
+            return NextResponse.redirect(httpsUrl, 301);
+          }
+        }
+
+        // Rate limiting for API routes
+        if (pathname.startsWith('/api/')) {
+          const rateLimitResponse = await rateLimit(req, apiLimiter, ip);
+          if (rateLimitResponse) return rateLimitResponse;
+        }
+
+        // Stricter rate limiting for auth endpoints
+        if (pathname.startsWith('/api/auth/') || pathname === '/login') {
+          const rateLimitResponse = await rateLimit(req, authLimiter, ip);
+          if (rateLimitResponse) return rateLimitResponse;
+        }
+
+        return NextResponse.next();
+      },
+      {
+        pages: {
+          signIn: "/login",
+        },
+      }
+    );
+    
+    return authMiddleware(req, {} as any);
+  }
+
+  // For other routes, just apply rate limiting
+  if (pathname.startsWith('/api/')) {
+    const rateLimitResponse = await rateLimit(req, apiLimiter, ip);
+    if (rateLimitResponse) return rateLimitResponse;
+  }
+
+  return NextResponse.next();
+}
+
+export default middleware;
 
 export const config = {
   matcher: [

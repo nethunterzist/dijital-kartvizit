@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { getTemplateById } from '@/app/lib/templates/templateRegistry';
 
@@ -69,7 +69,7 @@ const packages: Package[] = [
   }
 ];
 
-export default function OdemePage() {
+function OdemePageContent() {
   const searchParams = useSearchParams();
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState(2);
@@ -523,5 +523,26 @@ export default function OdemePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Loading component
+function OdemePageLoading() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Sayfa yükleniyor...</p>
+      </div>
+    </div>
+  );
+}
+
+// Main export with Suspense wrapper
+export default function OdemePage() {
+  return (
+    <Suspense fallback={<OdemePageLoading />}>
+      <OdemePageContent />
+    </Suspense>
   );
 }

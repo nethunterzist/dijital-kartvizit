@@ -339,21 +339,47 @@ export default function YeniFirmaPage() {
     setError(null);
     setSuccess(null);
 
+    console.log('🚀 FORM SUBMIT BAŞLADI');
+    console.log('📋 Form Event:', e);
+
     try {
-      const formData = new FormData();
+      console.log('✅ Form validasyonu başlıyor...');
+      
       if (!firmaAdi || !slug) {
+        console.log('❌ Validasyon hatası:', { firmaAdi, slug });
         throw new Error('Firma adı ve URL zorunludur');
       }
+      
+      console.log('✅ Temel validasyon geçti');
+      console.log('📊 Form verileri:', {
+        firmaAdi,
+        slug,
+        yetkiliAdi,
+        yetkiliPozisyon,
+        firmaHakkinda,
+        templateId
+      });
       
       // Geçerli banka hesaplarını filtrele
       const validBankAccounts = bankAccounts.filter(
         (account) => account.bank_name && account.account_holder && account.accounts.some(a => a.iban)
       );
+      console.log('🏦 Geçerli banka hesapları:', validBankAccounts);
       
       // Geçerli iletişim hesaplarını filtrele
       const validCommunicationAccounts = communicationAccounts.filter(
         (account) => account.type && account.value
       );
+      console.log('📞 Geçerli iletişim hesapları:', validCommunicationAccounts);
+
+      // Geçerli sosyal medya hesaplarını filtrele
+      const validSocialMediaAccounts = socialMediaAccounts.filter(
+        (account) => account.platform && account.url
+      );
+      console.log('📱 Geçerli sosyal medya hesapları:', validSocialMediaAccounts);
+
+      console.log('📦 FormData oluşturuluyor...');
+      const formData = new FormData();
 
       // Form verilerini oluştur
       formData.append("firmaAdi", firmaAdi);
@@ -365,47 +391,77 @@ export default function YeniFirmaPage() {
       formData.append("vergi_dairesi", vergiDairesi);
       formData.append("templateId", templateId.toString());
 
+      console.log('📝 Temel form alanları eklendi');
+
       // İletişim verilerini API'nin beklediği formatta gönder
       if (validCommunicationAccounts.length > 0) {
-        formData.append("communication_data", JSON.stringify(validCommunicationAccounts));
+        const communicationJson = JSON.stringify(validCommunicationAccounts);
+        formData.append("communication_data", communicationJson);
+        console.log('📞 İletişim verileri eklendi:', communicationJson);
       }
       
       // Sosyal medya hesaplarını API'nin beklediği formatta gönder
-      const validSocialMediaAccounts = socialMediaAccounts.filter(
-        (account) => account.platform && account.url
-      );
       if (validSocialMediaAccounts.length > 0) {
-        formData.append("sosyalMedyaHesaplari", JSON.stringify(validSocialMediaAccounts));
+        const socialMediaJson = JSON.stringify(validSocialMediaAccounts);
+        formData.append("sosyalMedyaHesaplari", socialMediaJson);
+        console.log('📱 Sosyal medya verileri eklendi:', socialMediaJson);
       }
 
       // Banka hesapları
       if (validBankAccounts.length > 0) {
-        formData.append("bankaHesaplari", JSON.stringify(validBankAccounts));
+        const bankAccountsJson = JSON.stringify(validBankAccounts);
+        formData.append("bankaHesaplari", bankAccountsJson);
+        console.log('🏦 Banka hesapları eklendi:', bankAccountsJson);
       }
       
       if (profilFoto) {
         formData.append('profilePhoto', profilFoto);
+        console.log('📸 Profil fotoğrafı eklendi:', { name: profilFoto.name, size: profilFoto.size, type: profilFoto.type });
       }
       
       if (firmaLogo) {
         formData.append('logoFile', firmaLogo);
+        console.log('🏢 Firma logosu eklendi:', { name: firmaLogo.name, size: firmaLogo.size, type: firmaLogo.type });
       }
       
       if (katalogDosya) {
-        // Önce Cloudinary'ye yükle
-        const katalogUrl = await uploadPdfToCloudinary(katalogDosya);
-        formData.append('katalog', katalogUrl);
+        console.log('📄 Katalog PDF yükleniyor...');
+        try {
+          const katalogUrl = await uploadPdfToCloudinary(katalogDosya);
+          formData.append('katalog', katalogUrl);
+          console.log('✅ Katalog PDF yüklendi:', katalogUrl);
+        } catch (pdfError) {
+          console.error('❌ PDF yükleme hatası:', pdfError);
+          throw new Error('Katalog PDF yüklenirken hata oluştu');
+        }
       }
       
       if (yetkiliAdi) {
         formData.append('yetkili_adi', yetkiliAdi);
         formData.append('yetkiliAdi', yetkiliAdi);
+        console.log('👤 Yetkili adı eklendi:', yetkiliAdi);
       }
       
       if (yetkiliPozisyon) {
         formData.append('yetkili_pozisyon', yetkiliPozisyon);
         formData.append('yetkiliPozisyon', yetkiliPozisyon);
+        console.log('💼 Yetkili pozisyonu eklendi:', yetkiliPozisyon);
       }
+
+      // FormData içeriğini logla
+      console.log('📦 FormData hazır, içerik:');
+      for (let [key, value] of formData.entries()) {
+        if (value instanceof File) {
+          console.log(`  ${key}: [File] ${value.name} (${value.size} bytes, ${value.type})`);
+        } else {
+          console.log(`  ${key}: ${value}`);
+        }
+      }
+      
+      console.log('🌐 API isteği gönderiliyor...');
+      console.log('🔗 URL: /api/firmalar');
+      console.log('📤 Method: POST');
+      console.log('⏰ Timestamp:', new Date().toISOString());
       
       // API isteği gönder
       const res = await fetch('/api/firmalar', {
@@ -413,16 +469,32 @@ export default function YeniFirmaPage() {
         body: formData
       });
       
+      console.log('📥 API yanıtı alındı');
+      console.log('📊 Response Status:', res.status);
+      console.log('📋 Response Headers:', Object.fromEntries(res.headers.entries()));
+      
       const text = await res.text();
+      console.log('📄 Raw Response Text:', text);
+      console.log('📏 Response Length:', text.length);
+      
       let responseData;
       try {
         responseData = JSON.parse(text);
-      } catch (e) {
+        console.log('✅ JSON parse başarılı');
+        console.log('📊 Parsed Response Data:', responseData);
+      } catch (parseError) {
+        console.error('❌ JSON parse hatası:', parseError);
+        console.log('🔍 Parse edilemeyen text:', text.substring(0, 500));
         throw new Error('API yanıtı JSON formatında değil: ' + text);
       }
       
       if (!res.ok) {
-        logger.error('API Hatası', { responseData, status: res.status, firmaAdi });
+        console.error('❌ API Hatası');
+        console.error('📊 Status:', res.status);
+        console.error('📄 Response Data:', responseData);
+        console.error('🏢 Firma Adı:', firmaAdi);
+        
+        console.error('API Hatası', { responseData, status: res.status, firmaAdi });
         
         // Detaylı hata mesajı oluştur
         let errorMessage = `API hata kodu: ${res.status}`;
@@ -445,12 +517,17 @@ export default function YeniFirmaPage() {
           errorMessage += ` - ${responseData.message}`;
         }
         
+        console.error('🚨 Final Error Message:', errorMessage);
         throw new Error(errorMessage);
       }
       
       // Başarılı yanıt
+      console.log('🎉 API isteği başarılı!');
+      console.log('✅ Response Data:', responseData);
+      
       setSuccess('Firma başarıyla eklendi');
       
+      console.log('🧹 Form temizleniyor...');
       // Formu sıfırla
       setFirmaAdi('');
       setSlug('');
@@ -477,14 +554,28 @@ export default function YeniFirmaPage() {
       setProfilFotoPreview('');
       setKatalogDosya(null);
       
+      console.log('✅ Form temizlendi');
+      console.log('🔄 2 saniye sonra yönlendirme yapılacak...');
+      
       // Kısa bir bekleme sonrası firmalar sayfasına yönlendir
       setTimeout(() => {
+        console.log('🔄 Firmalar sayfasına yönlendiriliyor...');
         router.push('/admin/firmalar');
       }, 2000);
       
     } catch (err: any) {
-      setError(err.message || 'Firma eklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
+      console.error('💥 HATA YAKALANDI');
+      console.error('🚨 Error Object:', err);
+      console.error('📝 Error Message:', err.message);
+      console.error('📚 Error Stack:', err.stack);
+      
+      const errorMessage = err.message || 'Firma eklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.';
+      console.error('🔴 Final Error Message:', errorMessage);
+      
+      setError(errorMessage);
     } finally {
+      console.log('🏁 FORM SUBMIT TAMAMLANDI');
+      console.log('⏰ End Timestamp:', new Date().toISOString());
       setLoading(false);
     }
   };

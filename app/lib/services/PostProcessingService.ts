@@ -16,7 +16,7 @@ export class PostProcessingService {
    * @param firma Firma object with all related data
    * @returns PostProcessingResult with task completion status
    */
-  static async processNewFirma(firma: any): Promise<PostProcessingResult> {
+  async processNewFirma(firma: any): Promise<PostProcessingResult> {
     const startTime = performance.now();
     const completedTasks: string[] = [];
     const failedTasks: string[] = [];
@@ -32,15 +32,15 @@ export class PostProcessingService {
     const tasks = [
       {
         name: 'HTML generation',
-        execute: () => this.generateHtml(firma)
+        execute: () => PostProcessingService.generateHtml(firma)
       },
       {
         name: 'QR code generation',
-        execute: () => this.generateQrCode(firma)
+        execute: () => PostProcessingService.generateQrCode(firma)
       },
       {
         name: 'Cache invalidation',
-        execute: () => this.invalidateCache()
+        execute: () => PostProcessingService.invalidateCache()
       }
     ];
 

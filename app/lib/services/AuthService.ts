@@ -15,7 +15,7 @@ export class AuthService {
    * @param req NextRequest object
    * @returns AuthResult with validation status and session data
    */
-  static async validateSession(req: NextRequest): Promise<AuthResult> {
+  async validateSession(req: NextRequest): Promise<AuthResult> {
     try {
       const session = await getServerSession(authOptions);
       
