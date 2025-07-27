@@ -132,6 +132,12 @@ export default async function KartvizitPage({ params }: { params: { slug: string
         
         if (!response.ok) {
             console.log('❌ API yanıtı başarısız, notFound() çağrılıyor');
+            console.log('🔍 Response Status:', response.status);
+            console.log('🔍 Response Text:', await response.text());
+            console.log('🔍 Full URL attempted:', apiUrl);
+            console.log('🔍 Environment:', process.env.NODE_ENV);
+            console.log('🔍 Vercel URL:', process.env.VERCEL_URL);
+            console.log('🔍 Public Base URL:', process.env.NEXT_PUBLIC_BASE_URL);
             return notFound();
         }
 

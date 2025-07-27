@@ -98,6 +98,9 @@ export async function GET(
     
     console.log('💾 Database sorgusu başlıyor...');
     console.log('🔍 Aranan slug:', slug);
+    console.log('🔍 Environment:', process.env.NODE_ENV);
+    console.log('🔍 Database URL exists:', !!process.env.DATABASE_URL);
+    console.log('🔍 Prisma version:', prisma._clientVersion);
     
     // Firma verisini ilişkili verilerle birlikte çek (Hem eski hem yeni yapıyı destekle)
     const firma = await prisma.firmalar.findFirst({
@@ -145,6 +148,42 @@ export async function GET(
     
     if (!firma) {
       console.log('❌ Firma bulunamadı, 404 döndürülüyor');
+      console.log('🔍 Database connection status: Attempting count query...');
+      
+      try {
+        const totalCount = await prisma.firmalar.count();
+        console.log('✅ Database accessible, total firmalar count:', totalCount);
+        
+        // Check if slug exists with different case
+        const firmaCaseInsensitive = await prisma.firmalar.findFirst({
+          where: { 
+            slug: { 
+              contains: slug, 
+              mode: 'insensitive' 
+            } 
+          },
+          select: { id: true, slug: true, firma_adi: true }
+        });
+        
+        if (firmaCaseInsensitive) {
+          console.log('🔍 Found similar slug with different case:', firmaCaseInsensitive);
+        } else {
+          console.log('🔍 No similar slug found in database');
+        }
+        
+        // Show sample slugs for debugging
+        const sampleSlugs = await prisma.firmalar.findMany({
+          select: { slug: true, firma_adi: true },
+          take: 5,
+          orderBy: { created_at: 'desc' }
+        });
+        console.log('🔍 Sample slugs in database:', sampleSlugs);
+        
+      } catch (dbError) {
+        console.log('❌ Database connection error:', dbError);
+        logger.error('Database connection failed in sayfalar API', { error: dbError });
+      }
+      
       return NextResponse.json({ error: 'Firma bulunamadı' }, { status: 404 });
     }
 

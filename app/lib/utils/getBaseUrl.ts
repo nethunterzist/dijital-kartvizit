@@ -47,6 +47,13 @@ export function getApiUrl(): string {
  * Request headers'ından port bilgisini alır
  */
 export function getServerBaseUrl(headers?: Headers): string {
+  // Vercel production ortamında absolute URL gerekli
+  if (process.env.VERCEL_URL && process.env.NODE_ENV === 'production') {
+    const url = `https://${process.env.VERCEL_URL}`;
+    logger.info('getServerBaseUrl: Using Vercel URL in production', { url });
+    return url;
+  }
+  
   if (headers) {
     const host = headers.get('host');
     const protocol = headers.get('x-forwarded-proto') || 'http';
