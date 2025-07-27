@@ -3,85 +3,51 @@ import prisma from '@/app/lib/db';
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('🔍 Firmalar API çağrısı...');
+    console.log('🔍 Testing firma API connection...');
     
-    // Get all firmalar for admin panel
+    // Test 1: Simple count query
+    const firmaCount = await prisma.firmalar.count();
+    console.log('✅ Firmalar count:', firmaCount);
+    
+    // Test 2: Get first 3 firmalar
     const firmalar = await prisma.firmalar.findMany({
+      take: 3,
       select: {
         id: true,
         firma_adi: true,
         slug: true,
-        yetkili_adi: true,
-        yetkili_pozisyon: true,
-        template_id: true,
-        onay: true,
-        goruntulenme: true,
-        created_at: true,
-        updated_at: true
+        created_at: true
       },
       orderBy: { created_at: 'desc' }
     });
     
-    console.log('✅ Firmalar fetched:', firmalar.length);
+    console.log('✅ Firmalar sample:', firmalar);
     
     return NextResponse.json({
-      data: firmalar,
-      pagination: {
-        page: 1,
-        limit: 1000,
-        total: firmalar.length,
-        totalPages: 1,
-        hasNextPage: false,
-        hasPrevPage: false
-      },
-      meta: {
-        count: firmalar.length,
-        search: null,
-        cached: false,
-        fetchTime: new Date().toISOString()
+      status: 'SUCCESS',
+      timestamp: new Date().toISOString(),
+      tests: {
+        prismaConnection: 'WORKING',
+        firmaCount,
+        sampleFirmalar: firmalar,
+        environment: process.env.NODE_ENV || 'unknown'
       }
     }, { status: 200 });
     
   } catch (error) {
-    console.error('❌ Firmalar API hatası:', error);
+    console.error('❌ Firma API test failed:', error);
     
     return NextResponse.json({
-      error: { message: 'Firmalar getirilirken hata oluştu' }
-    }, { status: 500 });
-  }
-}
-
-export async function POST(request: NextRequest) {
-  try {
-    console.log('🔍 POST firmalar çağrısı...');
-    
-    const data = await request.json();
-    console.log('📋 POST data keys:', Object.keys(data));
-
-    // Basit firma oluşturma
-    const newFirma = await prisma.firmalar.create({
-      data: {
-        firma_adi: data.firma_adi || data.firmaAdi,
-        slug: data.slug,
-        yetkili_adi: data.yetkili_adi || data.yetkiliAdi || null,
-        yetkili_pozisyon: data.yetkili_pozisyon || data.yetkiliPozisyon || null,
-        template_id: data.template_id || data.templateId ? parseInt(data.template_id || data.templateId) : 1,
-        onay: false,
-        goruntulenme: 0
+      status: 'ERROR',
+      timestamp: new Date().toISOString(),
+      error: {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        name: error instanceof Error ? error.name : 'UnknownError',
+        // Only include stack in development
+        ...(process.env.NODE_ENV === 'development' && {
+          stack: error instanceof Error ? error.stack : undefined
+        })
       }
-    });
-
-    console.log('✅ Firma oluşturuldu:', newFirma.id);
-
-    return NextResponse.json({ 
-      message: 'Firma başarıyla oluşturuldu', 
-      data: newFirma 
-    });
-    
-  } catch (error) {
-    console.error('❌ Firma oluşturma hatası:', error);
-    return NextResponse.json({
-      error: { message: 'Firma oluşturulurken hata oluştu' }
     }, { status: 500 });
   }
 }
