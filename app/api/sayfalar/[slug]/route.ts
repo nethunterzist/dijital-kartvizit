@@ -101,7 +101,12 @@ export async function GET(
     
     // Firma verisini ilişkili verilerle birlikte çek (Hem eski hem yeni yapıyı destekle)
     const firma = await prisma.firmalar.findFirst({
-      where: { slug },
+      where: { 
+        slug: { 
+          equals: slug, 
+          mode: 'insensitive' 
+        } 
+      },
       include: {
         iletisim_bilgileri: {
           where: { aktif: true },
