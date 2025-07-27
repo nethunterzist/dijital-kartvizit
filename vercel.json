@@ -1,4 +1,5 @@
 {
+  "name": "sanalkartvizitim",
   "buildCommand": "prisma generate && next build",
   "installCommand": "npm install",
   "framework": "nextjs",
@@ -8,12 +9,6 @@
       "maxDuration": 30
     }
   },
-  "crons": [
-    {
-      "path": "/api/health",
-      "schedule": "0 */6 * * *"
-    }
-  ],
   "headers": [
     {
       "source": "/(.*)",
