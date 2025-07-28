@@ -67,23 +67,36 @@ handlebars.registerHelper('getIconClass', function(iconPath: string, label: stri
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
     const { slug } = params;
     try {
-        const baseUrl = getServerBaseUrl();
-        const apiUrl = `${baseUrl}/api/sayfalar/${slug}`;
-        const response = await fetch(apiUrl, { 
-            cache: 'no-store', 
-            headers: { 
-                'Accept': 'application/json'
-            } 
+        // Direct database access instead of internal API call (same as main component)
+        const { default: prisma } = await import('@/app/lib/db');
+        
+        const firma = await prisma.firmalar.findFirst({
+            where: { 
+                slug: { 
+                    equals: slug, 
+                    mode: 'insensitive' 
+                } 
+            },
+            select: {
+                firma_adi: true,
+                firma_hakkinda: true,
+                profil_foto: true
+            }
         });
         
-        if (!response.ok) {
+        if (!firma) {
             return {
                 title: 'Kartvizit Bulunamadı',
                 description: 'İstediğiniz kartvizit sayfası bulunamadı.'
             };
         }
 
-        const data = await response.json();
+        // Use direct database data
+        const data = {
+            firma_adi: firma.firma_adi,
+            firma_hakkinda: firma.firma_hakkinda,
+            profil_foto: firma.profil_foto
+        };
         
         return {
             title: `${data.firma_adi} - Dijital Kartvizit`,
