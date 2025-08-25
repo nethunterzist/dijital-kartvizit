@@ -57,8 +57,24 @@ export async function GET(req: NextRequest) {
 
   } catch (error) {
     logger.error('Error fetching firmalar', { error });
+    
+    // DEBUG: Detaylı hata bilgisi production'da da göster
+    const errorDetail = {
+      message: error instanceof Error ? error.message : 'Bilinmeyen hata',
+      stack: error instanceof Error ? error.stack : null,
+      env: {
+        DATABASE_URL: process.env.DATABASE_URL ? 'configured' : 'missing',
+        NODE_ENV: process.env.NODE_ENV
+      }
+    };
+    
+    console.error('🔥 DETAILED ERROR:', errorDetail);
+    
     return NextResponse.json({
-      error: { message: 'Firmalar getirilirken bir hata oluştu' }
+      error: { 
+        message: 'Firmalar getirilirken bir hata oluştu',
+        debug: errorDetail  // Geçici debug bilgisi
+      }
     }, { status: 500 });
   }
 }
