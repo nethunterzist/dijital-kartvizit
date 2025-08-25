@@ -5,21 +5,13 @@ let pool: Pool | null = null;
 
 export function getPool() {
   if (!pool) {
-    const isProduction = process.env.NODE_ENV === 'production';
-    
-    // Vercel production'da SSL sorunları için özel config
-    const sslConfig = isProduction ? {
-      rejectUnauthorized: false,
-      ca: false,
-      checkServerIdentity: () => undefined
-    } : false;
-    
+    // SSL tamamen devre dışı - sslmode=disable DATABASE_URL'de zaten var
     pool = new Pool({
       connectionString: process.env.DATABASE_URL,
       max: 20,
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 5000, // Timeout'u artır
-      ssl: sslConfig
+      connectionTimeoutMillis: 5000,
+      ssl: false // SSL tamamen kapat
     });
     
     // Connection error handling
