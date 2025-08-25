@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/app/lib/db';
+import { prisma } from '@/app/lib/db';
 import bcrypt from 'bcrypt';
 
 export async function GET() {
   try {
     // Database bağlantısını test et
-    await prisma.$connect();
+    const result = await prisma.$queryRaw`SELECT 1 as test`;
+    
+    // Firma sayısını kontrol et
+    const firmaCount = await prisma.firmalar.count();
     
     // Admin tablosunu kontrol et
     const adminCount = await prisma.admins.count();
@@ -20,19 +23,16 @@ export async function GET() {
           password: hashedPassword
         }
       });
-      
-      return NextResponse.json({
-        status: 'healthy',
-        message: 'Database connected and default admin created',
-        adminCount: 1,
-        timestamp: new Date().toISOString()
-      });
     }
     
     return NextResponse.json({
       status: 'healthy',
       message: 'Database connected',
-      adminCount,
+      database: 'connected',
+      firmaCount,
+      adminCount: adminCount === 0 ? 1 : adminCount,
+      environment: process.env.NODE_ENV,
+      databaseUrl: process.env.DATABASE_URL ? 'configured' : 'missing',
       timestamp: new Date().toISOString()
     });
     
@@ -41,6 +41,9 @@ export async function GET() {
     return NextResponse.json({
       status: 'unhealthy',
       message: error instanceof Error ? error.message : 'Unknown error',
+      database: 'disconnected',
+      environment: process.env.NODE_ENV,
+      databaseUrl: process.env.DATABASE_URL ? 'configured' : 'missing',
       timestamp: new Date().toISOString()
     }, { status: 500 });
   }
