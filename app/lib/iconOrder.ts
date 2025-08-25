@@ -12,6 +12,7 @@ interface IconItem {
 
 // Varsayılan ikon sıralaması
 const DEFAULT_ICON_ORDER: IconItem[] = [
+  { id: 'paylas', label: 'Paylaş', icon: 'fas fa-share-alt', type: 'system', color: '#9C27B0' },
   { id: 'qr', label: 'QR Kod', icon: 'fas fa-qrcode', type: 'system', color: '#FFD700' },
   { id: 'instagram', label: 'Instagram', icon: 'fab fa-instagram', type: 'social', color: '#E4405F' },
   { id: 'facebook', label: 'Facebook', icon: 'fab fa-facebook', type: 'social', color: '#1877F2' },
@@ -66,6 +67,11 @@ export function getOrderedIcons(firmaData: FirmaData): IconItem[] {
     let shouldInclude = false;
 
     switch (iconConfig.id) {
+      case 'paylas':
+        // Paylaş butonu her zaman dahil
+        shouldInclude = true;
+        break;
+        
       case 'qr':
         // QR kod her zaman dahil
         shouldInclude = true;
@@ -91,7 +97,7 @@ export function getOrderedIcons(firmaData: FirmaData): IconItem[] {
       case 'harita':
         // İletişim kontrolü
         shouldInclude = firmaData.communication?.some(
-          comm => comm.type === iconConfig.id && comm.value
+          comm => comm.tip === iconConfig.id && comm.value
         ) || false;
         break;
       

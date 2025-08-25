@@ -9,25 +9,40 @@ export async function GET(
 ) {
   try {
     const slug = params.slug;
-    const firma = await prisma.firmalar.findFirst({ where: { slug } });
+    
+    // Use direct database access like the main page
+    const { getFirmaWithCommunication } = await import('@/app/lib/direct-db');
+    const firma = await getFirmaWithCommunication(slug);
+    
     if (!firma) {
       return NextResponse.json({ error: 'Firma bulunamadı' }, { status: 404 });
     }
+
+    // Extract first values from communication data for vCard
+    let telefon = '';
+    let eposta = '';
+    let website = '';
+    
+    // Find first phone number
+    const telefonItem = firma.iletisim_bilgileri.find(item => item.tip === 'telefon');
+    if (telefonItem) telefon = telefonItem.deger;
+    
+    // Find first email
+    const emailItem = firma.iletisim_bilgileri.find(item => item.tip === 'eposta');
+    if (emailItem) eposta = emailItem.deger;
+    
+    // Find first website
+    const websiteItem = firma.iletisim_bilgileri.find(item => item.tip === 'website');
+    if (websiteItem) website = websiteItem.deger;
+
     const vcardContent = await generateVCard({
       firma_adi: firma.firma_adi,
-      telefon: firma.telefon ?? undefined,
-      eposta: firma.eposta ?? undefined,
-      website: firma.website ?? undefined,
-      instagram: firma.instagram ?? undefined,
-      youtube: firma.youtube ?? undefined,
-      linkedin: firma.linkedin ?? undefined,
-      twitter: firma.twitter ?? undefined,
-      facebook: firma.facebook ?? undefined,
-      tiktok: firma.tiktok ?? undefined,
-      slug: firma.slug,
-      communication_data: firma.communication_data ?? undefined,
-      social_media_data: firma.social_media_data ?? undefined,
-      yetkili_adi: firma.yetkili_adi ?? undefined
+      yetkili_adi: firma.yetkili_adi ?? undefined,
+      yetkili_pozisyon: firma.yetkili_pozisyon ?? undefined,
+      telefon: telefon || undefined,
+      eposta: eposta || undefined,
+      website: website || undefined,
+      slug: firma.slug
     });
     return new NextResponse(vcardContent, {
       status: 200,

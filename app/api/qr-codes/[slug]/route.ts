@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Handlebars from 'handlebars';
-import prisma from '@/app/lib/db';
+import { getFirmaBySlug } from '@/app/lib/direct-db';
 import QRCode from 'qrcode';
 import { getTemplateById } from '@/app/lib/templates/templateRegistry';
 import { logger } from '@/app/lib/logger';
@@ -9,52 +9,14 @@ import { logger } from '@/app/lib/logger';
 async function getTemplateModule(templateId: number) {
   try {
     switch (templateId) {
-      case 2:
-        return await import('@/app/lib/templates/template2-modern');
-      case 3:
-        return await import('@/app/lib/templates/template3-minimal');
-      case 4:
-        return await import('@/app/lib/templates/template4-corporate');
-      case 5:
-        return await import('@/app/lib/templates/template5-colorful');
-      case 6:
-        return await import('@/app/lib/templates/template6-luxury');
-      case 7:
-        return await import('@/app/lib/templates/template7-corporate-slate');
-      case 8:
-        return await import('@/app/lib/templates/template8-clean-sheet');
-      case 9:
-        return await import('@/app/lib/templates/template9-night-pulse');
-      case 10:
-        return await import('@/app/lib/templates/template10-glass-aura');
-      case 11:
-        return await import('@/app/lib/templates/template11-pastel-bloom');
-      case 12:
-        return await import('@/app/lib/templates/template12-retro-signal');
-      case 13:
-        return await import('@/app/lib/templates/template13-gridfolio');
-      case 14:
-        return await import('@/app/lib/templates/template14-monotone');
-      case 15:
-        return await import('@/app/lib/templates/template15-vibe-stream');
-      case 16:
-        return await import('@/app/lib/templates/template16-goldmark');
-      case 17:
-        return await import('@/app/lib/templates/template17-green-soul');
-      case 18:
-        return await import('@/app/lib/templates/template18-ocean-breeze');
-      case 19:
-        return await import('@/app/lib/templates/template19-sunset-glow');
-      case 20:
-        return await import('@/app/lib/templates/template20-purple-rain');
-      case 21:
-        return await import('@/app/lib/templates/template21-crimson-edge');
+      case 1:
+        return await import('@/app/lib/templates/template1-gold');
       default:
-        return await import('@/app/lib/templates/template2-modern'); // Default template
+        return await import('@/app/lib/templates/template1-gold'); // Default template
     }
   } catch (error) {
     logger.error(`Template ${templateId} yüklenemedi`, { templateId, error: error instanceof Error ? error.message : String(error), stack: error instanceof Error ? error.stack : undefined });
-    return await import('@/app/lib/templates/template2-modern'); // Fallback
+    return await import('@/app/lib/templates/template1-gold'); // Fallback
   }
 }
 
@@ -66,17 +28,15 @@ export async function GET(
   let firma: any = null;
   
   try {
-    // Firma bilgilerini al
-    firma = await prisma.firmalar.findFirst({
-      where: { slug }
-    });
+    // Firma bilgilerini al - DIRECT DB
+    firma = await getFirmaBySlug(slug);
     
     if (!firma) {
       return NextResponse.json({ error: 'Firma bulunamadı' }, { status: 404 });
     }
 
-    // Firmanın template ID'sini al (varsayılan 2)
-    const templateId = firma.template_id || 2;
+    // Firmanın template ID'sini al (varsayılan 1)
+    const templateId = firma.template_id || 1;
     
     // Template modülünü yükle
     const templateModule = await getTemplateModule(templateId);
@@ -86,16 +46,8 @@ export async function GET(
     let templateString = '';
     
     // Template export'larını kontrol et
-    if (templateModuleAny.modernTemplate) {
-      templateString = templateModuleAny.modernTemplate;
-    } else if (templateModuleAny.minimalTemplate) {
-      templateString = templateModuleAny.minimalTemplate;
-    } else if (templateModuleAny.corporateTemplate) {
-      templateString = templateModuleAny.corporateTemplate;
-    } else if (templateModuleAny.colorfulTemplate) {
-      templateString = templateModuleAny.colorfulTemplate;
-    } else if (templateModuleAny.luxuryTemplate) {
-      templateString = templateModuleAny.luxuryTemplate;
+    if (templateModuleAny.goldTemplate) {
+      templateString = templateModuleAny.goldTemplate;
     } else {
       // Fallback - template modülünün ilk export'unu al
       const firstExport = Object.values(templateModule)[0];

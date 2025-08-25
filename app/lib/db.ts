@@ -18,6 +18,33 @@ export const prisma = globalForPrisma.prisma ?? new PrismaClient({
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 
+// Prepared statement conflict'ini çözmek için yardımcı fonksiyon
+export async function withFreshPrismaClient<T>(operation: (client: PrismaClient) => Promise<T>): Promise<T> {
+  // Development modunda prepared statement conflict'ini önlemek için
+  // geçici olarak yeni client oluştur
+  if (process.env.NODE_ENV === 'development') {
+    const freshClient = new PrismaClient({
+      log: ['error'],
+      errorFormat: 'pretty',
+      datasources: {
+        db: {
+          url: process.env.DATABASE_URL,
+        },
+      },
+    });
+    
+    try {
+      await freshClient.$connect();
+      const result = await operation(freshClient);
+      return result;
+    } finally {
+      await freshClient.$disconnect();
+    }
+  } else {
+    return operation(prisma);
+  }
+}
+
 // Eksik fonksiyonları ekle
 export async function getAllFirmalar() {
   return await prisma.firmalar.findMany({

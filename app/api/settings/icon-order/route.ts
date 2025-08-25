@@ -7,6 +7,7 @@ const SETTINGS_FILE = path.join(process.cwd(), 'data', 'icon-order.json');
 
 // Varsayılan ikon sıralaması
 const DEFAULT_ICON_ORDER = [
+  { id: 'paylas', label: 'Paylaş', icon: 'fas fa-share-alt', type: 'system', color: '#9C27B0' },
   { id: 'qr', label: 'QR Kod', icon: 'fas fa-qrcode', type: 'system', color: '#FFD700' },
   { id: 'instagram', label: 'Instagram', icon: 'fab fa-instagram', type: 'social', color: '#E4405F' },
   { id: 'facebook', label: 'Facebook', icon: 'fab fa-facebook', type: 'social', color: '#1877F2' },

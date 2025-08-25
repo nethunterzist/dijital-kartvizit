@@ -388,10 +388,7 @@ export const getTemplateList = unstable_cache(
     // This would typically come from a database or file system
     // For now, return a static list
     return [
-      { id: 1, name: 'Classic', slug: 'template1-classic' },
-      { id: 2, name: 'Modern', slug: 'template2-modern' },
-      { id: 3, name: 'Minimal', slug: 'template3-minimal' },
-      // ... other templates
+      { id: 1, name: 'Gold', slug: 'template1-gold' },
     ];
   },
   ['template-list'],

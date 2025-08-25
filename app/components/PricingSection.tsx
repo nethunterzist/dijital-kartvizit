@@ -62,8 +62,8 @@ export default function PricingSection() {
   ];
 
   const handlePurchase = (packageId: string) => {
-    // Ödeme sayfasına yönlendir
-    window.location.href = `/odeme?package=${packageId}`;
+    // İletişim sayfasına yönlendir
+    alert('Bu paket için lütfen bizimle iletişime geçin: info@dijitalkartvizit.com');
   };
 
   return (

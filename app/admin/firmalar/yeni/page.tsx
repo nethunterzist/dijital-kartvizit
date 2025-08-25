@@ -7,8 +7,8 @@ import Image from 'next/image';
 import { Tab } from '@headlessui/react';
 import { Icon } from '@/app/lib/icons';
 import { environment } from '@/app/environment';
-import PhonePreview from '@/components/PhonePreview';
-import TemplateSelector from '@/components/TemplateSelector';
+import PhonePreview from '@/app/components/PhonePreview';
+import TemplateSelector from '@/app/components/TemplateSelector';
 import { TEMPLATES } from '@/app/lib/templates/templateRegistry';
 import { logger } from '@/app/lib/logger';
 
@@ -159,6 +159,90 @@ export default function YeniFirmaPage() {
     type: '',
     value: ''
   }]);
+
+  // Otomatik doldur fonksiyonu
+  const handleAutoFill = () => {
+    const timestamp = Date.now();
+    
+    // Temel firma bilgileri
+    setFirmaAdi('Demo Teknoloji A.Ş.');
+    setSlug(`demo-teknoloji-${timestamp}`);
+    setYetkiliAdi('Ahmet Yılmaz');
+    setYetkiliPozisyon('Genel Müdür & Kurucu');
+    setFirmaHakkinda(`Demo Teknoloji A.Ş. olarak ${new Date().getFullYear()} yılından bu yana teknoloji sektöründe hizmet vermekteyiz. 
+    
+🚀 MİSYONUMUZ: Dijital dönüşüm sürecinde müşterilerimize en kaliteli çözümleri sunmak
+🎯 VİZYONUMUZ: Türkiye'nin önde gelen teknoloji firmalarından biri olmak
+💡 DEĞERLERİMİZ: İnovasyon, kalite, güvenilirlik ve müşteri memnuniyeti
+
+Uzman ekibimizle birlikte web tasarım, mobil uygulama geliştirme, e-ticaret çözümleri ve dijital pazarlama alanlarında hizmet veriyoruz. 100+ başarılı proje, 500+ mutlu müşteri ile sektörde fark yaratıyoruz.`);
+    setFirmaHakkindaBaslik('Hakkımızda & Vizyonumuz');
+    
+    // Kurumsal bilgiler
+    setFirmaUnvan('Demo Teknoloji Anonim Şirketi');
+    setFirmaVergiNo('1234567890');
+    setVergiDairesi('Beşiktaş Vergi Dairesi');
+
+    // İletişim hesapları - Her tipten 2'şer adet
+    setCommunicationAccounts([
+      { type: 'telefon', value: '0212 555 01 23', label: 'Merkez Ofis' },
+      { type: 'telefon', value: '0555 123 45 67', label: 'Mobil Hat' },
+      { type: 'eposta', value: 'info@demoteknoloji.com', label: 'Genel Bilgi' },
+      { type: 'eposta', value: 'satis@demoteknoloji.com', label: 'Satış Departmanı' },
+      { type: 'whatsapp', value: '0555 123 45 67', label: 'WhatsApp İletişim' },
+      { type: 'whatsapp', value: '0533 987 65 43', label: 'WhatsApp Destek' },
+      { type: 'telegram', value: '@demoteknoloji_official', label: 'Telegram Kanalı' },
+      { type: 'telegram', value: '@demoteknoloji_destek', label: 'Telegram Destek' },
+      { type: 'website', value: 'https://www.demoteknoloji.com', label: 'Ana Website' },
+      { type: 'website', value: 'https://blog.demoteknoloji.com', label: 'Blog Sitesi' },
+      { type: 'harita', value: 'https://goo.gl/maps/XyZ123DemoTek', label: 'Merkez Ofis Konumu' },
+      { type: 'harita', value: 'https://goo.gl/maps/ABC456DemoTek', label: 'İstanbul Şubesi' }
+    ]);
+
+    // Sosyal medya hesapları - Her platformdan 2'şer adet
+    setSocialMediaAccounts([
+      { platform: 'instagram', url: 'https://instagram.com/demoteknoloji_official', label: 'Kurumsal Instagram' },
+      { platform: 'instagram', url: 'https://instagram.com/demoteknoloji_ceo', label: 'CEO Instagram' },
+      { platform: 'facebook', url: 'https://facebook.com/DemoTeknoloji', label: 'Facebook Sayfası' },
+      { platform: 'facebook', url: 'https://facebook.com/groups/demotekno', label: 'Facebook Grubu' },
+      { platform: 'linkedin', url: 'https://linkedin.com/company/demo-teknoloji', label: 'Şirket LinkedIn' },
+      { platform: 'linkedin', url: 'https://linkedin.com/in/ahmet-yilmaz-demo', label: 'CEO LinkedIn' },
+      { platform: 'twitter', url: 'https://twitter.com/demoteknoloji_tr', label: 'Twitter Hesabı' },
+      { platform: 'twitter', url: 'https://twitter.com/demoteknoloji_ceo', label: 'CEO Twitter' },
+      { platform: 'youtube', url: 'https://youtube.com/@DemoTeknoloji', label: 'Ana Kanal' },
+      { platform: 'youtube', url: 'https://youtube.com/@DemoTekEgitim', label: 'Eğitim Kanalı' },
+      { platform: 'tiktok', url: 'https://tiktok.com/@demoteknoloji_official', label: 'Kurumsal TikTok' },
+      { platform: 'tiktok', url: 'https://tiktok.com/@demoteknoloji_tips', label: 'Tips TikTok' }
+    ]);
+
+    // Banka hesapları - 2 farklı banka, TL ve USD IBAN'ları
+    setBankAccounts([
+      {
+        bank_name: "ziraat",
+        bank_label: "Ziraat Bankası",
+        bank_logo: "/img/banks/ziraat.png",
+        account_holder: "Demo Teknoloji A.Ş.",
+        accounts: [
+          { iban: "TR33 0001 0000 1111 1111 1111 11", currency: "TRY" },
+          { iban: "TR33 0001 0000 2222 2222 2222 22", currency: "USD" }
+        ]
+      },
+      {
+        bank_name: "garanti",
+        bank_label: "Garanti BBVA",
+        bank_logo: "/img/banks/garanti.png",
+        account_holder: "Demo Teknoloji A.Ş.",
+        accounts: [
+          { iban: "TR44 0062 0000 3333 3333 3333 33", currency: "TRY" },
+          { iban: "TR44 0062 0000 4444 4444 4444 44", currency: "USD" }
+        ]
+      }
+    ]);
+
+    // Başarı mesajı göster
+    setSuccess('✅ Tüm alanlar otomatik olarak dolduruldu! (Upload alanları hariç)');
+    setTimeout(() => setSuccess(null), 3000);
+  };
 
   const handleProfilFotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -339,46 +423,28 @@ export default function YeniFirmaPage() {
     setError(null);
     setSuccess(null);
 
-    console.log('🚀 FORM SUBMIT BAŞLADI');
-    console.log('📋 Form Event:', e);
+    logger.info('Form submission started', { firmaAdi, slug });
 
     try {
-      console.log('✅ Form validasyonu başlıyor...');
-      
       if (!firmaAdi || !slug) {
-        console.log('❌ Validasyon hatası:', { firmaAdi, slug });
+        logger.warn('Validation failed', { firmaAdi: !!firmaAdi, slug: !!slug });
         throw new Error('Firma adı ve URL zorunludur');
       }
-      
-      console.log('✅ Temel validasyon geçti');
-      console.log('📊 Form verileri:', {
-        firmaAdi,
-        slug,
-        yetkiliAdi,
-        yetkiliPozisyon,
-        firmaHakkinda,
-        templateId
-      });
       
       // Geçerli banka hesaplarını filtrele
       const validBankAccounts = bankAccounts.filter(
         (account) => account.bank_name && account.account_holder && account.accounts.some(a => a.iban)
       );
-      console.log('🏦 Geçerli banka hesapları:', validBankAccounts);
-      
       // Geçerli iletişim hesaplarını filtrele
       const validCommunicationAccounts = communicationAccounts.filter(
         (account) => account.type && account.value
       );
-      console.log('📞 Geçerli iletişim hesapları:', validCommunicationAccounts);
 
       // Geçerli sosyal medya hesaplarını filtrele
       const validSocialMediaAccounts = socialMediaAccounts.filter(
         (account) => account.platform && account.url
       );
-      console.log('📱 Geçerli sosyal medya hesapları:', validSocialMediaAccounts);
 
-      console.log('📦 FormData oluşturuluyor...');
       const formData = new FormData();
 
       // Form verilerini oluştur
@@ -391,47 +457,42 @@ export default function YeniFirmaPage() {
       formData.append("vergi_dairesi", vergiDairesi);
       formData.append("templateId", templateId.toString());
 
-      console.log('📝 Temel form alanları eklendi');
 
       // İletişim verilerini API'nin beklediği formatta gönder
       if (validCommunicationAccounts.length > 0) {
         const communicationJson = JSON.stringify(validCommunicationAccounts);
         formData.append("communication_data", communicationJson);
-        console.log('📞 İletişim verileri eklendi:', communicationJson);
       }
       
       // Sosyal medya hesaplarını API'nin beklediği formatta gönder
       if (validSocialMediaAccounts.length > 0) {
         const socialMediaJson = JSON.stringify(validSocialMediaAccounts);
         formData.append("sosyalMedyaHesaplari", socialMediaJson);
-        console.log('📱 Sosyal medya verileri eklendi:', socialMediaJson);
       }
 
       // Banka hesapları
       if (validBankAccounts.length > 0) {
         const bankAccountsJson = JSON.stringify(validBankAccounts);
         formData.append("bankaHesaplari", bankAccountsJson);
-        console.log('🏦 Banka hesapları eklendi:', bankAccountsJson);
       }
       
       if (profilFoto) {
         formData.append('profilePhoto', profilFoto);
-        console.log('📸 Profil fotoğrafı eklendi:', { name: profilFoto.name, size: profilFoto.size, type: profilFoto.type });
+        logger.info('Profile photo added', { name: profilFoto.name, size: profilFoto.size });
       }
       
       if (firmaLogo) {
         formData.append('logoFile', firmaLogo);
-        console.log('🏢 Firma logosu eklendi:', { name: firmaLogo.name, size: firmaLogo.size, type: firmaLogo.type });
+        logger.info('Company logo added', { name: firmaLogo.name, size: firmaLogo.size });
       }
       
       if (katalogDosya) {
-        console.log('📄 Katalog PDF yükleniyor...');
         try {
           const katalogUrl = await uploadPdfToCloudinary(katalogDosya);
           formData.append('katalog', katalogUrl);
-          console.log('✅ Katalog PDF yüklendi:', katalogUrl);
+          logger.info('Catalog PDF uploaded successfully', { url: katalogUrl });
         } catch (pdfError) {
-          console.error('❌ PDF yükleme hatası:', pdfError);
+          logger.error('PDF upload failed', { error: pdfError });
           throw new Error('Katalog PDF yüklenirken hata oluştu');
         }
       }
@@ -439,29 +500,15 @@ export default function YeniFirmaPage() {
       if (yetkiliAdi) {
         formData.append('yetkili_adi', yetkiliAdi);
         formData.append('yetkiliAdi', yetkiliAdi);
-        console.log('👤 Yetkili adı eklendi:', yetkiliAdi);
       }
       
       if (yetkiliPozisyon) {
         formData.append('yetkili_pozisyon', yetkiliPozisyon);
         formData.append('yetkiliPozisyon', yetkiliPozisyon);
-        console.log('💼 Yetkili pozisyonu eklendi:', yetkiliPozisyon);
       }
 
-      // FormData içeriğini logla
-      console.log('📦 FormData hazır, içerik:');
-      for (let [key, value] of formData.entries()) {
-        if (value instanceof File) {
-          console.log(`  ${key}: [File] ${value.name} (${value.size} bytes, ${value.type})`);
-        } else {
-          console.log(`  ${key}: ${value}`);
-        }
-      }
+      // FormData is ready for submission
       
-      console.log('🌐 API isteği gönderiliyor...');
-      console.log('🔗 URL: /api/firmalar');
-      console.log('📤 Method: POST');
-      console.log('⏰ Timestamp:', new Date().toISOString());
       
       // API isteği gönder
       const res = await fetch('/api/firmalar', {
@@ -469,32 +516,19 @@ export default function YeniFirmaPage() {
         body: formData
       });
       
-      console.log('📥 API yanıtı alındı');
-      console.log('📊 Response Status:', res.status);
-      console.log('📋 Response Headers:', Object.fromEntries(res.headers.entries()));
       
       const text = await res.text();
-      console.log('📄 Raw Response Text:', text);
-      console.log('📏 Response Length:', text.length);
       
       let responseData;
       try {
         responseData = JSON.parse(text);
-        console.log('✅ JSON parse başarılı');
-        console.log('📊 Parsed Response Data:', responseData);
       } catch (parseError) {
-        console.error('❌ JSON parse hatası:', parseError);
-        console.log('🔍 Parse edilemeyen text:', text.substring(0, 500));
+        logger.error('JSON parse error', { error: parseError, text: text.substring(0, 500) });
         throw new Error('API yanıtı JSON formatında değil: ' + text);
       }
       
       if (!res.ok) {
-        console.error('❌ API Hatası');
-        console.error('📊 Status:', res.status);
-        console.error('📄 Response Data:', responseData);
-        console.error('🏢 Firma Adı:', firmaAdi);
-        
-        console.error('API Hatası', { responseData, status: res.status, firmaAdi });
+        logger.error('API error', { status: res.status, responseData, firmaAdi });
         
         // Detaylı hata mesajı oluştur
         let errorMessage = `API hata kodu: ${res.status}`;
@@ -517,18 +551,14 @@ export default function YeniFirmaPage() {
           errorMessage += ` - ${responseData.message}`;
         }
         
-        console.error('🚨 Final Error Message:', errorMessage);
         throw new Error(errorMessage);
       }
       
-      // Başarılı yanıt
-      console.log('🎉 API isteği başarılı!');
-      console.log('✅ Response Data:', responseData);
+      logger.info('Form submitted successfully', { firmaAdi, slug });
       
       setSuccess('Firma başarıyla eklendi');
       
-      console.log('🧹 Form temizleniyor...');
-      // Formu sıfırla
+      // Reset form
       setFirmaAdi('');
       setSlug('');
       setTelefon('');
@@ -554,28 +584,16 @@ export default function YeniFirmaPage() {
       setProfilFotoPreview('');
       setKatalogDosya(null);
       
-      console.log('✅ Form temizlendi');
-      console.log('🔄 2 saniye sonra yönlendirme yapılacak...');
-      
-      // Kısa bir bekleme sonrası firmalar sayfasına yönlendir
+      // Redirect to firms page after short delay
       setTimeout(() => {
-        console.log('🔄 Firmalar sayfasına yönlendiriliyor...');
         router.push('/admin/firmalar');
       }, 2000);
       
     } catch (err: any) {
-      console.error('💥 HATA YAKALANDI');
-      console.error('🚨 Error Object:', err);
-      console.error('📝 Error Message:', err.message);
-      console.error('📚 Error Stack:', err.stack);
-      
       const errorMessage = err.message || 'Firma eklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.';
-      console.error('🔴 Final Error Message:', errorMessage);
-      
+      logger.error('Form submission failed', { error: err, firmaAdi, slug });
       setError(errorMessage);
     } finally {
-      console.log('🏁 FORM SUBMIT TAMAMLANDI');
-      console.log('⏰ End Timestamp:', new Date().toISOString());
       setLoading(false);
     }
   };
@@ -629,6 +647,26 @@ export default function YeniFirmaPage() {
         <div className="flex gap-8">
           {/* Form Section */}
           <div className="flex-1 max-w-4xl">
+            {/* Otomatik Doldur Butonu */}
+            <div className="bg-gradient-to-r from-blue-500 to-purple-600 shadow-sm rounded-xl border border-gray-200 dark:border-gray-700 p-4 mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-white">🚀 Hızlı Demo Oluştur</h3>
+                  <p className="text-blue-100 text-sm mt-1">Tüm form alanlarını örnek verilerle otomatik doldur (Upload alanları hariç)</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleAutoFill}
+                  className="bg-white text-blue-600 hover:text-blue-700 px-6 py-3 rounded-lg font-medium shadow-sm hover:shadow-md transition-all duration-200 flex items-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  Otomatik Doldur
+                </button>
+              </div>
+            </div>
+
             <form 
               onSubmit={(e) => {
                 e.preventDefault();
@@ -1265,95 +1303,6 @@ export default function YeniFirmaPage() {
               <div className="pt-6 border-t border-gray-200">
                 <div className="flex justify-between">
                   <div className="flex space-x-3">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        // Otomatik doldur fonksiyonu - TÜM ALANLAR
-                        
-                        // 1. Firma Bilgileri - Benzersiz slug ile
-                        const timestamp = Date.now();
-                        setFirmaAdi("Örnek Teknoloji A.Ş.");
-                        setSlug(`ornek-teknoloji-${timestamp}`);
-                        setYetkiliAdi("Ahmet Yılmaz");
-                        setYetkiliPozisyon("Genel Müdür");
-                        
-                        // 2. Kurumsal Bilgiler
-                        setFirmaUnvan("Örnek Teknoloji Anonim Şirketi");
-                        setFirmaVergiNo("1234567890");
-                        setVergiDairesi("Merkez Vergi Dairesi");
-                        setFirmaHakkinda("Örnek Teknoloji A.Ş. olarak 2020 yılından bu yana teknoloji sektöründe hizmet vermekteyiz. Müşterilerimize en kaliteli çözümleri sunmak için çalışıyoruz. Uzman ekibimizle birlikte sektörde öncü konumdayız ve sürekli gelişen teknolojiye ayak uydurarak müşteri memnuniyetini ön planda tutuyoruz.");
-                        setFirmaHakkindaBaslik("Hakkımızda");
-                        
-                        // 3. Sosyal Medya Hesapları (Kapsamlı) - Tam URL formatında
-                        setSocialMediaAccounts([
-                          { platform: "instagram", url: "https://instagram.com/ornekteknoloji", type: "social", label: "Kurumsal Instagram" },
-                          { platform: "facebook", url: "https://facebook.com/ornekteknoloji", type: "social", label: "Facebook Sayfamız" },
-                          { platform: "linkedin", url: "https://linkedin.com/company/ornekteknoloji", type: "social", label: "LinkedIn Profili" },
-                          { platform: "twitter", url: "https://twitter.com/ornekteknoloji", type: "social", label: "Twitter Hesabı" },
-                          { platform: "youtube", url: "https://youtube.com/@ornekteknoloji", type: "social", label: "YouTube Kanalı" },
-                          { platform: "tiktok", url: "https://tiktok.com/@ornekteknoloji", type: "social", label: "TikTok Hesabı" }
-                        ]);
-                        
-                        // 4. İletişim Bilgileri (Kapsamlı)
-                        setCommunicationAccounts([
-                          { type: "telefon", value: "0212 555 01 23", label: "Merkez Ofis" },
-                          { type: "telefon", value: "0555 123 45 67", label: "Mobil Hat" },
-                          { type: "eposta", value: "info@ornekteknoloji.com", label: "Genel Bilgi" },
-                          { type: "eposta", value: "satis@ornekteknoloji.com", label: "Satış Departmanı" },
-                          { type: "whatsapp", value: "0555 123 45 67", label: "WhatsApp İletişim" },
-                          { type: "telegram", value: "@ornekteknoloji", label: "Telegram Kanalı" },
-                          { type: "website", value: "https://www.ornekteknoloji.com", label: "Ana Website" },
-                          { type: "harita", value: "https://maps.google.com/?q=Istanbul,Turkey", label: "Ofis Konumu" }
-                        ]);
-                        
-                        // 5. Banka Hesapları (3 Farklı Banka, Çoklu Para Birimi) - TRY formatında
-                        setBankAccounts([
-                          {
-                            bank_name: "ziraat",
-                            bank_label: "Ziraat Bankası",
-                            bank_logo: "/img/banks/ziraat.png",
-                            account_holder: "Örnek Teknoloji A.Ş.",
-                            accounts: [
-                              { iban: "TR33 0001 0000 0000 0000 0000 01", currency: "TRY" },
-                              { iban: "TR33 0001 0000 0000 0000 0000 02", currency: "USD" },
-                              { iban: "TR33 0001 0000 0000 0000 0000 03", currency: "EUR" }
-                            ]
-                          },
-                          {
-                            bank_name: "garanti",
-                            bank_label: "Garanti BBVA",
-                            bank_logo: "/img/banks/garanti.png",
-                            account_holder: "Örnek Teknoloji A.Ş.",
-                            accounts: [
-                              { iban: "TR44 0062 0000 0000 0000 0000 01", currency: "TRY" },
-                              { iban: "TR44 0062 0000 0000 0000 0000 02", currency: "USD" }
-                            ]
-                          },
-                          {
-                            bank_name: "isbankasi",
-                            bank_label: "İş Bankası",
-                            bank_logo: "/img/banks/isbankasi.png",
-                            account_holder: "Örnek Teknoloji A.Ş.",
-                            accounts: [
-                              { iban: "TR55 0064 0000 0000 0000 0000 01", currency: "TRY" },
-                              { iban: "TR55 0064 0000 0000 0000 0000 02", currency: "EUR" }
-                            ]
-                          }
-                        ]);
-                        
-                        // Template seçimi
-                        setTemplateId(2); // Modern template
-                        
-                        // Başarı mesajı
-                        setSuccess("Tüm alanlar otomatik olarak dolduruldu! Artık formu gözden geçirip kaydedebilirsiniz.");
-                        setError(null);
-                      }}
-                      className="inline-flex items-center px-4 py-2 border border-purple-300 rounded-lg shadow-sm text-sm font-medium text-purple-700 bg-purple-50 hover:bg-purple-100 transition-colors"
-                    >
-                      <Icon name="sparkles" className="w-4 h-4 mr-2" />
-                      Otomatik Doldur
-                    </button>
-                    
                     <Link
                       href="/admin/firmalar"
                       className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"

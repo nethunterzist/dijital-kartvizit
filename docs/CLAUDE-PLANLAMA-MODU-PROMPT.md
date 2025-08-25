@@ -23,8 +23,9 @@ GÖREV: Acemi geliştiriciye sub-agent koordinasyonu için optimize edilmiş pro
 
 📚 REFERANS KAYNAK:
 - Claude Code built-in sub-agent system
-- @docs/ klasörü (Tüm dokümantasyon)
-- Proje yapısı ve mevcut kodlar
+- @docs/ klasörü (Kapsamlı dokümantasyon sistemi - 50+ dosya)
+- Proje yapısı: Next.js 14 + Supabase + Prisma + TypeScript
+- Mevcut kodlar: Production-ready dijital kartvizit sistemi
 
 🎨 ÇıKTı STİLİ:
 - Net ve kopyalanabilir promptlar
@@ -36,7 +37,15 @@ GÖREV: Acemi geliştiriciye sub-agent koordinasyonu için optimize edilmiş pro
 
 📋 DOKÜMANTASYON SİSTEMİ:
 - Her prompt için uygun docs klasörü belirt
-- Mevcut klasörler: docs/database/, docs/api/, docs/ (root)
+- Mevcut klasörler: 
+  • docs/01-setup/ (Kurulum rehberleri)
+  • docs/02-architecture/ (Sistem mimarisi)
+  • docs/03-api/ (API dokümantasyonu + endpoints/)
+  • docs/04-database/ (Database + schema/)
+  • docs/05-deployment/ (Deployment + vercel/)
+  • docs/06-frontend/ (Frontend + components/)
+  • docs/07-backend/, docs/08-security/, docs/09-testing/
+  • docs/10-performance/, docs/11-guides/, docs/12-troubleshooting/
 - Modern Git-based tracking kullan
 - Execution terminal'da dokümantasyon güncellemesi dahil et
 
@@ -64,8 +73,8 @@ CLAUDE:
 🤖 AGENT: frontend-developer + ui-designer
 📝 PROMPT: [Optimize edilmiş komut]
 🔧 CONFIG: --magic --c7 --persona-frontend
-⚡ DOCS: @docs/02-development/
-📋 LOG: docs/05-logs/ui-components/2025-08-23-dashboard-component.md
+⚡ DOCS: @docs/06-frontend/components/
+📋 TRACK: commit "feat: add dashboard component" + docs/06-frontend/components/
 
 SİZ: [Bu prompt'u diğer terminale kopyalar ve log otomatik oluşur]
 ```
@@ -116,16 +125,18 @@ SİZ: [Bu prompt'u diğer terminale kopyalar ve log otomatik oluşur]
 
 ### 🎛️ Yaygın Kullanım Senaryoları:
 
-#### 🏗️ Database & Backend (Updated for Supabase)
-- **Database Migration** → database-architect (automated Supabase migrations) ⭐
-- **Backend API Development** → backend-architect + api-design-specialist
+#### 🏗️ Database & Backend (Supabase + Prisma Production-Ready)
+- **Database Schema Changes** → database-architect (@docs/04-database/schema/) ⭐
+- **API Endpoint Development** → api-design-architect (@docs/03-api/endpoints/) ⭐
 - **Real-time Features** → realtime-communication-architect + backend-architect
 - **Authentication System** → backend-architect + security-vulnerability-scanner
+- **New API Routes** → api-design-specialist (@docs/03-api/)
 
-#### 🎨 Frontend Development
-- **UI Component Development** → frontend-developer + ui-designer
+#### 🎨 Frontend Development (Next.js 14 + TypeScript)
+- **UI Component Development** → frontend-developer + ui-designer (@docs/06-frontend/components/) ⭐
+- **Template System** → frontend-developer + ui-designer (@docs/06-frontend/templates/)
 - **Responsive Design** → frontend-developer + accessibility-auditor
-- **Component Libraries** → ui-designer + frontend-developer
+- **Component Libraries** → ui-component-architect (@docs/06-frontend/)
 
 #### 🔒 Security & Performance
 - **Security Audit** → security-vulnerability-scanner + code-review-specialist
@@ -137,13 +148,15 @@ SİZ: [Bu prompt'u diğer terminale kopyalar ve log otomatik oluşur]
 - **Code Quality Review** → code-review-specialist + code-refactoring-expert
 - **Accessibility Testing** → accessibility-auditor + frontend-developer
 
-#### 🚀 DevOps & Infrastructure
-- **Deployment Setup** → devops-automator + environment-config-specialist
-- **Environment Configuration** → environment-config-specialist + devops-automator
+#### 🚀 DevOps & Infrastructure (Vercel + Supabase)
+- **Production Deployment** → devops-pipeline-architect (@docs/05-deployment/vercel/) ⭐
+- **Environment Configuration** → environment-config-specialist (@docs/01-setup/environment-setup.md)
+- **Performance Monitoring** → monitoring-observability-expert (@docs/10-performance/)
 
-#### 📝 Documentation
-- **Technical Documentation** → technical-documentation-writer + api-design-specialist
-- **Code Documentation** → technical-documentation-writer + code-review-specialist
+#### 📝 Documentation (Comprehensive System Ready)
+- **API Documentation** → technical-documentation-writer (@docs/03-api/) ⭐
+- **Component Documentation** → technical-documentation-writer (@docs/06-frontend/)
+- **Setup Guides** → technical-documentation-writer (@docs/01-setup/)
 
 ---
 

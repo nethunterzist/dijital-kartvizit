@@ -2,11 +2,29 @@ import useSWR from 'swr';
 
 // Fetcher fonksiyonu
 const fetcher = async (url: string) => {
+  console.log('🔄 Fetching data from:', url);
+  
   const res = await fetch(url);
+  
+  console.log('📡 Response status:', res.status, res.statusText);
+  
   if (!res.ok) {
-    throw new Error('Veri çekilirken bir hata oluştu');
+    let errorMessage = `HTTP ${res.status}: ${res.statusText}`;
+    
+    try {
+      const errorData = await res.json();
+      errorMessage = errorData.error?.message || errorMessage;
+      console.error('❌ API Error Response:', errorData);
+    } catch (e) {
+      console.error('❌ Failed to parse error response');
+    }
+    
+    throw new Error(errorMessage);
   }
-  return res.json();
+  
+  const data = await res.json();
+  console.log('✅ Data fetched successfully:', data);
+  return data;
 };
 
 // Firmalar listesi için hook

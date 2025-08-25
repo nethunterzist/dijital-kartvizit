@@ -20,7 +20,6 @@ Modern ve kullanıcı dostu dijital kartvizit oluşturma platformu.
 - **Database**: Prisma ORM (SQLite/PostgreSQL)
 - **Authentication**: NextAuth.js
 - **File Upload**: Cloudinary
-- **Testing**: Jest + Cypress
 - **Deployment**: Vercel
 
 ## 📦 Kurulum
@@ -49,7 +48,6 @@ cp .env.example .env
 
 4. Veritabanını başlatın:
 ```bash
-npm run init-db
 npx prisma db push
 ```
 
@@ -111,22 +109,7 @@ NODE_ENV="production"
 │   ├── components/        # React bileşenleri
 │   └── lib/               # Utility fonksiyonları
 ├── prisma/                # Database schema ve migrations
-├── public/                # Static dosyalar
-├── cypress/               # E2E testler
-└── scripts/               # Utility scripts
-```
-
-## 🧪 Testing
-
-```bash
-# Unit testler
-npm run test
-
-# E2E testler
-npm run cypress:open
-
-# Test coverage
-npm run test:coverage
+└── public/                # Static dosyalar
 ```
 
 ## 📊 Performance

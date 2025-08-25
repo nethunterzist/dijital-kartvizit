@@ -1,0 +1,131 @@
+{
+  "iconOrder": [
+    {
+      "id": "qr",
+      "label": "QR Kod",
+      "icon": "fas fa-qrcode",
+      "type": "system",
+      "color": "#FFD700"
+    },
+    {
+      "id": "instagram",
+      "label": "Instagram",
+      "icon": "fab fa-instagram",
+      "type": "social",
+      "color": "#E4405F"
+    },
+    {
+      "id": "facebook",
+      "label": "Facebook",
+      "icon": "fab fa-facebook",
+      "type": "social",
+      "color": "#1877F2"
+    },
+    {
+      "id": "twitter",
+      "label": "Twitter",
+      "icon": "fab fa-twitter",
+      "type": "social",
+      "color": "#1DA1F2"
+    },
+    {
+      "id": "linkedin",
+      "label": "LinkedIn",
+      "icon": "fab fa-linkedin",
+      "type": "social",
+      "color": "#0A66C2"
+    },
+    {
+      "id": "youtube",
+      "label": "YouTube",
+      "icon": "fab fa-youtube",
+      "type": "social",
+      "color": "#FF0000"
+    },
+    {
+      "id": "tiktok",
+      "label": "TikTok",
+      "icon": "fab fa-tiktok",
+      "type": "social",
+      "color": "#000000"
+    },
+    {
+      "id": "telefon",
+      "label": "Telefon",
+      "icon": "fas fa-phone",
+      "type": "communication",
+      "color": "#4CAF50"
+    },
+    {
+      "id": "eposta",
+      "label": "E-posta",
+      "icon": "fas fa-envelope",
+      "type": "communication",
+      "color": "#FF5722"
+    },
+    {
+      "id": "whatsapp",
+      "label": "WhatsApp",
+      "icon": "fab fa-whatsapp",
+      "type": "communication",
+      "color": "#25D366"
+    },
+    {
+      "id": "telegram",
+      "label": "Telegram",
+      "icon": "fab fa-telegram",
+      "type": "communication",
+      "color": "#0088cc"
+    },
+    {
+      "id": "website",
+      "label": "Website",
+      "icon": "fas fa-globe",
+      "type": "communication",
+      "color": "#9C27B0"
+    },
+    {
+      "id": "harita",
+      "label": "Harita",
+      "icon": "fas fa-map-marker-alt",
+      "type": "communication",
+      "color": "#FF9800"
+    },
+    {
+      "id": "katalog",
+      "label": "Katalog",
+      "icon": "fas fa-book",
+      "type": "other",
+      "color": "#795548"
+    },
+    {
+      "id": "banka",
+      "label": "Banka Hesapları",
+      "icon": "fas fa-university",
+      "type": "system",
+      "color": "#FFD700"
+    },
+    {
+      "id": "vergi",
+      "label": "Vergi Bilgileri",
+      "icon": "fas fa-file-invoice",
+      "type": "system",
+      "color": "#2196F3"
+    },
+    {
+      "id": "hakkimizda",
+      "label": "Hakkımızda",
+      "icon": "fas fa-info-circle",
+      "type": "system",
+      "color": "#2196F3"
+    },
+    {
+      "id": "paylas",
+      "label": "Paylaş",
+      "icon": "fas fa-share-alt",
+      "type": "system",
+      "color": "#9C27B0"
+    }
+  ],
+  "updatedAt": "2025-08-24T21:24:40.885Z"
+}

@@ -7,8 +7,8 @@ import { Tab } from '@headlessui/react';
 import { Icon } from '@/app/lib/icons';
 import { environment } from '@/app/environment';
 import { logger } from '@/app/lib/logger';
-import PhonePreview from '@/components/PhonePreview';
-import TemplateSelector from '@/components/TemplateSelector';
+import PhonePreview from '@/app/components/PhonePreview';
+import TemplateSelector from '@/app/components/TemplateSelector';
 import { TEMPLATES } from '@/app/lib/templates/templateRegistry';
 
 // newBankAccount fonksiyonu: Yeni bir boş banka hesabı objesi oluşturur

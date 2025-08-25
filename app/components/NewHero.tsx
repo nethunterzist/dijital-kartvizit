@@ -28,7 +28,7 @@ export default function NewHero() {
         }} />
       </div>
 
-      <div className="max-w-6xl w-full text-center pt-32 pb-16 z-10 px-4">
+      <div className="max-w-6xl w-full text-center pt-32 pb-32 z-10 px-4">
         {/* Main Headline */}
         <div className="mb-6">
           <h1 className="text-5xl md:text-7xl font-extrabold text-gray-900 leading-tight mb-4">
@@ -36,7 +36,7 @@ export default function NewHero() {
           </h1>
           <div className="text-3xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-4">
             <Typewriter
-              words={['3 Adımda Oluşturun', 'Anında Paylaşın', 'Hemen Satın Alın']}
+              words={['Anında Paylaşın', 'Hemen Satın Alın', 'Profesyonelce Oluşturun']}
               loop={0}
               cursor
               cursorStyle='|'
@@ -91,116 +91,251 @@ export default function NewHero() {
             <span className="text-sm font-medium">%99.9 Uptime</span>
           </div>
         </div>
-
-        {/* Hero Visual */}
-        <div className="relative max-w-4xl mx-auto">
-          {/* 3D Phone Mockup */}
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 rounded-3xl blur-3xl opacity-20 scale-110"></div>
-            <div className="relative bg-white rounded-3xl shadow-2xl p-8 border border-gray-100">
-              <div className="grid md:grid-cols-3 gap-8 items-center">
-                {/* Phone 1 */}
-                <div className="transform rotate-3 hover:rotate-0 transition-transform duration-500">
-                  <div className="w-48 h-96 bg-black rounded-[2.5rem] p-2 shadow-2xl mx-auto">
-                    <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 rounded-[2rem] flex items-center justify-center">
-                      <div className="text-white text-center">
-                        <div className="w-16 h-16 bg-white rounded-full mx-auto mb-4 flex items-center justify-center">
-                          <i className="fas fa-user text-2xl text-gray-600"></i>
-                        </div>
-                        <h3 className="font-bold text-lg mb-1">Ahmet Yılmaz</h3>
-                        <p className="text-sm opacity-90">Genel Müdür</p>
-                        <div className="grid grid-cols-3 gap-2 mt-4">
-                          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                            <i className="fas fa-qrcode text-white text-xs"></i>
-                          </div>
-                          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                            <i className="fas fa-phone text-white text-xs"></i>
-                          </div>
-                          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                            <i className="fas fa-envelope text-white text-xs"></i>
-                          </div>
-                          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                            <i className="fab fa-instagram text-white text-xs"></i>
-                          </div>
-                          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                            <i className="fab fa-linkedin text-white text-xs"></i>
-                          </div>
-                          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                            <i className="fas fa-globe text-white text-xs"></i>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+        
+        {/* iPhone Carousel - Full Screen */}
+        <div className="relative left-1/2 transform -translate-x-1/2 w-screen overflow-hidden mt-16">
+          <div className="h-[600px] flex items-center">
+            <div className="flex animate-scroll gap-8">
+              {/* iPhone Mockup 1 */}
+              <div className="flex-shrink-0">
+                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
+                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
+                    <img 
+                      src="https://furkanyigit.com/sanal/1.jpg" 
+                      alt="Digital Business Card"
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                 </div>
+              </div>
 
-                {/* Phone 2 - Center */}
-                <div className="transform scale-110 hover:scale-125 transition-transform duration-500">
-                  <div className="w-48 h-96 bg-black rounded-[2.5rem] p-2 shadow-2xl mx-auto">
-                    <div className="w-full h-full bg-gradient-to-br from-green-500 to-teal-600 rounded-[2rem] flex items-center justify-center">
-                      <div className="text-white text-center">
-                        <div className="w-16 h-16 bg-white rounded-full mx-auto mb-4 flex items-center justify-center">
-                          <i className="fas fa-building text-2xl text-gray-600"></i>
-                        </div>
-                        <h3 className="font-bold text-lg mb-1">Tech Şirket</h3>
-                        <p className="text-sm opacity-90">Yazılım Geliştirme</p>
-                        <div className="grid grid-cols-3 gap-2 mt-4">
-                          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                            <i className="fas fa-qrcode text-white text-xs"></i>
-                          </div>
-                          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                            <i className="fas fa-university text-white text-xs"></i>
-                          </div>
-                          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                            <i className="fas fa-globe text-white text-xs"></i>
-                          </div>
-                          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                            <i className="fab fa-facebook text-white text-xs"></i>
-                          </div>
-                          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                            <i className="fab fa-youtube text-white text-xs"></i>
-                          </div>
-                          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                            <i className="fas fa-book text-white text-xs"></i>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+              {/* iPhone Mockup 2 */}
+              <div className="flex-shrink-0">
+                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
+                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
+                    <img 
+                      src="https://furkanyigit.com/sanal/2.jpg" 
+                      alt="Digital Business Card"
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                 </div>
+              </div>
 
-                {/* Phone 3 */}
-                <div className="transform -rotate-3 hover:rotate-0 transition-transform duration-500">
-                  <div className="w-48 h-96 bg-black rounded-[2.5rem] p-2 shadow-2xl mx-auto">
-                    <div className="w-full h-full bg-gradient-to-br from-pink-500 to-red-600 rounded-[2rem] flex items-center justify-center">
-                      <div className="text-white text-center">
-                        <div className="w-16 h-16 bg-white rounded-full mx-auto mb-4 flex items-center justify-center">
-                          <i className="fas fa-briefcase text-2xl text-gray-600"></i>
-                        </div>
-                        <h3 className="font-bold text-lg mb-1">Ayşe Demir</h3>
-                        <p className="text-sm opacity-90">Pazarlama Uzmanı</p>
-                        <div className="grid grid-cols-3 gap-2 mt-4">
-                          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                            <i className="fas fa-qrcode text-white text-xs"></i>
-                          </div>
-                          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                            <i className="fab fa-whatsapp text-white text-xs"></i>
-                          </div>
-                          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                            <i className="fab fa-twitter text-white text-xs"></i>
-                          </div>
-                          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                            <i className="fas fa-map-marker-alt text-white text-xs"></i>
-                          </div>
-                          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                            <i className="fab fa-tiktok text-white text-xs"></i>
-                          </div>
-                          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                            <i className="fas fa-info-circle text-white text-xs"></i>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+              {/* iPhone Mockup 3 */}
+              <div className="flex-shrink-0">
+                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
+                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
+                    <img 
+                      src="https://furkanyigit.com/sanal/3.jpg" 
+                      alt="Digital Business Card"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* iPhone Mockup 4 */}
+              <div className="flex-shrink-0">
+                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
+                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
+                    <img 
+                      src="https://furkanyigit.com/sanal/4.jpg" 
+                      alt="Digital Business Card"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* iPhone Mockup 5 */}
+              <div className="flex-shrink-0">
+                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
+                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
+                    <img 
+                      src="https://furkanyigit.com/sanal/5.jpg" 
+                      alt="Digital Business Card"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* iPhone Mockup 6 */}
+              <div className="flex-shrink-0">
+                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
+                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
+                    <img 
+                      src="https://furkanyigit.com/sanal/6.jpg" 
+                      alt="Digital Business Card"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* iPhone Mockup 7 */}
+              <div className="flex-shrink-0">
+                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
+                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
+                    <img 
+                      src="https://furkanyigit.com/sanal/7.jpg" 
+                      alt="Digital Business Card"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* iPhone Mockup 8 */}
+              <div className="flex-shrink-0">
+                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
+                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
+                    <img 
+                      src="https://furkanyigit.com/sanal/8.jpg" 
+                      alt="Digital Business Card"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* iPhone Mockup 9 */}
+              <div className="flex-shrink-0">
+                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
+                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
+                    <img 
+                      src="https://furkanyigit.com/sanal/9.jpg" 
+                      alt="Digital Business Card"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Repeat for infinite scroll effect - Full duplicate set */}
+              <div className="flex-shrink-0">
+                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
+                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
+                    <img 
+                      src="https://furkanyigit.com/sanal/1.jpg" 
+                      alt="Digital Business Card"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex-shrink-0">
+                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
+                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
+                    <img 
+                      src="https://furkanyigit.com/sanal/2.jpg" 
+                      alt="Digital Business Card"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex-shrink-0">
+                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
+                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
+                    <img 
+                      src="https://furkanyigit.com/sanal/3.jpg" 
+                      alt="Digital Business Card"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex-shrink-0">
+                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
+                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
+                    <img 
+                      src="https://furkanyigit.com/sanal/4.jpg" 
+                      alt="Digital Business Card"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex-shrink-0">
+                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
+                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
+                    <img 
+                      src="https://furkanyigit.com/sanal/5.jpg" 
+                      alt="Digital Business Card"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex-shrink-0">
+                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
+                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
+                    <img 
+                      src="https://furkanyigit.com/sanal/6.jpg" 
+                      alt="Digital Business Card"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex-shrink-0">
+                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
+                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
+                    <img 
+                      src="https://furkanyigit.com/sanal/7.jpg" 
+                      alt="Digital Business Card"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex-shrink-0">
+                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
+                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
+                    <img 
+                      src="https://furkanyigit.com/sanal/8.jpg" 
+                      alt="Digital Business Card"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex-shrink-0">
+                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
+                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
+                    <img 
+                      src="https://furkanyigit.com/sanal/9.jpg" 
+                      alt="Digital Business Card"
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                 </div>
               </div>
@@ -208,6 +343,20 @@ export default function NewHero() {
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes scroll {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
+        }
+        .animate-scroll {
+          animation: scroll 40s linear infinite;
+        }
+      `}</style>
 
       {/* Scroll indicator - Apple Mouse Style */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">

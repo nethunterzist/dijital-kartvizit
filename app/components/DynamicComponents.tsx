@@ -188,7 +188,7 @@ export const DynamicSmartFaq = dynamic(
 
 // Template selector için dynamic import
 export const DynamicTemplateSelector = dynamic(
-  () => import('@/components/TemplateSelector'),
+  () => import('@/app/components/TemplateSelector'),
   {
     loading: () => (
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -203,7 +203,7 @@ export const DynamicTemplateSelector = dynamic(
 
 // Phone preview için dynamic import
 export const DynamicPhonePreview = dynamic(
-  () => import('@/components/PhonePreview'),
+  () => import('@/app/components/PhonePreview'),
   {
     loading: () => (
       <div className="w-80 h-[600px] bg-gray-200 dark:bg-gray-700 rounded-[2.5rem] animate-pulse"></div>
