@@ -124,6 +124,16 @@ module.exports = {
 
 ### 🗄️ Veritabanı Sorunları
 
+#### SSL Certificate Hatası (Vercel + Supabase)
+```bash
+# Error: self-signed certificate in certificate chain
+# Error: cert file not found (Is a directory (os error 21))
+```
+**Çözüm:**
+📄 **[Detaylı SSL Certificate Çözüm Rehberi](./ssl-certificate-issues.md)**
+
+Bu kritik sorunu çözmek için yukarıdaki rehberi mutlaka inceleyin.
+
 #### Migration Hatası
 ```bash
 # Error: Migration failed to apply
