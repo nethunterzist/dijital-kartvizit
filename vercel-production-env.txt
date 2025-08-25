@@ -4,8 +4,8 @@ NEXT_PUBLIC_SUPABASE_URL=https://rlhqnrfhjumbkxghyocd.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsaHFucmZoanVtYmt4Z2h5b2NkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM1NjQ0MTUsImV4cCI6MjA2OTE0MDQxNX0.H4zO6N35FEJh0Ua1pufu36qQRHqAvfVsjzCqUX-_F1k
 SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsaHFucmZoanVtYmt4Z2h5b2NkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MzU2NDQxNSwiZXhwIjoyMDY5MTQwNDE1fQ.xggW4k6W0OJG_OCyduwcl3WGl570g_yoRbUsCluI_HQ
 
-# Database URL with pgbouncer for Vercel production - SSL fix
-DATABASE_URL=postgresql://postgres.rlhqnrfhjumbkxghyocd:0Urpxtr41fFlK9D@aws-0-eu-central-1.pooler.supabase.com:6543/postgres?sslmode=require&sslcert=&sslkey=&sslrootcert=
+# Database URL with pgbouncer for Vercel production - No SSL mode
+DATABASE_URL=postgresql://postgres.rlhqnrfhjumbkxghyocd:0Urpxtr41fFlK9D@aws-0-eu-central-1.pooler.supabase.com:6543/postgres
 
 # Application Configuration
 NEXTAUTH_SECRET=dijital-kartvizit-super-secret-key-2025-production-vercel-deployment
