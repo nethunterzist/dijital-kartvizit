@@ -81,6 +81,11 @@ const PhonePreview: React.FC<PhonePreviewProps> = ({
     );
 
     html = html.replace(
+      /\{\{#if firma_adi\}\}([\s\S]*?)\{\{\/if\}\}/g,
+      sampleData.firma_adi ? '$1' : ''
+    );
+
+    html = html.replace(
       /\{\{#if firma_logo\}\}([\s\S]*?)\{\{\/if\}\}/g,
       sampleData.firma_logo ? '$1' : ''
     );
@@ -465,17 +470,21 @@ const PhonePreview: React.FC<PhonePreviewProps> = ({
         
         {/* Phone Frame - Temalar sayfasındaki gibi */}
         <div className="w-80 h-[600px] bg-black rounded-[2.5rem] p-2 shadow-2xl">
-          <div className="w-full h-full bg-white rounded-[2rem] overflow-hidden relative">
+          <div className="w-full h-full rounded-[2rem] overflow-hidden relative" style={{ background: 'transparent' }}>
             {/* Preview Content - Isolated with iframe */}
             <iframe
               className="w-full h-full border-0"
+              style={{ backgroundColor: 'transparent' }}
+              frameBorder="0"
               srcDoc={`
                 <!DOCTYPE html>
                 <html>
                 <head>
+                  <base href="https://furkanyigit.com/">
                   <meta name="viewport" content="width=device-width, initial-scale=1.0">
                   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
                   <style>
+                    html,body{height:100%;margin:0;background:transparent!important}
                     body { 
                       margin: 0; 
                       padding: 0; 
@@ -551,6 +560,43 @@ const PhonePreview: React.FC<PhonePreviewProps> = ({
                         text-align: center !important;
                     }
                   </style>
+                  
+                  <style id="admin-preview-patch">
+                    html,body{height:100%;margin:0;background:transparent!important}
+                    .main-container{
+                      background-size: cover !important;
+                      background-color: transparent !important;
+                    }
+                    .company-logo-section {
+                      display: none !important;
+                    }
+                    .accounts-list {
+                      display: none !important;
+                    }
+                  </style>
+                  
+                  ${templateId === 4 || templateId === 8 ? `
+                    <style id="template-font-patch">
+                      body .profile-name,
+                      body .profile-position,
+                      body .company-name,
+                      body .person-name,
+                      body .position,
+                      body .contact-button,
+                      body .contact-button *,
+                      body .icon-label,
+                      body .main-content,
+                      body .main-content * {
+                        color: white !important;
+                      }
+                      body .contact-button {
+                        border-color: white !important;
+                      }
+                      body .contact-button i {
+                        color: white !important;
+                      }
+                    </style>
+                  ` : ''}
                 </head>
                 <body>
                   ${templateHtml}

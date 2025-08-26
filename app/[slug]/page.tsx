@@ -172,30 +172,42 @@ export default async function KartvizitPage({ params }: { params: { slug: string
         websiteArray = websiteItems.map(item => item.deger);
         console.log('🌐 Website array:', websiteArray);
 
-        // Sosyal medya verilerini normalize et
+        // Sosyal medya verilerini normalize et - HER PLATFORMDAN SADECE İLK HESAP!
         let socialMediaArray: any[] = [];
+        const processedPlatforms = new Set<string>();
+        
         firma.sosyal_medya_hesaplari.forEach((item) => {
-            const meta = SOCIAL_MEDIA_META[item.platform] || {};
-            socialMediaArray.push({
-                icon: meta.icon || '',
-                label: item.etiket || meta.label || item.platform,
-                url: item.url.startsWith('http') ? item.url : (meta.urlPrefix ? meta.urlPrefix + item.url : item.url),
-                platform: item.platform
-            });
+            // Her platformdan sadece ilk hesabı al
+            if (!processedPlatforms.has(item.platform)) {
+                processedPlatforms.add(item.platform);
+                const meta = SOCIAL_MEDIA_META[item.platform] || {};
+                socialMediaArray.push({
+                    icon: meta.icon || '',
+                    label: item.etiket || meta.label || item.platform,
+                    url: item.url.startsWith('http') ? item.url : (meta.urlPrefix ? meta.urlPrefix + item.url : item.url),
+                    platform: item.platform
+                });
+            }
         });
         console.log('📱 Social media array:', socialMediaArray);
 
-        // İletişim verilerini normalize et
+        // İletişim verilerini normalize et - HER TİPTEN SADECE İLK BİLGİ!
         let communicationArray: any[] = [];
+        const processedTypes = new Set<string>();
+        
         firma.iletisim_bilgileri.forEach((item) => {
-            const meta = COMM_META[item.tip] || {};
-            communicationArray.push({
-                icon: meta.icon || '',
-                label: item.etiket || meta.label || item.tip,
-                url: meta.urlPrefix ? meta.urlPrefix + item.deger : '',
-                value: item.deger,
-                tip: item.tip
-            });
+            // Her tipten sadece ilk bilgiyi al
+            if (!processedTypes.has(item.tip)) {
+                processedTypes.add(item.tip);
+                const meta = COMM_META[item.tip] || {};
+                communicationArray.push({
+                    icon: meta.icon || '',
+                    label: item.etiket || meta.label || item.tip,
+                    url: meta.urlPrefix ? meta.urlPrefix + item.deger : '',
+                    value: item.deger,
+                    tip: item.tip
+                });
+            }
         });
         console.log('📞 Communication array:', communicationArray);
 
@@ -258,19 +270,23 @@ export default async function KartvizitPage({ params }: { params: { slug: string
         console.log('  - facebook:', facebook);
         console.log('  - linkedin:', linkedin);
 
-        // Transform communication data for new template structure
+        // Transform communication data for new template structure - SADECE İLK DEĞER!
         const communication_data: Record<string, Array<{value: string, label: string}>> = {};
+        const processedCommTypes = new Set<string>();
         
-        // Group by type
+        // Group by type - but only first of each type!
         firma.iletisim_bilgileri.forEach(item => {
-            const key = `${item.tip}lar`; // telefon -> telefonlar
-            if (!communication_data[key]) {
-                communication_data[key] = [];
+            if (!processedCommTypes.has(item.tip)) {
+                processedCommTypes.add(item.tip);
+                const key = `${item.tip}lar`; // telefon -> telefonlar
+                if (!communication_data[key]) {
+                    communication_data[key] = [];
+                }
+                communication_data[key].push({
+                    value: item.deger,
+                    label: item.etiket
+                });
             }
-            communication_data[key].push({
-                value: item.deger,
-                label: item.etiket
-            });
         });
 
         // Handle special cases

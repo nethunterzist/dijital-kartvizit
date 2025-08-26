@@ -1,4 +1,4 @@
-export const goldTemplate = `<!DOCTYPE html>
+export const luxuryBlackTemplate = `<!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
@@ -35,7 +35,7 @@ export const goldTemplate = `<!DOCTYPE html>
         }
 
         .main-container {
-            background: url('https://www.businesstimetv.com/dijitalkimlik/img/back.jpeg') no-repeat center center;
+            background: url('https://furkanyigit.com/dijital/bg/5.png') no-repeat center center;
             background-size: contain;
             width: 100%;
             min-height: 100vh;

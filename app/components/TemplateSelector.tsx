@@ -69,17 +69,59 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
           html = html.replace(/\{\{#each.*?\}\}([\s\S]*?)\{\{.*?\/each\}\}/g, '');
           html = html.replace(/\{\{#unless.*?\}\}([\s\S]*?)\{\{.*?\/unless\}\}/g, '');
           
-          // Basit ikonlar ekle
-          const simpleIcons = `
-            <div class="icon-card"><a href="#"><i class="fas fa-qrcode"></i><span class="icon-label">QR Kod</span></a></div>
-            <div class="icon-card"><a href="#"><i class="fas fa-phone"></i><span class="icon-label">Telefon</span></a></div>
-            <div class="icon-card"><a href="#"><i class="fas fa-envelope"></i><span class="icon-label">E-posta</span></a></div>
-            <div class="icon-card"><a href="#"><i class="fab fa-whatsapp"></i><span class="icon-label">WhatsApp</span></a></div>
-            <div class="icon-card"><a href="#"><i class="fab fa-instagram"></i><span class="icon-label">Instagram</span></a></div>
-            <div class="icon-card"><a href="#"><i class="fab fa-facebook"></i><span class="icon-label">Facebook</span></a></div>
-            <div class="icon-card"><a href="#"><i class="fas fa-globe"></i><span class="icon-label">Website</span></a></div>
-            <div class="icon-card"><a href="#"><i class="fas fa-university"></i><span class="icon-label">Banka</span></a></div>
-          `;
+          // Basit ikonlar ekle - Template'e göre format
+          let simpleIcons = '';
+          if (template.id === 1) {
+            // Gold template için özel format
+            simpleIcons = `
+              <div class="icon-item">
+                <a href="#" class="icon-link icon-telefon">
+                  <i class="fas fa-phone"></i>
+                </a>
+                <span class="icon-label">Telefon</span>
+              </div>
+              <div class="icon-item">
+                <a href="#" class="icon-link icon-whatsapp">
+                  <i class="fab fa-whatsapp"></i>
+                </a>
+                <span class="icon-label">WhatsApp</span>
+              </div>
+              <div class="icon-item">
+                <a href="#" class="icon-link icon-email">
+                  <i class="fas fa-envelope"></i>
+                </a>
+                <span class="icon-label">E-posta</span>
+              </div>
+              <div class="icon-item">
+                <a href="#" class="icon-link icon-instagram">
+                  <i class="fab fa-instagram"></i>
+                </a>
+                <span class="icon-label">Instagram</span>
+              </div>
+              <div class="icon-item">
+                <a href="#" class="icon-link icon-website">
+                  <i class="fas fa-globe"></i>
+                </a>
+                <span class="icon-label">Website</span>
+              </div>
+              <div class="icon-item">
+                <a href="#" class="icon-link icon-qr">
+                  <i class="fas fa-qrcode"></i>
+                </a>
+                <span class="icon-label">QR Kod</span>
+              </div>
+            `;
+          } else {
+            // Diğer template'ler için standart format
+            simpleIcons = `
+              <div class="icon-card"><a href="#"><i class="fas fa-phone"></i><span class="icon-label">Telefon</span></a></div>
+              <div class="icon-card"><a href="#"><i class="fab fa-whatsapp"></i><span class="icon-label">WhatsApp</span></a></div>
+              <div class="icon-card"><a href="#"><i class="fas fa-envelope"></i><span class="icon-label">E-posta</span></a></div>
+              <div class="icon-card"><a href="#"><i class="fab fa-instagram"></i><span class="icon-label">Instagram</span></a></div>
+              <div class="icon-card"><a href="#"><i class="fas fa-globe"></i><span class="icon-label">Website</span></a></div>
+              <div class="icon-card"><a href="#"><i class="fas fa-qrcode"></i><span class="icon-label">QR Kod</span></a></div>
+            `;
+          }
 
           // İkon yerleştir
           html = html.replace('<div class="icons-grid">', `<div class="icons-grid">${simpleIcons}`);
@@ -96,19 +138,20 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
               * { box-sizing: border-box; }
               body { 
                 margin: 0; 
-                padding: 8px; 
+                padding: 0; 
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                transform: scale(0.35);
+                transform: scale(0.25);
                 transform-origin: top left;
-                width: 285%;
-                height: 285%;
-                background: white;
+                width: 400%;
+                height: 400%;
+                background: transparent;
                 overflow: hidden;
               }
               .container { 
                 max-width: 100%; 
                 padding: 16px;
                 min-height: 100vh;
+                box-sizing: border-box;
               }
               .profile-section { 
                 text-align: center; 
@@ -161,6 +204,49 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
                 padding: 16px 0;
                 max-width: 100%;
               }
+              
+              /* Gold template için özel stiller */
+              .icon-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+              }
+              
+              .icon-link {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 55px;
+                height: 55px;
+                background: rgba(246, 246, 246, 0.28);
+                border-radius: 12px;
+                border: 3px solid #000000;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                text-decoration: none;
+                transition: all 0.3s ease;
+                box-sizing: border-box;
+              }
+              
+              .icon-link i {
+                font-size: 1.5rem;
+                color: var(--text-dark, #2C2C2C);
+              }
+              
+              .icon-item .icon-label {
+                font-size: 0.75rem;
+                font-weight: 500;
+                color: var(--text-dark, #2C2C2C);
+                text-align: center;
+              }
+              
+              /* Gold template icon renkler */
+              .icon-telefon i { color: #4CAF50 !important; }
+              .icon-whatsapp i { color: #25D366 !important; }
+              .icon-email i { color: #FF9800 !important; }
+              .icon-instagram i { color: #E4405F !important; }
+              .icon-website i { color: #607D8B !important; }
+              .icon-qr i { color: #9C27B0 !important; }
               .icon-card { 
                 display: flex; 
                 flex-direction: column; 
@@ -319,15 +405,6 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
                         />
                       )}
                       
-                      {/* Clickable Overlay */}
-                      <div 
-                        className="absolute inset-0 z-10 cursor-pointer"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleTemplateSelect(template.id);
-                        }}
-                      />
                     </div>
                     
                     {/* Selected Indicator */}
