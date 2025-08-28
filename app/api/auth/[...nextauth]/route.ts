@@ -1,6 +1,9 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 const handler = NextAuth({
   providers: [
@@ -12,23 +15,46 @@ const handler = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.username || !credentials?.password) {
+          console.log('❌ Credentials eksik');
           return null;
         }
 
         try {
-          // Hardcoded admin check for now to bypass database issues
-          if (credentials.username === 'admin' && credentials.password === 'admin123') {
+          console.log('🔍 Auth deneniyor:', credentials.username);
+          
+          // Database'den kullanıcıyı bul
+          const user = await prisma.admins.findFirst({
+            where: { username: credentials.username }
+          });
+          
+          if (!user) {
+            console.log('❌ Kullanıcı bulunamadı:', credentials.username);
+            return null;
+          }
+          
+          console.log('✅ Kullanıcı bulundu, şifre kontrol ediliyor');
+          
+          // Şifre karşılaştır
+          const passwordMatch = await bcrypt.compare(credentials.password, user.password);
+          
+          console.log('🔐 Şifre karşılaştırması:', passwordMatch);
+          
+          if (passwordMatch) {
+            console.log('✅ Login başarılı!');
             return {
-              id: '1',
-              name: 'admin',
+              id: user.id.toString(),
+              name: user.username,
               email: null,
             };
           }
           
+          console.log('❌ Şifre yanlış');
           return null;
         } catch (error) {
-          console.error('Auth error:', error);
+          console.error('💥 Auth error:', error);
           return null;
+        } finally {
+          await prisma.$disconnect();
         }
       }
     })
