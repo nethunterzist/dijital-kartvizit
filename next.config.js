@@ -21,6 +21,10 @@ const nextConfig = {
     poweredByHeader: false,
     generateEtags: true,
     
+    // Static file serving configuration for standalone mode
+    assetPrefix: '',
+    trailingSlash: false,
+    
     // Advanced optimizations for production
     compiler: {
       removeConsole: {
