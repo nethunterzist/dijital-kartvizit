@@ -25,6 +25,12 @@ const nextConfig = {
     // assetPrefix must be undefined for standalone mode
     trailingSlash: false,
     
+    // Experimental feature to copy static files in standalone mode
+    experimental: {
+      ...experimental,
+      outputFileTracingRoot: process.cwd(),
+    },
+    
     // Advanced optimizations for production
     compiler: {
       removeConsole: {
