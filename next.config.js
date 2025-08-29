@@ -22,7 +22,7 @@ const nextConfig = {
     generateEtags: true,
     
     // Static file serving configuration for standalone mode
-    assetPrefix: '',
+    // assetPrefix must be undefined for standalone mode
     trailingSlash: false,
     
     // Advanced optimizations for production
