@@ -13,6 +13,9 @@ const nextConfig = {
     optimizePackageImports: ['@heroicons/react', 'lucide-react', 'react-icons'],
     serverComponentsExternalPackages: ['bcrypt', 'prisma'],
     optimizeServerReact: true,
+    ...(process.env.NODE_ENV === 'production' && {
+      outputFileTracingRoot: process.cwd(),
+    }),
   },
   
   // Production optimizations
@@ -25,11 +28,6 @@ const nextConfig = {
     // assetPrefix must be undefined for standalone mode
     trailingSlash: false,
     
-    // Experimental feature to copy static files in standalone mode
-    experimental: {
-      ...experimental,
-      outputFileTracingRoot: process.cwd(),
-    },
     
     // Advanced optimizations for production
     compiler: {
