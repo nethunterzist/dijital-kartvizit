@@ -1,23 +1,27 @@
 # Use Node.js 20 Alpine for smaller image size
 FROM node:20-alpine
 
+# Install build dependencies
+RUN apk add --no-cache python3 make g++
+
 # Set working directory
 WORKDIR /app
 
-# Copy package files first for better Docker layer caching
+# Copy package files and install dependencies
 COPY package*.json ./
-
-# Install dependencies
-RUN npm ci --only=production=false
+RUN npm install
 
 # Copy all source code
 COPY . .
 
-# Generate Prisma client
-RUN npx prisma generate
+# Accept runtime environment variables
+ARG DATABASE_URL
+ARG NEXTAUTH_URL
+ARG NEXTAUTH_SECRET
 
-# Build the Next.js application
-RUN npm run build
+ENV DATABASE_URL=$DATABASE_URL
+ENV NEXTAUTH_URL=$NEXTAUTH_URL
+ENV NEXTAUTH_SECRET=$NEXTAUTH_SECRET
 
 # Expose port 3000
 EXPOSE 3000
@@ -30,5 +34,5 @@ RUN adduser -S nextjs -u 1001
 RUN chown -R nextjs:nodejs /app
 USER nextjs
 
-# Start the application
-CMD ["npm", "start"]
+# Generate Prisma client, build and start the application
+CMD ["sh", "-c", "npx prisma generate && npm run build && npm start"]

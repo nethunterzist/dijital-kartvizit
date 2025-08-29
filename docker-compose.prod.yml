@@ -2,7 +2,12 @@ version: '3.8'
 
 services:
   app:
-    build: .
+    build:
+      context: .
+      args:
+        DATABASE_URL: postgresql://postgres:v1JuQjXhW6g23DdR7TVpFz4z0aanP5uGGzXf2r0GPphCa71fF7qoIj6z197rjR34@46.62.171.65:5432/dijitalkartvizit?sslmode=disable
+        NEXTAUTH_URL: https://fowksko404s008ogkg4gw0gk.46.62.171.65.sslip.io
+        NEXTAUTH_SECRET: your_secret_key_here
     ports:
       - "3000:3000"
     environment:
