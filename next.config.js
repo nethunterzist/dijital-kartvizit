@@ -20,12 +20,11 @@ const nextConfig = {
   
   // Production optimizations
   ...(process.env.NODE_ENV === 'production' && {
-    output: 'standalone',
+    // output: 'standalone', // DISABLED - causing static asset issues
     poweredByHeader: false,
     generateEtags: true,
     
-    // Static file serving configuration for standalone mode
-    // assetPrefix must be undefined for standalone mode
+    // Static file serving configuration
     trailingSlash: false,
     
     
