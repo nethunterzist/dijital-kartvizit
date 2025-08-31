@@ -33,6 +33,7 @@ interface PhonePreviewProps {
       currency: string;
     }>;
   }>;
+  gradientColor?: string;
 }
 
 const PhonePreview: React.FC<PhonePreviewProps> = ({
@@ -46,7 +47,8 @@ const PhonePreview: React.FC<PhonePreviewProps> = ({
   firmaHakkinda,
   firmaHakkindaBaslik,
   templateId = 2,
-  bankAccounts = []
+  bankAccounts = [],
+  gradientColor = '#D4AF37,#F7E98E,#B8860B'
 }) => {
   // Gerçek template HTML'ini oluştur
   const templateHtml = useMemo(() => {
@@ -72,7 +74,8 @@ const PhonePreview: React.FC<PhonePreviewProps> = ({
       .replace(/\{\{profil_foto\}\}/g, sampleData.profil_foto)
       .replace(/\{\{firma_logo\}\}/g, sampleData.firma_logo)
       .replace(/\{\{firma_hakkinda\}\}/g, sampleData.firma_hakkinda)
-      .replace(/\{\{firma_hakkinda_baslik\}\}/g, sampleData.firma_hakkinda_baslik);
+      .replace(/\{\{firma_hakkinda_baslik\}\}/g, sampleData.firma_hakkinda_baslik)
+      .replace(/\{\{gradient_color\}\}/g, gradientColor);
 
     // Conditional blokları işle
     html = html.replace(
@@ -98,6 +101,12 @@ const PhonePreview: React.FC<PhonePreviewProps> = ({
     html = html.replace(
       /\{\{#if yetkili_pozisyon\}\}([\s\S]*?)\{\{\/if\}\}/g,
       sampleData.yetkili_pozisyon ? '$1' : ''
+    );
+
+    // Gradient color conditional blokları işle
+    html = html.replace(
+      /\{\{#if gradient_color\}\}([\s\S]*?)\{\{else\}\}([\s\S]*?)\{\{\/if\}\}/g,
+      gradientColor ? '$1' : '$2'
     );
 
     // İkonları oluştur
@@ -220,6 +229,16 @@ const PhonePreview: React.FC<PhonePreviewProps> = ({
             <span class="icon-label">${icon.label}</span>
           </div>
         `;
+      } else if (templateId === 3 || templateId === 8) {
+        // Golden Edge ve Golden Blocks için özel format
+        iconsHtml += `
+          <div class="icon-card">
+            <a href="${icon.url}" class="icon-link">
+              <i class="${icon.icon}"></i>
+            </a>
+            <span class="icon-label">${icon.label}</span>
+          </div>
+        `;
       } else {
         iconsHtml += `
           <div class="icon-card">
@@ -233,11 +252,11 @@ const PhonePreview: React.FC<PhonePreviewProps> = ({
     });
 
     // Template'e göre ikon yerleştirme
-    if (templateId === 3 || templateId === 8 || templateId === 14) {
-      // Minimal template'ler - liste formatı
+    if (templateId === 9 || templateId === 14) {
+      // Sadece gerçek minimal template'ler - liste formatı
       html = html.replace('<div class="icons-grid">', `<div class="icons-grid minimal-list">${iconsHtml}`);
     } else {
-      // Diğer template'ler - grid formatı
+      // Diğer template'ler - grid formatı (Golden Edge ve Golden Blocks dahil)
       html = html.replace('<div class="icons-grid">', `<div class="icons-grid">${iconsHtml}`);
     }
 
@@ -434,11 +453,12 @@ const PhonePreview: React.FC<PhonePreviewProps> = ({
         .bank-icon {
           ${bankAccounts && bankAccounts.length > 0 && bankAccounts.some(bank => bank.accounts.some(acc => acc.iban)) ? '' : 'display: none !important;'}
         }
+        
       </style>
     `;
 
     return mobileCSS + html;
-  }, [templateId, firmaAdi, yetkiliAdi, yetkiliPozisyon, profilFotoPreview, firmaLogoPreview, communicationAccounts, socialMediaAccounts, firmaHakkinda, firmaHakkindaBaslik, bankAccounts]);
+  }, [templateId, firmaAdi, yetkiliAdi, yetkiliPozisyon, profilFotoPreview, firmaLogoPreview, communicationAccounts, socialMediaAccounts, firmaHakkinda, firmaHakkindaBaslik, bankAccounts, gradientColor]);
 
   // Template bilgisini al
   const templateInfo = TEMPLATES.find(t => t.id === templateId);
@@ -480,7 +500,7 @@ const PhonePreview: React.FC<PhonePreviewProps> = ({
                 <!DOCTYPE html>
                 <html>
                 <head>
-                  <base href="https://furkanyigit.com/">
+                  <base href="/">
                   <meta name="viewport" content="width=device-width, initial-scale=1.0">
                   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
                   <style>
@@ -559,6 +579,65 @@ const PhonePreview: React.FC<PhonePreviewProps> = ({
                         color: var(--text-dark) !important;
                         text-align: center !important;
                     }
+                    
+                    /* Golden Edge (3) ve Golden Blocks (8) için iframe CSS */
+                    ${templateId === 3 || templateId === 8 ? `
+                    .icon-card {
+                        display: flex !important;
+                        flex-direction: column !important;
+                        align-items: center !important;
+                        gap: 8px !important;
+                        text-align: center !important;
+                        padding: 8px 4px !important;
+                        border-radius: 6px !important;
+                        min-height: auto !important;
+                        justify-content: center !important;
+                    }
+                    
+                    .icon-card .icon-link {
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        width: 70px !important;
+                        height: 70px !important;
+                        background: rgb(246 246 246 / 28%) !important;
+                        border-radius: 15px !important;
+                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+                        transition: all 0.3s ease !important;
+                        text-decoration: none !important;
+                        margin-bottom: 6px !important;
+                    }
+                    
+                    .icon-card .icon-link i {
+                        font-size: 2.2rem !important;
+                        color: var(--text-dark, #2C2C2C) !important;
+                    }
+                    
+                    .icon-card .icon-label {
+                        font-size: 0.75rem !important;
+                        font-weight: 500 !important;
+                        color: var(--text-dark, #2C2C2C) !important;
+                        text-align: center !important;
+                        line-height: 1.2 !important;
+                    }
+                    
+                    .icon-card .fa-phone { color: #4CAF50 !important; }
+                    .icon-card .fa-map-marker-alt { color: #FF5722 !important; }
+                    .icon-card .fa-whatsapp { color: #25D366 !important; }
+                    .icon-card .fa-instagram { color: #E4405F !important; }
+                    .icon-card .fa-envelope { color: #FF9800 !important; }
+                    .icon-card .fa-share-alt { color: #2196F3 !important; }
+                    .icon-card .fa-qrcode { color: #9C27B0 !important; }
+                    .icon-card .fa-globe { color: #607D8B !important; }
+                    .icon-card .fa-facebook { color: #1877F2 !important; }
+                    .icon-card .fa-twitter { color: #1DA1F2 !important; }
+                    .icon-card .fa-linkedin { color: #0077B5 !important; }
+                    .icon-card .fa-youtube { color: #FF0000 !important; }
+                    .icon-card .fa-tiktok { color: #000000 !important; }
+                    .icon-card .fa-telegram { color: #0088CC !important; }
+                    .icon-card .fa-university { color: #FFD700 !important; }
+                    .icon-card .fa-info-circle { color: #17A2B8 !important; }
+                    ` : ''}
                   </style>
                   
                   <style id="admin-preview-patch">

@@ -331,7 +331,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
         />
 
         {/* Modal */}
-        <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-6xl sm:w-full">
+        <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-6xl sm:w-full sm:max-h-[90vh]">
           {/* Header */}
           <div className="bg-white px-6 py-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
@@ -373,9 +373,9 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
           </div>
 
           {/* Content */}
-          <div className="bg-gray-50 px-6 py-6">
+          <div className="bg-gray-50 px-6 py-6 overflow-y-auto max-h-[calc(90vh-140px)]">
             {/* Templates Grid */}
-            <div className="grid grid-cols-5 gap-4 mb-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-6">
               {currentTemplates.map((template) => (
                 <div
                   key={template.id}
@@ -383,7 +383,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
                   onClick={() => handleTemplateSelect(template.id)}
                 >
                   {/* Phone Frame */}
-                  <div className="w-full aspect-[9/16] bg-black rounded-[1rem] p-1 shadow-lg transition-all duration-200">
+                  <div className="w-full aspect-[3/4] bg-black rounded-[1rem] p-1 shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-105">
                     <div className="w-full h-full bg-white rounded-[0.75rem] overflow-hidden relative">
                       {/* Preview Content */}
                       {previewHtmls[template.id] && (

@@ -18,9 +18,9 @@ export function getBaseUrl(): string {
   }
   
   // Server-side ortamında environment variables kontrol et
-  if (process.env.VERCEL_URL) {
-    const url = `https://${process.env.VERCEL_URL}`;
-    logger.info('getBaseUrl: Running on Vercel, using VERCEL_URL', { url });
+  if (process.env.NEXTAUTH_URL) {
+    const url = process.env.NEXTAUTH_URL;
+    logger.info('getBaseUrl: Using NEXTAUTH_URL', { url });
     return url;
   }
   
@@ -47,10 +47,10 @@ export function getApiUrl(): string {
  * Request headers'ından port bilgisini alır
  */
 export function getServerBaseUrl(headers?: Headers): string {
-  // Vercel production ortamında absolute URL gerekli
-  if (process.env.VERCEL_URL && process.env.NODE_ENV === 'production') {
-    const url = `https://${process.env.VERCEL_URL}`;
-    logger.info('getServerBaseUrl: Using Vercel URL in production', { url });
+  // Production ortamında absolute URL gerekli
+  if (process.env.NEXTAUTH_URL && process.env.NODE_ENV === 'production') {
+    const url = process.env.NEXTAUTH_URL;
+    logger.info('getServerBaseUrl: Using NEXTAUTH_URL in production', { url });
     return url;
   }
   

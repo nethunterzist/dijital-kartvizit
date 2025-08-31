@@ -44,7 +44,8 @@ const BANKALAR = [
   { id: "anadolubank", label: "AnadoluBank", logo: "/img/banks/anadolubank.png" },
   { id: "sekerbank", label: "Şekerbank", logo: "/img/banks/sekerbank.png" },
   { id: "icbc", label: "ICBC Turkey Bank", logo: "/img/banks/icbc.png" },
-  { id: "odeabank", label: "Odeabank", logo: "/img/banks/odeabank.png" }
+  { id: "odeabank", label: "Odeabank", logo: "/img/banks/odeabank.png" },
+  { id: "enpara", label: "Enpara", logo: "/img/banks/enpara.png" }
 ];
 
 interface Firma {
@@ -95,19 +96,20 @@ interface CommunicationAccount {
   label?: string; // Özel başlık için yeni alan eklendi
 }
 
-// Cloudinary'ye PDF yükleme fonksiyonu
-async function uploadPdfToCloudinary(file: File): Promise<string> {
+// Local file upload fonksiyonu
+async function uploadFileToLocal(file: File, folder: string): Promise<string> {
   const formData = new FormData();
   formData.append('file', file);
-  formData.append('upload_preset', environment.cloudinary.uploadPreset);
 
-  const res = await fetch(environment.cloudinary.uploadUrl, {
+  const res = await fetch(`/api/upload?folder=${folder}`, {
     method: 'POST',
     body: formData,
   });
-  if (!res.ok) throw new Error('PDF yükleme başarısız');
+  
+  if (!res.ok) throw new Error(`${folder} dosya yükleme başarısız`);
+
   const data = await res.json();
-  return data.secure_url;
+  return data.url;
 }
 
 export default function FirmaDuzenlePage({ params }: { params: { id: string } }) {
@@ -146,6 +148,7 @@ export default function FirmaDuzenlePage({ params }: { params: { id: string } })
   const [selectedTab, setSelectedTab] = useState(0);
   const [templateId, setTemplateId] = useState(2);
   const [isTemplateSelectorOpen, setIsTemplateSelectorOpen] = useState(false);
+  const [gradientColor, setGradientColor] = useState('#D4AF37,#F7E98E,#B8860B');
 
   // Sosyal medya için state (telefonlar, epostalar ve whatsapplar da buraya taşındı)
   const [socialMediaAccounts, setSocialMediaAccounts] = useState<SocialMediaAccount[]>([{
@@ -232,6 +235,7 @@ export default function FirmaDuzenlePage({ params }: { params: { id: string } })
         setYetkiliAdi(firma.yetkili_adi || "");
         setYetkiliPozisyon(firma.yetkili_pozisyon || "");
         setTemplateId(firma.template_id || 2);
+        setGradientColor(firma.gradient_color || '#D4AF37,#F7E98E,#B8860B');
         
         // Profil fotoğrafı varsa önizleme ayarla
         if (firma.profil_foto) {
@@ -615,6 +619,7 @@ export default function FirmaDuzenlePage({ params }: { params: { id: string } })
       formData.append("firma_vergi_no", firmaVergiNo);
       formData.append("vergi_dairesi", vergiDairesi);
       formData.append("templateId", templateId.toString());
+      formData.append("gradientColor", gradientColor);
 
       // İletişim verilerini FormData'ya doğru formatta ekle
       validCommunicationAccounts.forEach((account, index) => {
@@ -653,8 +658,8 @@ export default function FirmaDuzenlePage({ params }: { params: { id: string } })
       }
       
       if (katalogDosya) {
-        // Önce Cloudinary'ye yükle
-        const katalogUrl = await uploadPdfToCloudinary(katalogDosya);
+        // Local storage'a yükle
+        const katalogUrl = await uploadFileToLocal(katalogDosya, 'firma_kataloglari');
         formData.append('katalog', katalogUrl);
       }
       
@@ -1001,6 +1006,105 @@ export default function FirmaDuzenlePage({ params }: { params: { id: string } })
                               onChange={handleFirmaLogoChange}
                               className="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-gray-300 dark:border-gray-600 rounded-lg p-3 bg-white dark:bg-gray-800"
                             />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Profil Çerçeve Rengi - TAM GENİŞLİK */}
+                    <div className="mt-6">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                        Profil Çerçeve Rengi
+                      </label>
+                      <div className="space-y-4">
+                        {/* Hazır renk seçenekleri - 2 satır halinde */}
+                        <div className="grid grid-cols-5 gap-3">
+                          {[
+                            { name: 'Altın', colors: '#D4AF37,#F7E98E,#B8860B', preview: 'linear-gradient(45deg, #D4AF37, #F7E98E, #B8860B)' },
+                            { name: 'Mavi', colors: '#2563EB,#60A5FA,#1D4ED8', preview: 'linear-gradient(45deg, #2563EB, #60A5FA, #1D4ED8)' },
+                            { name: 'Yeşil', colors: '#059669,#34D399,#047857', preview: 'linear-gradient(45deg, #059669, #34D399, #047857)' },
+                            { name: 'Mor', colors: '#7C3AED,#A78BFA,#5B21B6', preview: 'linear-gradient(45deg, #7C3AED, #A78BFA, #5B21B6)' },
+                            { name: 'Kırmızı', colors: '#DC2626,#F87171,#B91C1C', preview: 'linear-gradient(45deg, #DC2626, #F87171, #B91C1C)' },
+                            { name: 'Turuncu', colors: '#EA580C,#FB923C,#C2410C', preview: 'linear-gradient(45deg, #EA580C, #FB923C, #C2410C)' },
+                            { name: 'Pembe', colors: '#EC4899,#F472B6,#BE185D', preview: 'linear-gradient(45deg, #EC4899, #F472B6, #BE185D)' },
+                            { name: 'Cyan', colors: '#0891B2,#22D3EE,#0E7490', preview: 'linear-gradient(45deg, #0891B2, #22D3EE, #0E7490)' },
+                            { name: 'İndigo', colors: '#4338CA,#818CF8,#312E81', preview: 'linear-gradient(45deg, #4338CA, #818CF8, #312E81)' },
+                            { name: 'Siyah', colors: '#374151,#6B7280,#111827', preview: 'linear-gradient(45deg, #374151, #6B7280, #111827)' }
+                          ].map((option) => (
+                            <button
+                              key={option.name}
+                              type="button"
+                              onClick={() => setGradientColor(option.colors)}
+                              className={`h-16 rounded-lg transition-all hover:scale-105 border-4 ${
+                                gradientColor === option.colors ? 'border-gray-800 shadow-lg ring-2 ring-blue-500' : 'border-gray-300'
+                              }`}
+                              style={{ background: option.preview }}
+                              title={option.name}
+                            />
+                          ))}
+                        </div>
+
+                        {/* Özel Gradient ve Renk Seçimi */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {/* Özel gradient girişi */}
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+                              Özel Gradient
+                            </label>
+                            <input
+                              type="text"
+                              value={gradientColor}
+                              onChange={(e) => setGradientColor(e.target.value)}
+                              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                              placeholder="#D4AF37,#F7E98E,#B8860B"
+                            />
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Format: #renk1,#renk2,#renk3</p>
+                          </div>
+                          
+                          {/* Renk Seçici */}
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+                              Renk Seçici
+                            </label>
+                            <div className="grid grid-cols-3 gap-2">
+                              {[1, 2, 3].map((num) => {
+                                const colors = gradientColor.split(',');
+                                const currentColor = colors[num - 1]?.trim() || '#D4AF37';
+                                
+                                return (
+                                  <div key={num}>
+                                    <input
+                                      type="color"
+                                      value={currentColor}
+                                      onChange={(e) => {
+                                        const newColors = [...colors];
+                                        newColors[num - 1] = e.target.value;
+                                        while (newColors.length < 3) newColors.push('#D4AF37');
+                                        setGradientColor(newColors.slice(0, 3).join(','));
+                                      }}
+                                      className="w-full h-12 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer"
+                                    />
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-1">Renk {num}</p>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Önizleme */}
+                        <div className="flex items-center justify-center p-4 bg-gray-100 dark:bg-gray-600 rounded-lg">
+                          <div className="flex items-center space-x-4">
+                            <div
+                              className="w-20 h-20 rounded-full border-4 border-white shadow-lg"
+                              style={{
+                                background: gradientColor ? `linear-gradient(45deg, ${gradientColor})` : 'linear-gradient(45deg, #D4AF37, #F7E98E, #B8860B)'
+                              }}
+                            />
+                            <div>
+                              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Önizleme</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">{gradientColor}</p>
+                            </div>
                           </div>
                         </div>
                       </div>

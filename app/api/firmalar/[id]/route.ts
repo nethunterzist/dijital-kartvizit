@@ -8,6 +8,7 @@ import { parseForm, processImages } from '@/app/lib/multerHelper';
 import { generateQRCode } from '@/app/lib/qrCodeGenerator';
 import { logger } from '@/app/lib/logger';
 import { PrismaClient } from '@prisma/client';
+import { LocalFileUploadService } from '@/app/lib/services/LocalFileUploadService';
 
 // Prisma singleton
 const globalForPrisma = globalThis as unknown as {
@@ -288,18 +289,42 @@ export async function PUT(
 
   let data: Record<string, any> = {};
   let isFormData = false;
+  let originalFormData: FormData | null = null;
 
   try {
     // Önce FormData olarak parse etmeyi dene
     try {
       const formData = await request.formData();
       isFormData = true;
+      originalFormData = formData;
+      
+      // File olmayan değerleri data'ya aktar
       for (const [key, value] of formData.entries()) {
         if (!(value instanceof File)) {
           data[key] = value;
         }
       }
       logger.info("FormData başarıyla ayrıştırıldı:", Object.keys(data));
+      
+      // File upload işlemleri
+      const uploadService = new LocalFileUploadService();
+      const uploadResult = await uploadService.processUploads(formData);
+      
+      if (uploadResult.success && uploadResult.urls) {
+        if (uploadResult.urls.profilePhotoUrl) {
+          data.profil_foto = uploadResult.urls.profilePhotoUrl;
+          logger.info("Profil fotoğrafı güncellendi:", uploadResult.urls.profilePhotoUrl);
+        }
+        if (uploadResult.urls.logoUrl) {
+          data.firma_logo = uploadResult.urls.logoUrl;
+          logger.info("Firma logosu güncellendi:", uploadResult.urls.logoUrl);
+        }
+        if (uploadResult.urls.catalogUrl) {
+          data.katalog = uploadResult.urls.catalogUrl;
+          logger.info("Katalog güncellendi:", uploadResult.urls.catalogUrl);
+        }
+      }
+      
     } catch (formError) {
       // FormData ayrıştırılamazsa JSON olarak dene
       try {
@@ -346,8 +371,12 @@ export async function PUT(
           firma_vergi_no = $8,
           vergi_dairesi = $9,
           template_id = $10,
+          profil_foto = $11,
+          firma_logo = $12,
+          katalog = $13,
+          gradient_color = $14,
           updated_at = NOW()
-        WHERE id = $11
+        WHERE id = $15
         RETURNING *
       `, [
         data.firma_adi || data.firmaAdi || existingFirma.firma_adi,
@@ -360,6 +389,10 @@ export async function PUT(
         data.firma_vergi_no || existingFirma.firma_vergi_no,
         data.vergi_dairesi || existingFirma.vergi_dairesi,
         data.template_id || data.templateId ? parseInt(data.template_id || data.templateId) : existingFirma.template_id,
+        data.profil_foto || existingFirma.profil_foto,
+        data.firma_logo || existingFirma.firma_logo,
+        data.katalog || existingFirma.katalog,
+        data.gradientColor || data.gradient_color || existingFirma.gradient_color,
         id
       ]);
       
@@ -444,7 +477,7 @@ export async function PUT(
                       bankaHesabiId,
                       subAccount.iban,
                       subAccount.currency || 'TRY',
-                      subAccount.hesap_turu || 'Vadesiz Mevduat',
+                      subAccount.hesap_turu || '',
                       true
                     ]);
                   }

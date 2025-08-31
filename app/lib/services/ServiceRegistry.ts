@@ -51,7 +51,7 @@ class ServiceRegistry {
 export const ServiceLoaders = {
   authService: () => import('./AuthService').then(m => new m.AuthService()),
   formDataParser: () => import('./FormDataParser').then(m => new m.FormDataParser()),
-  fileUploadService: () => import('./FileUploadService').then(m => new m.FileUploadService()),
+  fileUploadService: () => import('./LocalFileUploadService').then(m => new m.LocalFileUploadService()),
   firmaService: () => import('./FirmaService').then(m => new m.FirmaService()),
   postProcessingService: () => import('./PostProcessingService').then(m => new m.PostProcessingService()),
   cacheInvalidationService: () => import('./CacheInvalidationService').then(m => new m.CacheInvalidationService()),

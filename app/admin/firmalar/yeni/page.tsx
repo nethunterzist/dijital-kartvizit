@@ -45,7 +45,8 @@ const BANKALAR = [
   { id: "anadolubank", label: "AnadoluBank", logo: "/img/banks/anadolubank.png" },
   { id: "sekerbank", label: "Şekerbank", logo: "/img/banks/sekerbank.png" },
   { id: "icbc", label: "ICBC Turkey Bank", logo: "/img/banks/icbc.png" },
-  { id: "odeabank", label: "Odeabank", logo: "/img/banks/odeabank.png" }
+  { id: "odeabank", label: "Odeabank", logo: "/img/banks/odeabank.png" },
+  { id: "enpara", label: "Enpara", logo: "/img/banks/enpara.png" }
 ];
 
 interface Firma {
@@ -96,19 +97,20 @@ interface CommunicationAccount {
   label?: string; // Özel başlık için yeni alan eklendi
 }
 
-// Cloudinary'ye PDF yükleme fonksiyonu
-async function uploadPdfToCloudinary(file: File): Promise<string> {
+// Local file upload fonksiyonu
+async function uploadFileToLocal(file: File, folder: string): Promise<string> {
   const formData = new FormData();
   formData.append('file', file);
-  formData.append('upload_preset', 'pdf_unsigned'); // Cloudinary panelinden preset adını gir
 
-  const res = await fetch('https://api.cloudinary.com/v1_1/dmjdeij1f/auto/upload', {
+  const res = await fetch(`/api/upload?folder=${folder}`, {
     method: 'POST',
     body: formData,
   });
-  if (!res.ok) throw new Error('PDF yükleme başarısız');
+  
+  if (!res.ok) throw new Error(`${folder} dosya yükleme başarısız`);
+
   const data = await res.json();
-  return data.secure_url;
+  return data.url;
 }
 
 export default function YeniFirmaPage() {
@@ -146,6 +148,7 @@ export default function YeniFirmaPage() {
   const [selectedTab, setSelectedTab] = useState(0);
   const [templateId, setTemplateId] = useState(2);
   const [isTemplateSelectorOpen, setIsTemplateSelectorOpen] = useState(false);
+  const [gradientColor, setGradientColor] = useState('#D4AF37,#F7E98E,#B8860B'); // default gold
 
   // Sosyal medya için state (telefonlar, epostalar ve whatsapplar da buraya taşındı)
   const [socialMediaAccounts, setSocialMediaAccounts] = useState<SocialMediaAccount[]>([{
@@ -456,6 +459,7 @@ Uzman ekibimizle birlikte web tasarım, mobil uygulama geliştirme, e-ticaret ç
       formData.append("firma_vergi_no", firmaVergiNo);
       formData.append("vergi_dairesi", vergiDairesi);
       formData.append("templateId", templateId.toString());
+      formData.append("gradientColor", gradientColor);
 
 
       // İletişim verilerini API'nin beklediği formatta gönder
@@ -488,7 +492,7 @@ Uzman ekibimizle birlikte web tasarım, mobil uygulama geliştirme, e-ticaret ç
       
       if (katalogDosya) {
         try {
-          const katalogUrl = await uploadPdfToCloudinary(katalogDosya);
+          const katalogUrl = await uploadFileToLocal(katalogDosya, 'firma_kataloglari');
           formData.append('katalog', katalogUrl);
           logger.info('Catalog PDF uploaded successfully', { url: katalogUrl });
         } catch (pdfError) {
@@ -856,7 +860,7 @@ Uzman ekibimizle birlikte web tasarım, mobil uygulama geliştirme, e-ticaret ç
                           </div>
                         </div>
                       </div>
-
+                      
                       {/* Firma Logosu */}
                       <div>
                         <label htmlFor="firmaLogo" className="block text-sm font-medium text-gray-700 mb-2">
@@ -906,6 +910,101 @@ Uzman ekibimizle birlikte web tasarım, mobil uygulama geliştirme, e-ticaret ç
                         </div>
                       </div>
                     </div>
+
+                    {/* Profil Gradient Rengi - TAM GENİŞLİK */}
+                    <div className="mt-6">
+                      <label className="block text-sm font-medium text-gray-700 mb-3">
+                        Profil Çerçeve Rengi
+                      </label>
+                      <div className="space-y-4">
+                        {/* Hazır renk seçenekleri - 2 satır halinde */}
+                        <div className="grid grid-cols-5 gap-3">
+                          {[
+                            { name: 'Altın', colors: '#D4AF37,#F7E98E,#B8860B', preview: 'linear-gradient(45deg, #D4AF37, #F7E98E, #B8860B)' },
+                            { name: 'Mavi', colors: '#2563EB,#60A5FA,#1D4ED8', preview: 'linear-gradient(45deg, #2563EB, #60A5FA, #1D4ED8)' },
+                            { name: 'Yeşil', colors: '#059669,#34D399,#047857', preview: 'linear-gradient(45deg, #059669, #34D399, #047857)' },
+                            { name: 'Mor', colors: '#7C3AED,#A78BFA,#5B21B6', preview: 'linear-gradient(45deg, #7C3AED, #A78BFA, #5B21B6)' },
+                            { name: 'Kırmızı', colors: '#DC2626,#F87171,#B91C1C', preview: 'linear-gradient(45deg, #DC2626, #F87171, #B91C1C)' },
+                            { name: 'Turuncu', colors: '#EA580C,#FB923C,#C2410C', preview: 'linear-gradient(45deg, #EA580C, #FB923C, #C2410C)' },
+                            { name: 'Pembe', colors: '#EC4899,#F472B6,#BE185D', preview: 'linear-gradient(45deg, #EC4899, #F472B6, #BE185D)' },
+                            { name: 'Cyan', colors: '#0891B2,#22D3EE,#0E7490', preview: 'linear-gradient(45deg, #0891B2, #22D3EE, #0E7490)' },
+                            { name: 'İndigo', colors: '#4338CA,#818CF8,#312E81', preview: 'linear-gradient(45deg, #4338CA, #818CF8, #312E81)' },
+                            { name: 'Siyah', colors: '#374151,#6B7280,#111827', preview: 'linear-gradient(45deg, #374151, #6B7280, #111827)' }
+                          ].map((option) => (
+                            <button
+                              key={option.name}
+                              type="button"
+                              onClick={() => setGradientColor(option.colors)}
+                              className={`w-full h-16 rounded-lg border-4 transition-all hover:scale-105 hover:shadow-lg ${
+                                gradientColor === option.colors ? 'border-gray-800 shadow-lg' : 'border-gray-300'
+                              }`}
+                              style={{ background: option.preview }}
+                              title={option.name}
+                            />
+                          ))}
+                        </div>
+                        
+                        {/* Custom Color Picker */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {/* Manuel renk girişi */}
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600 mb-2">Özel Gradient</label>
+                            <input
+                              type="text"
+                              value={gradientColor}
+                              onChange={(e) => setGradientColor(e.target.value)}
+                              className="block w-full text-sm rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border"
+                              placeholder="#D4AF37,#F7E98E,#B8860B"
+                            />
+                            <div className="text-xs text-gray-500 mt-1">
+                              Format: #renk1,#renk2,#renk3
+                            </div>
+                          </div>
+                          
+                          {/* Color Picker */}
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600 mb-2">Renk Seçici</label>
+                            <div className="flex space-x-2">
+                              {[1, 2, 3].map((num) => (
+                                <div key={num} className="flex-1">
+                                  <input
+                                    type="color"
+                                    value={gradientColor.split(',')[num-1] || '#D4AF37'}
+                                    onChange={(e) => {
+                                      const colors = gradientColor.split(',');
+                                      colors[num-1] = e.target.value;
+                                      setGradientColor(colors.join(','));
+                                    }}
+                                    className="w-full h-10 border border-gray-300 rounded cursor-pointer"
+                                    title={`Renk ${num}`}
+                                  />
+                                  <div className="text-xs text-center mt-1 text-gray-500">
+                                    Renk {num}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Önizleme */}
+                        <div className="flex items-center justify-center space-x-3 p-4 bg-gray-50 rounded-lg">
+                          <div 
+                            className="w-16 h-16 rounded-full border-4 border-gray-300 shadow-md"
+                            style={{ 
+                              background: `linear-gradient(45deg, ${gradientColor.split(',').join(', ')})`
+                            }}
+                          />
+                          <div className="text-center">
+                            <div className="text-sm font-medium text-gray-700">Önizleme</div>
+                            <div className="text-xs text-gray-500 mt-1 font-mono">
+                              {gradientColor}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
                   </Tab.Panel>
 
                   {/* Tab 2: Kurumsal Bilgiler */}
@@ -1424,6 +1523,7 @@ Uzman ekibimizle birlikte web tasarım, mobil uygulama geliştirme, e-ticaret ç
               firmaHakkindaBaslik={firmaHakkindaBaslik}
               templateId={templateId}
               bankAccounts={bankAccounts}
+              gradientColor={gradientColor}
             />
           </div>
         </div>

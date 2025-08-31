@@ -6,6 +6,9 @@ export const luxuryBlackTemplate = `<!DOCTYPE html>
     <title>{{firma_adi}} - Dijital Kartvizit</title>
     <link rel="icon" href="https://sanalkartvizitim.com/wp-content/uploads/2024/03/fav.png" type="image/png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&display=swap">
     <style>
         :root {
             --gold-primary: #D4AF37;
@@ -29,13 +32,13 @@ export const luxuryBlackTemplate = `<!DOCTYPE html>
             height: 100%;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background-color: var(--white);
             overflow-x: hidden;
         }
 
         .main-container {
-            background: url('https://furkanyigit.com/dijital/bg/5.png') no-repeat center center;
+            background: url('/img/bg/5.png') no-repeat center center;
             background-size: contain;
             width: 100%;
             min-height: 100vh;
@@ -74,7 +77,7 @@ export const luxuryBlackTemplate = `<!DOCTYPE html>
             height: 200px;
             border-radius: 50%;
             border: 8px solid transparent;
-            background: linear-gradient(45deg, var(--gold-primary), var(--gold-light), var(--gold-dark)) border-box;
+            background: linear-gradient(45deg, {{#if gradient_color}}{{gradient_color}}{{else}}#D4AF37, #F7E98E, #B8860B{{/if}}) border-box;
             background-clip: border-box;
             object-fit: cover;
             box-shadow: 0 8px 24px var(--shadow-medium);
@@ -89,7 +92,7 @@ export const luxuryBlackTemplate = `<!DOCTYPE html>
             left: -8px;
             right: -8px;
             bottom: -8px;
-            background: linear-gradient(45deg, var(--gold-primary), var(--gold-light), var(--gold-dark));
+            background: linear-gradient(45deg, {{#if gradient_color}}{{gradient_color}}{{else}}#D4AF37, #F7E98E, #B8860B{{/if}});
             border-radius: 50%;
             z-index: -1;
         }
@@ -167,7 +170,8 @@ export const luxuryBlackTemplate = `<!DOCTYPE html>
             margin: 5px auto;
             justify-content: center;
             box-sizing: border-box;
-            overflow: hidden;
+            overflow: visible;
+            padding-top: 8px;
         }
 
         .icon-item, .icon-card {
@@ -264,11 +268,10 @@ export const luxuryBlackTemplate = `<!DOCTYPE html>
             margin-top: 6px;
             line-height: 1.1;
             max-width: 70px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            word-wrap: break-word;
+            white-space: normal;
+            display: block;
         }
-
         /* YouTube Section */
         .youtube-section {
             margin: 5px 0 5px 0;

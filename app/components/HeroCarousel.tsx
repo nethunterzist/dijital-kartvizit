@@ -2,12 +2,12 @@
 import React, { useRef, useEffect } from "react";
 
 const images = [
-  "https://furkanyigit.com/sanal/1.jpg",
-  "https://furkanyigit.com/sanal/2.jpg",
-  "https://furkanyigit.com/sanal/3.jpg",
-  "https://furkanyigit.com/sanal/4.jpg",
-  "https://furkanyigit.com/sanal/5.jpg",
-  "https://furkanyigit.com/sanal/6.jpg"
+  "/img/hero/1.jpg",
+  "/img/hero/2.jpg",
+  "/img/hero/3.jpg",
+  "/img/hero/4.jpg",
+  "/img/hero/5.jpg",
+  "/img/hero/6.jpg"
 ];
 const allImages = Array.from({ length: 20 }, (_, i) => images[i % images.length]);
 

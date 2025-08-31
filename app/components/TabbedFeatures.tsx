@@ -37,7 +37,7 @@ const tabs = [
     label: 'Modern Entegrasyonlar',
     image: '/img/feature-integration.png',
     title: 'Modern Entegrasyonlar',
-    desc: 'Supabase, Vercel, Next.js gibi modern altyapı ile geliştirildi.'
+    desc: 'Hetzner, Coolify, Next.js gibi modern altyapı ile geliştirildi.'
   },
 ];
 

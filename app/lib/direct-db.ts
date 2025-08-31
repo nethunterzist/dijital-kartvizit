@@ -31,22 +31,26 @@ export async function getAllFirmalar(search?: string, page = 1, limit = 1000) {
     let countQuery = 'SELECT COUNT(*) FROM firmalar';
     let dataQuery = `
       SELECT 
-        id, firma_adi, slug, profil_foto, firma_logo,
-        yetkili_adi, yetkili_pozisyon, created_at, updated_at,
-        goruntulenme, template_id, onay
-      FROM firmalar
+        f.id, f.firma_adi, f.slug, f.profil_foto, f.firma_logo,
+        f.yetkili_adi, f.yetkili_pozisyon, f.created_at, f.updated_at,
+        f.goruntulenme, f.template_id, f.onay,
+        -- Get the first phone number from IletisimBilgisi table
+        (SELECT ib.deger FROM "IletisimBilgisi" ib WHERE ib.firma_id = f.id AND ib.tip = 'telefon' ORDER BY ib.sira LIMIT 1) as telefon,
+        -- Get the first email from IletisimBilgisi table
+        (SELECT ib.deger FROM "IletisimBilgisi" ib WHERE ib.firma_id = f.id AND ib.tip = 'eposta' ORDER BY ib.sira LIMIT 1) as eposta
+      FROM firmalar f
     `;
     
     const params: any[] = [];
     
     if (search) {
-      const searchCondition = ` WHERE firma_adi ILIKE $1 OR slug ILIKE $1 OR yetkili_adi ILIKE $1`;
+      const searchCondition = ` WHERE f.firma_adi ILIKE $1 OR f.slug ILIKE $1 OR f.yetkili_adi ILIKE $1`;
       countQuery += searchCondition;
       dataQuery += searchCondition;
       params.push(`%${search}%`);
     }
     
-    dataQuery += ` ORDER BY created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
+    dataQuery += ` ORDER BY f.created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
     params.push(limit, offset);
     
     // Execute queries
@@ -56,15 +60,60 @@ export async function getAllFirmalar(search?: string, page = 1, limit = 1000) {
     ]);
     
     const totalCount = parseInt(countResult.rows[0].count);
-    const firmalar = dataResult.rows.map(row => ({
-      ...row,
-      goruntulenme: row.goruntulenme || 0,
-      telefon: null,
-      eposta: null,
-      communication_data: JSON.stringify({
-        telefonlar: [],
-        epostalar: []
-      })
+    
+    // Now fetch communication data for each company and build the structure
+    const firmalar = await Promise.all(dataResult.rows.map(async (row) => {
+      try {
+        // Get all communication data for this company
+        const commQuery = `
+          SELECT tip, deger, etiket, sira 
+          FROM "IletisimBilgisi" 
+          WHERE firma_id = $1 
+          ORDER BY sira
+        `;
+        const commResult = await client.query(commQuery, [row.id]);
+        
+        // Build communication_data structure
+        const telefonlar: any[] = [];
+        const epostalar: any[] = [];
+        
+        commResult.rows.forEach(comm => {
+          if (comm.tip === 'telefon') {
+            telefonlar.push({
+              value: comm.deger,
+              label: comm.etiket || 'Telefon',
+              type: 'telefon'
+            });
+          } else if (comm.tip === 'eposta') {
+            epostalar.push({
+              value: comm.deger,
+              label: comm.etiket || 'E-posta',
+              type: 'eposta'
+            });
+          }
+        });
+        
+        return {
+          ...row,
+          goruntulenme: row.goruntulenme || 0,
+          communication_data: JSON.stringify({
+            telefonlar,
+            epostalar
+          })
+        };
+      } catch (error) {
+        console.error('Error fetching communication data for firma', row.id, error);
+        return {
+          ...row,
+          goruntulenme: row.goruntulenme || 0,
+          telefon: null,
+          eposta: null,
+          communication_data: JSON.stringify({
+            telefonlar: [],
+            epostalar: []
+          })
+        };
+      }
     }));
     
     return {
@@ -87,10 +136,10 @@ export async function createFirma(data: any) {
     const query = `
       INSERT INTO firmalar (
         firma_adi, slug, yetkili_adi, yetkili_pozisyon, 
-        profil_foto, firma_logo, template_id, firma_hakkinda,
+        profil_foto, firma_logo, katalog, template_id, firma_hakkinda,
         firma_hakkinda_baslik, firma_unvan, firma_vergi_no,
-        vergi_dairesi, onay, goruntulenme
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+        vergi_dairesi, gradient_color, onay, goruntulenme
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
       RETURNING *
     `;
     
@@ -101,12 +150,14 @@ export async function createFirma(data: any) {
       data.yetkili_pozisyon || null,
       data.profil_foto || null,
       data.firma_logo || null,
+      data.katalog || null,
       data.template_id || 1,
       data.firma_hakkinda || null,
       data.firma_hakkinda_baslik || 'Hakkımızda',
       data.firma_unvan || null,
       data.firma_vergi_no || null,
       data.vergi_dairesi || null,
+      data.gradient_color || '#D4AF37,#F7E98E,#B8860B', // default gold gradient
       false, // onay
       0 // goruntulenme
     ];

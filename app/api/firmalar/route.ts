@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllFirmalar, createFirma, deleteFirma, getPool } from '@/app/lib/direct-db';
 import { logger } from '@/app/lib/logger';
+import { LocalFileUploadService } from '@/app/lib/services/LocalFileUploadService';
 
 // API yanıt helper fonksiyonları
 function successResponse(data: any, message?: string, status = 200) {
@@ -87,14 +88,39 @@ export async function POST(req: NextRequest) {
     const contentType = req.headers.get('content-type');
     
     let formData;
+    let uploadedUrls: { [key: string]: string } = {};
     
     // FormData veya JSON kontrolü
     if (contentType?.includes('multipart/form-data')) {
-      formData = await req.formData();
+      const originalFormData = await req.formData();
+      
+      // Önce dosya upload işlemini yap
+      try {
+        const uploadService = new LocalFileUploadService();
+        const uploadResult = await uploadService.processUploads(originalFormData);
+        
+        if (uploadResult.success && uploadResult.urls) {
+          // LocalFileUploadResult.urls'den string record'a çevir
+          if (uploadResult.urls.profilePhotoUrl) {
+            uploadedUrls.profilePhoto = uploadResult.urls.profilePhotoUrl;
+          }
+          if (uploadResult.urls.logoUrl) {
+            uploadedUrls.logoFile = uploadResult.urls.logoUrl;
+          }
+          if (uploadResult.urls.catalogUrl) {
+            uploadedUrls.katalog = uploadResult.urls.catalogUrl;
+          }
+        }
+        
+        logger.info('Files uploaded successfully', { urls: uploadedUrls });
+      } catch (uploadError) {
+        logger.error('File upload failed', { error: uploadError });
+        return errorResponse('Dosya yükleme hatası', 'UPLOAD_ERROR', { error: uploadError }, 500);
+      }
       
       // FormData'yı object'e çevir
       const data: any = {};
-      for (const [key, value] of formData.entries()) {
+      for (const [key, value] of originalFormData.entries()) {
         data[key] = value;
       }
       
@@ -121,7 +147,6 @@ export async function POST(req: NextRequest) {
       logger.warn('Missing required fields', { missingFields });
       return errorResponse('Gerekli alanlar eksik', 'MISSING_FIELDS', { missingFields }, 400);
     }
-
     
     // Direct DB - NO PRISMA
     const newFirma = await createFirma({
@@ -129,14 +154,16 @@ export async function POST(req: NextRequest) {
       slug: slug,
       yetkili_adi: formData.yetkili_adi || formData.yetkiliAdi || null,
       yetkili_pozisyon: formData.yetkili_pozisyon || formData.yetkiliPozisyon || null,
-      profil_foto: formData.profil_foto || null,
-      firma_logo: formData.firma_logo || null,
+      profil_foto: uploadedUrls.profilePhoto || formData.profil_foto || null,
+      firma_logo: uploadedUrls.logoFile || formData.firma_logo || null,
+      katalog: uploadedUrls.katalog || formData.katalog || null,
       template_id: parseInt(formData.templateId || formData.template_id) || 1,
       firma_hakkinda: formData.firma_hakkinda || null,
       firma_hakkinda_baslik: formData.firma_hakkinda_baslik || 'Hakkımızda',
       firma_unvan: formData.firma_unvan || null,
       firma_vergi_no: formData.firma_vergi_no || null,
-      vergi_dairesi: formData.vergi_dairesi || null
+      vergi_dairesi: formData.vergi_dairesi || null,
+      gradient_color: formData.gradientColor || formData.gradient_color || '#D4AF37,#F7E98E,#B8860B'
     });
 
     logger.info('Firma created successfully', { id: newFirma.id, firma_adi: firmaAdi, slug });

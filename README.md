@@ -17,10 +17,10 @@ Modern ve kullanıcı dostu dijital kartvizit oluşturma platformu.
 
 - **Frontend**: Next.js 14 (App Router)
 - **Styling**: Tailwind CSS
-- **Database**: Prisma ORM (SQLite/PostgreSQL)
+- **Database**: PostgreSQL + Prisma ORM
 - **Authentication**: NextAuth.js
-- **File Upload**: Cloudinary
-- **Deployment**: Vercel
+- **Cache**: Upstash Redis KV
+- **Deployment**: Hetzner Server + Coolify
 
 ## 📦 Kurulum
 
@@ -60,42 +60,43 @@ Uygulama [http://localhost:3000](http://localhost:3000) adresinde çalışacakt�
 
 ## 🚀 Production Deployment
 
-### Supabase + Vercel Deployment
+### Hetzner Server + Coolify Deployment
 
-1. **Supabase Database Kurulumu:**
-   - [supabase.com](https://supabase.com) hesabı oluşturun
-   - Yeni proje oluşturun: `dijital-kartvizit`
-   - Region: `Europe (Frankfurt)`
-   - Database connection string'i alın
+Bu proje artık **Hetzner sunucusu** üzerinde **Coolify** ile self-hosted olarak çalışmaktadır.
 
-2. **Vercel Deployment:**
-   - Vercel hesabınızı GitHub'a bağlayın
-   - Bu repository'yi import edin
-   - Environment variables'ları ayarlayın
+1. **Sunucu Altyapısı:**
+   - **Hosting**: Hetzner Cloud Server (46.62.171.65)
+   - **Platform**: Coolify (Self-hosted PaaS)
+   - **Database**: PostgreSQL (Docker container)
+   - **Cache**: Upstash Redis KV
 
-3. **Database Migration:**
-   - `npx prisma db push`
-   - `npx prisma generate`
+2. **Deployment Yöntemi:**
+   - Docker container ile deployment
+   - Coolify üzerinden otomatik build & deploy
+   - PostgreSQL veritabanı aynı sunucuda
+
+3. **Detaylı Kurulum:**
+   - Kapsamlı kurulum için `SUNUCU-MIGRASYONU-KILAVUZU.md` dosyasına bakın
 
 ### Environment Variables
 
 ```env
-# Supabase Database
-DATABASE_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres?sslmode=require"
+# PostgreSQL Database (Coolify)
+DATABASE_URL="postgresql://postgres:[PASSWORD]@46.62.171.65:5432/dijitalkartvizit?sslmode=disable"
 
 # Authentication
 NEXTAUTH_SECRET="your-super-secret-key-min-64-chars"
-NEXTAUTH_URL="https://yourdomain.com"
+NEXTAUTH_URL="http://your-domain.com"
 
-# Supabase API (opsiyonel)
-SUPABASE_URL="https://[PROJECT-REF].supabase.co"
-SUPABASE_ANON_KEY="eyJ..."
-SUPABASE_SERVICE_ROLE_KEY="eyJ..."
+# Cache (Upstash Redis)
+KV_URL="rediss://default:[TOKEN]@[endpoint].upstash.io:6379"
+KV_REST_API_URL="https://[endpoint].upstash.io"
+KV_REST_API_TOKEN="your-token"
 
-# File Upload (opsiyonel)
-CLOUDINARY_CLOUD_NAME="your-cloud-name"
-CLOUDINARY_API_KEY="your-api-key"
-CLOUDINARY_API_SECRET="your-api-secret"
+# File Upload (opsiyonel - local storage kullanılıyor)
+CLOUDINARY_CLOUD_NAME=""
+CLOUDINARY_API_KEY=""
+CLOUDINARY_API_SECRET=""
 
 NODE_ENV="production"
 ```

@@ -310,6 +310,7 @@ export default async function KartvizitPage({ params }: { params: { slug: string
             yetkili_pozisyon: firma.yetkili_pozisyon,
             slug: firma.slug,
             template_id: firma.template_id || 1, // Use template 1 (gold) by default
+            gradient_color: firma.gradient_color, // Dynamic profile gradient
             website: websiteArray.length > 0 ? websiteArray : [],
             firma_logo: firma.firma_logo,
             
@@ -412,7 +413,7 @@ export default async function KartvizitPage({ params }: { params: { slug: string
                                 {
                                     iban: 'TR64 0006 4000 0011 2345 6789 01',
                                     para_birimi: 'TRY',
-                                    hesap_turu: 'Vadesiz Mevduat'
+                                    hesap_turu: ''
                                 },
                                 {
                                     iban: 'TR64 0006 4000 0011 2345 6789 02',

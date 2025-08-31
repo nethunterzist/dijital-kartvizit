@@ -20,14 +20,14 @@ Modern dijital kartvizit sisteminin kapsamlı teknik dokümantasyonu. Bu merkezi
 | Katman | Teknoloji | Versiyon | Açıklama |
 |--------|-----------|----------|-----------|
 | **Frontend** | Next.js | 14.x | React tabanlı full-stack framework |
-| **Backend** | Next.js API Routes | 14.x | Serverless API endpoints |
-| **Database** | Supabase (PostgreSQL) | Latest | Cloud-native database |
+| **Backend** | Next.js API Routes | 14.x | API endpoints |
+| **Database** | PostgreSQL | Latest | Self-hosted database |
 | **ORM** | Prisma | 6.x | Type-safe database client |
 | **Styling** | Tailwind CSS | 3.x | Utility-first CSS framework |
 | **Authentication** | NextAuth.js | 4.x | Secure authentication system |
-| **Deployment** | Vercel | Latest | Serverless deployment platform |
-| **File Storage** | Cloudinary | Latest | Media management (optional) |
-| **Monitoring** | Vercel Analytics | Latest | Performance tracking |
+| **Deployment** | Hetzner + Coolify | Latest | Self-hosted deployment platform |
+| **Cache** | Upstash Redis KV | Latest | Distributed cache system |
+| **Containerization** | Docker | Latest | Container deployment |
 
 ## 📋 Dokümantasyon Navigasyonu
 
@@ -63,8 +63,8 @@ Database schema, migrations ve veritabanı yönetimi.
 
 ### 🚀 [05. Deployment](./05-deployment/)
 Production deployment ve DevOps süreçleri.
-- **Vercel**: Platform konfigürasyonu ([vercel/](./05-deployment/vercel/))
-- **Supabase**: Database setup ([supabase/](./05-deployment/supabase/))
+- **Coolify**: Self-hosted deployment platform
+- **PostgreSQL**: Database setup and management
 - **Environment**: Environment variables ([environment/](./05-deployment/environment/))
 - **Monitoring**: İzleme sistemleri ([monitoring/](./05-deployment/monitoring/))
 
@@ -171,8 +171,8 @@ npm run dev
 
 ### Development Resources
 - **GitHub Repository**: [Project Repository](https://github.com/username/dijital-kartvizit)
-- **Vercel Dashboard**: [Deployment Status](https://vercel.com/dashboard)
-- **Supabase Dashboard**: [Database Management](https://app.supabase.com)
+- **Coolify Dashboard**: Self-hosted deployment management
+- **PostgreSQL**: Direct database management
 
 ### External Documentation
 - **Next.js Docs**: [https://nextjs.org/docs](https://nextjs.org/docs)

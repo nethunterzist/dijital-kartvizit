@@ -3,22 +3,22 @@ import { Icon } from '@/app/lib/icons';
 
 const videoData = [
   {
-    src: "https://furkanyigit.com/sanal/video1.mp4",
+    src: "/img/hero/video1.mp4",
     title: "Dijital Kartvizit Oluştur",
     desc: "Kendi dijital kartvizitini saniyeler içinde oluştur, kişisel ve kurumsal bilgilerini ekle."
   },
   {
-    src: "https://furkanyigit.com/sanal/video2.mp4",
+    src: "/img/hero/video2.mp4",
     title: "Tüm Sosyal Medya ve İletişim Bilgileri",
     desc: "Instagram, X, LinkedIn, WhatsApp ve tüm iletişim kanallarını tek bir kartta topla."
   },
   {
-    src: "https://furkanyigit.com/sanal/video3.mp4",
+    src: "/img/hero/video3.mp4",
     title: "QR Kod ile Kolay Paylaşım",
     desc: "Kartvizitini QR kod veya kısa link ile anında paylaş, hızlıca rehbere eklet."
   },
   {
-    src: "https://furkanyigit.com/sanal/video4.mp4",
+    src: "/img/hero/video4.mp4",
     title: "Dosya ve Katalog Yükleme",
     desc: "Firma logonu, profil fotoğrafını ve PDF kataloglarını güvenle yükle, her yerden eriş."
   }

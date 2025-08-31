@@ -284,7 +284,7 @@ export default function TemalarPage() {
     // Template HTML'e base href ekle (görsel yolları için)
     templateHtml = templateHtml.replace(
       '<head>',
-      '<head>\n  <base href="https://furkanyigit.com/">'
+      '<head>\n  <base href="/">'
     );
 
     // Admin preview özel patch - sadece önizlemede cover düzeltmesi + logo şeffaflığı
@@ -501,7 +501,7 @@ export default function TemalarPage() {
       // Template HTML'e base href ekle + admin preview patch
       templateHtml = templateHtml.replace(
         '<head>',
-        '<head>\n  <base href="https://furkanyigit.com/">'
+        '<head>\n  <base href="/">'
       );
 
       // Admin preview özel patch - catch bloğu için de aynı + logo şeffaflığı

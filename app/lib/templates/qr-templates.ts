@@ -18,7 +18,7 @@ export const qrTemplate2 = `
         
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             overflow-y: auto;
@@ -143,7 +143,7 @@ export const qrTemplate3 = `
         
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background: #ffffff;
             color: #1f2937;
             overflow-y: auto;
@@ -268,7 +268,7 @@ export const qrTemplate4 = `
         
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
             color: #ffffff;
             overflow-y: auto;
@@ -393,7 +393,7 @@ export const qrTemplate5 = `
         
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background: #f8f9fa;
             color: #333;
             overflow-y: auto;
@@ -518,7 +518,7 @@ export const qrTemplate6 = `
         
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background: #121212;
             color: #FFFFFF;
             overflow-y: auto;
@@ -643,7 +643,7 @@ export const qrTemplate7 = `
         
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background: #F2F2F2;
             color: #1A1A1A;
             overflow-y: auto;
@@ -768,7 +768,7 @@ export const qrTemplate8 = `
         
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background: #ffffff;
             color: #2d3748;
             overflow-y: auto;
@@ -893,7 +893,7 @@ export const qrTemplate9 = `
         
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
             color: #ffffff;
             overflow-y: auto;
@@ -1018,7 +1018,7 @@ export const qrTemplate10 = `
         
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background: rgba(255, 255, 255, 0.1);
             color: #ffffff;
             overflow-y: auto;
@@ -1143,7 +1143,7 @@ export const qrTemplate11 = `
         
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
             color: #4a5568;
             overflow-y: auto;
@@ -1268,7 +1268,7 @@ export const qrTemplate12 = `
         
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
             color: #2d3748;
             overflow-y: auto;
@@ -1393,7 +1393,7 @@ export const qrTemplate13 = `
         
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background: #f7fafc;
             color: #2d3748;
             overflow-y: auto;
@@ -1664,7 +1664,7 @@ export const qrTemplate15 = `
         
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: #ffffff;
             overflow-y: auto;
@@ -1789,7 +1789,7 @@ export const qrTemplate16 = `
         
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background: #121212;
             color: #FFFFFF;
             overflow-y: auto;
@@ -1914,7 +1914,7 @@ export const qrTemplate17 = `
         
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
             color: #ffffff;
             overflow-y: auto;
@@ -2039,7 +2039,7 @@ export const qrTemplate18 = `
         
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
             color: #ffffff;
             overflow-y: auto;
@@ -2164,7 +2164,7 @@ export const qrTemplate19 = `
         
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background: linear-gradient(135deg, #fd79a8 0%, #fdcb6e 100%);
             color: #ffffff;
             overflow-y: auto;
@@ -2289,7 +2289,7 @@ export const qrTemplate20 = `
         
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
             color: #ffffff;
             overflow-y: auto;
@@ -2414,7 +2414,7 @@ export const qrTemplate21 = `
         
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
             color: #ffffff;
             overflow-y: auto;
@@ -2539,7 +2539,7 @@ export const qrTemplate23 = `
         
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background: linear-gradient(135deg, #a8e6cf 0%, #88d8a3 100%);
             color: #2d3748;
             overflow-y: auto;
@@ -2664,7 +2664,7 @@ export const qrTemplate25 = `
         
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background: linear-gradient(135deg, #d4a574 0%, #8b4513 100%);
             color: #ffffff;
             overflow-y: auto;
@@ -2789,7 +2789,7 @@ export const qrTemplate26 = `
         
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             color: #ffffff;
             overflow-y: auto;
@@ -2914,7 +2914,7 @@ export const qrTemplate27 = `
         
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%);
             color: #1a202c;
             overflow-y: auto;
@@ -3039,7 +3039,7 @@ export const qrTemplate28 = `
         
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             color: #ffffff;
             overflow-y: auto;
@@ -3164,7 +3164,7 @@ export const qrTemplate29 = `
         
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background: linear-gradient(135deg, #c9b037 0%, #928639 100%);
             color: #1a202c;
             overflow-y: auto;
@@ -3289,7 +3289,7 @@ export const qrTemplate30 = `
         
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background: linear-gradient(135deg, #a8e6cf 0%, #7fcdcd 100%);
             color: #2d3748;
             overflow-y: auto;
@@ -3414,7 +3414,7 @@ export const qrTemplate32 = `
         
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%);
             color: #ffffff;
             overflow-y: auto;
@@ -3539,7 +3539,7 @@ export const qrTemplate33 = `
         
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background: linear-gradient(135deg, #fbb6ce 0%, #f093fb 100%);
             color: #2d3748;
             overflow-y: auto;
@@ -3664,7 +3664,7 @@ export const qrTemplate34 = `
         
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
             color: #ffffff;
             overflow-y: auto;
@@ -3789,7 +3789,7 @@ export const qrTemplate35 = `
         
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background: #1a202c;
             color: #ffffff;
             overflow-y: auto;
@@ -3914,7 +3914,7 @@ export const qrTemplate36 = `
         
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background: #f7fafc;
             color: #2d3748;
             overflow-y: auto;
@@ -4039,7 +4039,7 @@ export const qrTemplate37 = `
         
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
             color: #ffffff;
             overflow-y: auto;
@@ -4164,7 +4164,7 @@ export const qrTemplate38 = `
         
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%);
             color: #2d3748;
             overflow-y: auto;
@@ -4289,7 +4289,7 @@ export const qrTemplate39 = `
         
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Rubik', sans-serif;
             background: linear-gradient(135deg, #2c5282 0%, #2a4365 100%);
             color: #ffffff;
             overflow-y: auto;

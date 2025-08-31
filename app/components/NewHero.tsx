@@ -102,7 +102,7 @@ export default function NewHero() {
                   <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
                     <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
                     <img 
-                      src="https://furkanyigit.com/sanal/1.jpg" 
+                      src="/img/hero/1.jpg" 
                       alt="Digital Business Card"
                       className="w-full h-full object-cover"
                     />
@@ -116,7 +116,7 @@ export default function NewHero() {
                   <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
                     <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
                     <img 
-                      src="https://furkanyigit.com/sanal/2.jpg" 
+                      src="/img/hero/2.jpg" 
                       alt="Digital Business Card"
                       className="w-full h-full object-cover"
                     />
@@ -130,7 +130,7 @@ export default function NewHero() {
                   <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
                     <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
                     <img 
-                      src="https://furkanyigit.com/sanal/3.jpg" 
+                      src="/img/hero/3.jpg" 
                       alt="Digital Business Card"
                       className="w-full h-full object-cover"
                     />
@@ -144,7 +144,7 @@ export default function NewHero() {
                   <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
                     <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
                     <img 
-                      src="https://furkanyigit.com/sanal/4.jpg" 
+                      src="/img/hero/4.jpg" 
                       alt="Digital Business Card"
                       className="w-full h-full object-cover"
                     />
@@ -158,7 +158,7 @@ export default function NewHero() {
                   <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
                     <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
                     <img 
-                      src="https://furkanyigit.com/sanal/5.jpg" 
+                      src="/img/hero/5.jpg" 
                       alt="Digital Business Card"
                       className="w-full h-full object-cover"
                     />
@@ -172,7 +172,7 @@ export default function NewHero() {
                   <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
                     <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
                     <img 
-                      src="https://furkanyigit.com/sanal/6.jpg" 
+                      src="/img/hero/6.jpg" 
                       alt="Digital Business Card"
                       className="w-full h-full object-cover"
                     />
@@ -186,7 +186,7 @@ export default function NewHero() {
                   <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
                     <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
                     <img 
-                      src="https://furkanyigit.com/sanal/7.jpg" 
+                      src="/img/hero/7.jpg" 
                       alt="Digital Business Card"
                       className="w-full h-full object-cover"
                     />
@@ -200,7 +200,7 @@ export default function NewHero() {
                   <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
                     <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
                     <img 
-                      src="https://furkanyigit.com/sanal/8.jpg" 
+                      src="/img/hero/8.jpg" 
                       alt="Digital Business Card"
                       className="w-full h-full object-cover"
                     />
@@ -214,7 +214,7 @@ export default function NewHero() {
                   <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
                     <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
                     <img 
-                      src="https://furkanyigit.com/sanal/9.jpg" 
+                      src="/img/hero/9.jpg" 
                       alt="Digital Business Card"
                       className="w-full h-full object-cover"
                     />
@@ -228,7 +228,7 @@ export default function NewHero() {
                   <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
                     <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
                     <img 
-                      src="https://furkanyigit.com/sanal/1.jpg" 
+                      src="/img/hero/1.jpg" 
                       alt="Digital Business Card"
                       className="w-full h-full object-cover"
                     />
@@ -241,7 +241,7 @@ export default function NewHero() {
                   <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
                     <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
                     <img 
-                      src="https://furkanyigit.com/sanal/2.jpg" 
+                      src="/img/hero/2.jpg" 
                       alt="Digital Business Card"
                       className="w-full h-full object-cover"
                     />
@@ -254,7 +254,7 @@ export default function NewHero() {
                   <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
                     <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
                     <img 
-                      src="https://furkanyigit.com/sanal/3.jpg" 
+                      src="/img/hero/3.jpg" 
                       alt="Digital Business Card"
                       className="w-full h-full object-cover"
                     />
@@ -267,7 +267,7 @@ export default function NewHero() {
                   <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
                     <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
                     <img 
-                      src="https://furkanyigit.com/sanal/4.jpg" 
+                      src="/img/hero/4.jpg" 
                       alt="Digital Business Card"
                       className="w-full h-full object-cover"
                     />
@@ -280,7 +280,7 @@ export default function NewHero() {
                   <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
                     <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
                     <img 
-                      src="https://furkanyigit.com/sanal/5.jpg" 
+                      src="/img/hero/5.jpg" 
                       alt="Digital Business Card"
                       className="w-full h-full object-cover"
                     />
@@ -293,7 +293,7 @@ export default function NewHero() {
                   <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
                     <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
                     <img 
-                      src="https://furkanyigit.com/sanal/6.jpg" 
+                      src="/img/hero/6.jpg" 
                       alt="Digital Business Card"
                       className="w-full h-full object-cover"
                     />
@@ -306,7 +306,7 @@ export default function NewHero() {
                   <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
                     <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
                     <img 
-                      src="https://furkanyigit.com/sanal/7.jpg" 
+                      src="/img/hero/7.jpg" 
                       alt="Digital Business Card"
                       className="w-full h-full object-cover"
                     />
@@ -319,7 +319,7 @@ export default function NewHero() {
                   <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
                     <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
                     <img 
-                      src="https://furkanyigit.com/sanal/8.jpg" 
+                      src="/img/hero/8.jpg" 
                       alt="Digital Business Card"
                       className="w-full h-full object-cover"
                     />
@@ -332,7 +332,7 @@ export default function NewHero() {
                   <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
                     <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
                     <img 
-                      src="https://furkanyigit.com/sanal/9.jpg" 
+                      src="/img/hero/9.jpg" 
                       alt="Digital Business Card"
                       className="w-full h-full object-cover"
                     />
