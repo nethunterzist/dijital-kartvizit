@@ -402,6 +402,11 @@ export const wavesTemplate = `<!DOCTYPE html>
 
         /* Responsive Design */
         @media (max-width: 480px) {
+            .main-container {
+                background-size: cover;
+                background-position: center center;
+            }
+
             .card-content {
                 padding: 0 15px;
                 gap: 15px;
@@ -727,25 +732,97 @@ export const wavesTemplate = `<!DOCTYPE html>
                 text-align: left;
             }
 
+            /* Banka Modal Mobil Düzeltmeleri */
+            .modal-content {
+                margin: 10px;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+
+            .bank-accounts {
+                gap: 15px;
+            }
+
+            .bank-account {
+                border-radius: 8px;
+            }
+
+            .bank-header {
+                padding: 12px 15px;
+            }
+
             .bank-info {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
+                flex-direction: row;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .bank-logo {
+                width: 35px;
+                height: 35px;
+                flex-shrink: 0;
+            }
+
+            .bank-name {
+                font-size: 1rem;
+                line-height: 1.2;
+            }
+
+            .account-holder {
+                font-size: 0.85rem;
+                margin-top: 2px;
+            }
+
+            .accounts-list {
+                padding: 15px;
+                gap: 15px;
             }
 
             .account-item {
+                background: #f8f9fa;
+                padding: 15px;
+                border-radius: 8px;
+                display: flex;
                 flex-direction: column;
-                align-items: stretch;
-                gap: 10px;
+                gap: 12px;
+            }
+
+            .account-details {
+                width: 100%;
+            }
+
+            .iban-number {
+                font-size: 0.95rem;
+                font-weight: 600;
+                color: var(--text-dark);
+                word-break: break-all;
+                line-height: 1.3;
+                margin-bottom: 8px;
+            }
+
+            .account-info {
+                display: flex;
+                gap: 8px;
+                margin-top: 5px;
+            }
+
+            .currency {
+                background: #e3f2fd;
+                color: #1976d2;
+                padding: 3px 8px;
+                border-radius: 4px;
+                font-size: 0.75rem;
+                font-weight: 500;
             }
 
             .copy-iban-btn {
                 align-self: flex-end;
-            }
-
-            .iban-number {
+                width: 50px;
+                height: 40px;
+                border-radius: 6px;
                 font-size: 0.9rem;
-                word-break: break-all;
+                padding: 8px;
+                min-width: unset;
             }
         }
     </style>
@@ -1134,9 +1211,7 @@ export const wavesTemplate = `<!DOCTYPE html>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, initializing share menu...');
             const shareMenu = document.getElementById('share-menu');
-            console.log('Share menu element:', shareMenu);
             
             // Global functions
             window.openShareMenu = function openShareMenu(event) {
@@ -1288,31 +1363,6 @@ export const wavesTemplate = `<!DOCTYPE html>
             }
         });
         
-            // Test function for debugging
-            window.testShareMenu = function() {
-                console.log('Test function called');
-                const menu = document.getElementById('share-menu');
-                console.log('Menu element in test:', menu);
-                if (menu) {
-                    menu.classList.add('open');
-                    console.log('Menu opened in test');
-                    
-                    // CSS Debug
-                    const styles = window.getComputedStyle(menu);
-                    console.log('CSS Debug:');
-                    console.log('bottom:', styles.bottom);
-                    console.log('position:', styles.position);
-                    console.log('z-index:', styles.zIndex);
-                    console.log('background:', styles.background);
-                    console.log('visibility:', styles.visibility);
-                    console.log('opacity:', styles.opacity);
-                    console.log('transform:', styles.transform);
-                } else {
-                    console.error('Menu not found in test');
-                }
-            }
-            
-            console.log('All functions initialized');
         }); // End of DOMContentLoaded
     </script>
 </body>

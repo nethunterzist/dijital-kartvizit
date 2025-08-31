@@ -1134,9 +1134,7 @@ export const goldenEdgeTemplate = `<!DOCTYPE html>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, initializing share menu...');
             const shareMenu = document.getElementById('share-menu');
-            console.log('Share menu element:', shareMenu);
             
             // Global functions
             window.openShareMenu = function openShareMenu(event) {
@@ -1288,31 +1286,6 @@ export const goldenEdgeTemplate = `<!DOCTYPE html>
             }
         });
         
-            // Test function for debugging
-            window.testShareMenu = function() {
-                console.log('Test function called');
-                const menu = document.getElementById('share-menu');
-                console.log('Menu element in test:', menu);
-                if (menu) {
-                    menu.classList.add('open');
-                    console.log('Menu opened in test');
-                    
-                    // CSS Debug
-                    const styles = window.getComputedStyle(menu);
-                    console.log('CSS Debug:');
-                    console.log('bottom:', styles.bottom);
-                    console.log('position:', styles.position);
-                    console.log('z-index:', styles.zIndex);
-                    console.log('background:', styles.background);
-                    console.log('visibility:', styles.visibility);
-                    console.log('opacity:', styles.opacity);
-                    console.log('transform:', styles.transform);
-                } else {
-                    console.error('Menu not found in test');
-                }
-            }
-            
-            console.log('All functions initialized');
         }); // End of DOMContentLoaded
     </script>
 </body>

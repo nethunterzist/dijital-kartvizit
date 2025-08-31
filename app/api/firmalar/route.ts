@@ -59,22 +59,11 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     logger.error('Error fetching firmalar', { error });
     
-    // DEBUG: Detaylı hata bilgisi production'da da göster
-    const errorDetail = {
-      message: error instanceof Error ? error.message : 'Bilinmeyen hata',
-      stack: error instanceof Error ? error.stack : null,
-      env: {
-        DATABASE_URL: process.env.DATABASE_URL ? 'configured' : 'missing',
-        NODE_ENV: process.env.NODE_ENV
-      }
-    };
-    
-    console.error('🔥 DETAILED ERROR:', errorDetail);
+    console.error('Error fetching firmalar:', error);
     
     return NextResponse.json({
       error: { 
-        message: 'Firmalar getirilirken bir hata oluştu',
-        debug: errorDetail  // Geçici debug bilgisi
+        message: 'Firmalar getirilirken bir hata oluştu'
       }
     }, { status: 500 });
   }
@@ -414,20 +403,6 @@ export async function POST(req: NextRequest) {
 
     return successResponse({
       ...newFirma,
-      debug: {
-        formData_keys: Object.keys(formData),
-        communication_data_exists: !!formData.communication_data,
-        sosyalMedyaHesaplari_exists: !!formData.sosyalMedyaHesaplari,
-        bankaHesaplari_exists: !!formData.bankaHesaplari,
-        communication_data_raw: formData.communication_data,
-        sosyalMedyaHesaplari_raw: formData.sosyalMedyaHesaplari,
-        bankaHesaplari_raw: formData.bankaHesaplari,
-        actual_iletisim_count: actualIletisimCount,
-        actual_sosyal_count: actualSosyalCount,
-        actual_banka_count: actualBankaCount,
-        actual_banka_detay_count: actualBankaDetayCount,
-        save_status: saveStatus
-      }
     }, 'Firma başarıyla oluşturuldu', 201);
 
   } catch (error) {

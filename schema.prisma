@@ -40,6 +40,7 @@ model firmalar {
   tip                    String?
   firma_logo             String?
   template_id            Int                 @default(1)
+  gradient_color         String?             @default("#D4AF37,#F7E98E,#B8860B")
   banka_hesaplari        BankaHesabi[]
   iletisim_bilgileri     IletisimBilgisi[]
   sosyal_medya_hesaplari SosyalMedyaHesabi[]

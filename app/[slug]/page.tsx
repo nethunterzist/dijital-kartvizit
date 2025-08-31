@@ -111,27 +111,15 @@ export default async function KartvizitPage({ params }: { params: { slug: string
     const { slug } = params;
     
     try {
-        console.log('🔍 ===== KARTVIZIT SAYFASI BAŞLADI =====');
-        console.log('📋 Slug:', slug);
-        console.log('⏰ Timestamp:', new Date().toISOString());
-        
         // Direct database access instead of internal API call
-        console.log('💾 Direct database query başlıyor...');
         const { getFirmaWithCommunication } = await import('@/app/lib/direct-db');
         const { getOrderedIcons } = await import('@/app/lib/iconOrder');
         
         const firma = await getFirmaWithCommunication(slug);
         
         if (!firma) {
-            console.log('❌ Firma bulunamadı, notFound() çağrılıyor');
             return notFound();
         }
-
-        console.log('✅ Firma bulundu:', firma.firma_adi);
-        console.log('📊 Database firm data:');
-        console.log('  - İletişim bilgileri sayısı:', firma.iletisim_bilgileri?.length || 0);
-        console.log('  - Sosyal medya hesapları sayısı:', firma.sosyal_medya_hesaplari?.length || 0);
-        console.log('  - Banka hesapları sayısı:', firma.banka_hesaplari?.length || 0);
         
         // Transform data for template (SAME LOGIC AS API ROUTE)
         
@@ -170,46 +158,33 @@ export default async function KartvizitPage({ params }: { params: { slug: string
         let websiteArray: string[] = [];
         const websiteItems = firma.iletisim_bilgileri.filter(item => item.tip === 'website');
         websiteArray = websiteItems.map(item => item.deger);
-        console.log('🌐 Website array:', websiteArray);
 
-        // Sosyal medya verilerini normalize et - HER PLATFORMDAN SADECE İLK HESAP!
+        // Sosyal medya verilerini normalize et - TÜM HESAPLARI GÖSTER!
         let socialMediaArray: any[] = [];
-        const processedPlatforms = new Set<string>();
         
         firma.sosyal_medya_hesaplari.forEach((item) => {
-            // Her platformdan sadece ilk hesabı al
-            if (!processedPlatforms.has(item.platform)) {
-                processedPlatforms.add(item.platform);
-                const meta = SOCIAL_MEDIA_META[item.platform] || {};
-                socialMediaArray.push({
-                    icon: meta.icon || '',
-                    label: item.etiket || meta.label || item.platform,
-                    url: item.url.startsWith('http') ? item.url : (meta.urlPrefix ? meta.urlPrefix + item.url : item.url),
-                    platform: item.platform
-                });
-            }
+            const meta = SOCIAL_MEDIA_META[item.platform] || {};
+            socialMediaArray.push({
+                icon: meta.icon || '',
+                label: item.etiket || meta.label || item.platform,
+                url: item.url.startsWith('http') ? item.url : (meta.urlPrefix ? meta.urlPrefix + item.url : item.url),
+                platform: item.platform
+            });
         });
-        console.log('📱 Social media array:', socialMediaArray);
 
-        // İletişim verilerini normalize et - HER TİPTEN SADECE İLK BİLGİ!
+        // İletişim verilerini normalize et - TÜM BİLGİLERİ GÖSTER!
         let communicationArray: any[] = [];
-        const processedTypes = new Set<string>();
         
         firma.iletisim_bilgileri.forEach((item) => {
-            // Her tipten sadece ilk bilgiyi al
-            if (!processedTypes.has(item.tip)) {
-                processedTypes.add(item.tip);
-                const meta = COMM_META[item.tip] || {};
-                communicationArray.push({
-                    icon: meta.icon || '',
-                    label: item.etiket || meta.label || item.tip,
-                    url: meta.urlPrefix ? meta.urlPrefix + item.deger : '',
-                    value: item.deger,
-                    tip: item.tip
-                });
-            }
+            const meta = COMM_META[item.tip] || {};
+            communicationArray.push({
+                icon: meta.icon || '',
+                label: item.etiket || meta.label || item.tip,
+                url: meta.urlPrefix ? meta.urlPrefix + item.deger : '',
+                value: item.deger,
+                tip: item.tip
+            });
         });
-        console.log('📞 Communication array:', communicationArray);
 
         // Banka hesaplarını normalize et
         let bankaHesaplari: any[] = [];
@@ -225,7 +200,6 @@ export default async function KartvizitPage({ params }: { params: { slug: string
                 }))
             });
         });
-        console.log('🏦 Banka hesapları array:', bankaHesaplari);
         
         // Extract individual field values for template compatibility
         let telefon: string = '';
@@ -263,30 +237,20 @@ export default async function KartvizitPage({ params }: { params: { slug: string
         const twitterItem = firma.sosyal_medya_hesaplari.find(item => item.platform === 'twitter');
         if (twitterItem) twitter = twitterItem.url.startsWith('http') ? twitterItem.url : `https://twitter.com/${twitterItem.url.replace('@', '')}`;
 
-        console.log('🔧 Template data flattened:');
-        console.log('  - telefon:', telefon);
-        console.log('  - email:', email);
-        console.log('  - whatsapp:', whatsapp);
-        console.log('  - facebook:', facebook);
-        console.log('  - linkedin:', linkedin);
 
-        // Transform communication data for new template structure - SADECE İLK DEĞER!
+        // Transform communication data for new template structure - TÜM DEĞERLER!
         const communication_data: Record<string, Array<{value: string, label: string}>> = {};
-        const processedCommTypes = new Set<string>();
         
-        // Group by type - but only first of each type!
+        // Group by type - all values!
         firma.iletisim_bilgileri.forEach(item => {
-            if (!processedCommTypes.has(item.tip)) {
-                processedCommTypes.add(item.tip);
-                const key = `${item.tip}lar`; // telefon -> telefonlar
-                if (!communication_data[key]) {
-                    communication_data[key] = [];
-                }
-                communication_data[key].push({
-                    value: item.deger,
-                    label: item.etiket
-                });
+            const key = `${item.tip}lar`; // telefon -> telefonlar
+            if (!communication_data[key]) {
+                communication_data[key] = [];
             }
+            communication_data[key].push({
+                value: item.deger,
+                label: item.etiket
+            });
         });
 
         // Handle special cases
@@ -301,7 +265,6 @@ export default async function KartvizitPage({ params }: { params: { slug: string
             communication_data['haritalar'] = communication_data['haritalar'];
         }
         
-        console.log('📞 New communication_data structure:', communication_data);
 
         // Complete data object for template
         const data = {
@@ -354,26 +317,16 @@ export default async function KartvizitPage({ params }: { params: { slug: string
             about: firma.firma_hakkinda ? { icon: EXTRA_META.about.icon, label: EXTRA_META.about.label, content: firma.firma_hakkinda } : null,
             profil_foto: firma.profil_foto
         };
-        console.log('✅ API JSON verisi alındı');
-        console.log('📊 Data:', data);
-        console.log('🎨 Template ID:', data.template_id);
         
         // Template ID'ye göre doğru template'i al
-        console.log('🎨 Template işleme başlıyor...');
-        console.log('🔍 Template ID:', data.template_id || 2);
         
         const { getTemplateByType } = await import('@/app/lib/cardTemplate');
         const selectedTemplate = getTemplateByType(data.template_id || 2);
         
-        console.log('✅ Template alındı, uzunluk:', selectedTemplate.length);
-        console.log('📄 Template preview:', selectedTemplate.substring(0, 200) + '...');
-        
         // Handlebars ile template'i derle
-        console.log('🔧 Handlebars template derleniyor...');
         const compiledTemplate = handlebars.compile(selectedTemplate);
         
         // Template'i veri ile doldur
-        console.log('📝 Template veri ile dolduruluyor...');
         const templateData = {
             ...data,
             // Test için manual veriler ekleniyor
@@ -447,13 +400,7 @@ export default async function KartvizitPage({ params }: { params: { slug: string
             `
         };
         
-        console.log('📊 Template data:', templateData);
-        
         const html = compiledTemplate(templateData);
-        
-        console.log('✅ HTML oluşturuldu, uzunluk:', html.length);
-        console.log('📄 HTML preview:', html.substring(0, 300) + '...');
-        console.log('🏁 ===== KARTVIZIT SAYFASI TAMAMLANDI =====');
         
         // HTML'i döndür
         return (
@@ -462,11 +409,11 @@ export default async function KartvizitPage({ params }: { params: { slug: string
             </FontAwesomeLoader>
         );
     } catch (error: any) {
-        console.error('❌ KRITIK HATA - Kartvizit sayfası oluşturulurken hata');
-        console.error('Slug:', slug);
-        console.error('Error Message:', error?.message);
-        console.error('Error Stack:', error?.stack);
-        console.error('Full Error:', error);
+        console.error('Error generating business card page:', {
+            slug,
+            message: error?.message,
+            stack: error?.stack
+        });
         return notFound();
     }
 }

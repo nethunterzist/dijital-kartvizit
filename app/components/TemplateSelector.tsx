@@ -11,16 +11,7 @@ interface TemplateSelectorProps {
   onSelectTemplate: (templateId: number) => void;
 }
 
-// BASIT MOCK DATA - Sadece gerekli alanlar
-const SAMPLE_DATA = {
-  firma_adi: "Örnek Teknoloji A.Ş.",
-  yetkili_adi: "Ahmet Yılmaz", 
-  yetkili_pozisyon: "Genel Müdür",
-  profil_foto: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-  firma_logo: "https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=100&h=100&fit=crop",
-  firma_hakkinda: "Teknoloji sektöründe hizmet vermekteyiz.",
-  firma_hakkinda_baslik: "Hakkımızda"
-};
+// Artık mock data'ya gerek yok - sadece background görselleri gösteriyoruz
 
 const TemplateSelector: React.FC<TemplateSelectorProps> = ({
   isOpen,
@@ -45,261 +36,59 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
   const startIndex = (currentPage - 1) * templatesPerPage;
   const currentTemplates = filteredTemplates.slice(startIndex, startIndex + templatesPerPage);
   
-  // Template HTML'lerini oluştur
+  // Sadece background görselleri için basit HTML oluştur
   useEffect(() => {
     if (isOpen) {
       const generatePreviews = async () => {
         const htmls: { [key: number]: string } = {};
         
         for (const template of currentTemplates) {
-          let html = getTemplateByType(template.id);
+          // Template'e göre background görsel ve minimal stil
+          const backgroundImage = `/img/bg/${template.id}.png`;
           
-          // Basit değişken değiştirme
-          html = html
-            .replace(/\{\{firma_adi\}\}/g, SAMPLE_DATA.firma_adi)
-            .replace(/\{\{yetkili_adi\}\}/g, SAMPLE_DATA.yetkili_adi)
-            .replace(/\{\{yetkili_pozisyon\}\}/g, SAMPLE_DATA.yetkili_pozisyon)
-            .replace(/\{\{profil_foto\}\}/g, SAMPLE_DATA.profil_foto)
-            .replace(/\{\{firma_logo\}\}/g, SAMPLE_DATA.firma_logo)
-            .replace(/\{\{firma_hakkinda\}\}/g, SAMPLE_DATA.firma_hakkinda)
-            .replace(/\{\{firma_hakkinda_baslik\}\}/g, SAMPLE_DATA.firma_hakkinda_baslik);
-
-          // Conditional blokları basit işle
-          html = html.replace(/\{\{#if.*?\}\}([\s\S]*?)\{\{.*?\/if\}\}/g, '$1');
-          html = html.replace(/\{\{#each.*?\}\}([\s\S]*?)\{\{.*?\/each\}\}/g, '');
-          html = html.replace(/\{\{#unless.*?\}\}([\s\S]*?)\{\{.*?\/unless\}\}/g, '');
-          
-          // Basit ikonlar ekle - Template'e göre format
-          let simpleIcons = '';
-          if (template.id === 1) {
-            // Gold template için özel format
-            simpleIcons = `
-              <div class="icon-item">
-                <a href="#" class="icon-link icon-telefon">
-                  <i class="fas fa-phone"></i>
-                </a>
-                <span class="icon-label">Telefon</span>
-              </div>
-              <div class="icon-item">
-                <a href="#" class="icon-link icon-whatsapp">
-                  <i class="fab fa-whatsapp"></i>
-                </a>
-                <span class="icon-label">WhatsApp</span>
-              </div>
-              <div class="icon-item">
-                <a href="#" class="icon-link icon-email">
-                  <i class="fas fa-envelope"></i>
-                </a>
-                <span class="icon-label">E-posta</span>
-              </div>
-              <div class="icon-item">
-                <a href="#" class="icon-link icon-instagram">
-                  <i class="fab fa-instagram"></i>
-                </a>
-                <span class="icon-label">Instagram</span>
-              </div>
-              <div class="icon-item">
-                <a href="#" class="icon-link icon-website">
-                  <i class="fas fa-globe"></i>
-                </a>
-                <span class="icon-label">Website</span>
-              </div>
-              <div class="icon-item">
-                <a href="#" class="icon-link icon-qr">
-                  <i class="fas fa-qrcode"></i>
-                </a>
-                <span class="icon-label">QR Kod</span>
-              </div>
-            `;
-          } else {
-            // Diğer template'ler için standart format
-            simpleIcons = `
-              <div class="icon-card"><a href="#"><i class="fas fa-phone"></i><span class="icon-label">Telefon</span></a></div>
-              <div class="icon-card"><a href="#"><i class="fab fa-whatsapp"></i><span class="icon-label">WhatsApp</span></a></div>
-              <div class="icon-card"><a href="#"><i class="fas fa-envelope"></i><span class="icon-label">E-posta</span></a></div>
-              <div class="icon-card"><a href="#"><i class="fab fa-instagram"></i><span class="icon-label">Instagram</span></a></div>
-              <div class="icon-card"><a href="#"><i class="fas fa-globe"></i><span class="icon-label">Website</span></a></div>
-              <div class="icon-card"><a href="#"><i class="fas fa-qrcode"></i><span class="icon-label">QR Kod</span></a></div>
-            `;
-          }
-
-          // İkon yerleştir
-          html = html.replace('<div class="icons-grid">', `<div class="icons-grid">${simpleIcons}`);
-          if (!html.includes('icons-grid')) {
-            html = html.replace(/<\/body>/i, `<div class="icons-grid">${simpleIcons}</div></body>`);
-          }
-
-          // Kalan değişkenleri temizle
-          html = html.replace(/\{\{[^}]*\}\}/g, '');
-
-          // BÜYÜK PREVIEW İÇİN CSS
-          const previewCSS = `
+          const simpleHTML = `
             <style>
-              * { box-sizing: border-box; }
-              body { 
+              * { 
                 margin: 0; 
                 padding: 0; 
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                transform: scale(0.25);
-                transform-origin: top left;
-                width: 400%;
-                height: 400%;
-                background: transparent;
+                box-sizing: border-box; 
+              }
+              html, body {
+                width: 100%;
+                height: 100%;
                 overflow: hidden;
               }
-              .container { 
-                max-width: 100%; 
-                padding: 16px;
-                min-height: 100vh;
-                box-sizing: border-box;
-              }
-              .profile-section { 
-                text-align: center; 
-                margin-bottom: 24px; 
-              }
-              .profile-photo { 
-                width: 120px; 
-                height: 120px; 
-                border-radius: 50%; 
-                margin: 0 auto 16px; 
-                object-fit: cover;
-                display: block;
-              }
-              .company-name { 
-                font-size: 24px; 
-                font-weight: bold; 
-                margin-bottom: 8px;
-                color: inherit;
-              }
-              .person-name { 
-                font-size: 20px; 
-                font-weight: 600; 
-                margin-bottom: 4px;
-                color: inherit;
-              }
-              .position { 
-                font-size: 16px; 
-                opacity: 0.8;
-                margin-bottom: 16px;
-                color: inherit;
-              }
-              .contact-button {
-                margin-bottom: 20px;
-                padding: 12px 20px;
-                border-radius: 8px;
-                font-size: 16px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 8px;
-                text-decoration: none;
-                border: 1px solid rgba(255,255,255,0.3);
-                color: inherit;
-                background: rgba(255,255,255,0.1);
-              }
-              .icons-grid { 
-                display: grid; 
-                grid-template-columns: repeat(4, 1fr); 
-                gap: 12px; 
-                padding: 16px 0;
-                max-width: 100%;
-              }
-              
-              /* Gold template için özel stiller */
-              .icon-item {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 8px;
-              }
-              
-              .icon-link {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: 55px;
-                height: 55px;
-                background: rgba(246, 246, 246, 0.28);
-                border-radius: 12px;
-                border: 3px solid #000000;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-                text-decoration: none;
-                transition: all 0.3s ease;
-                box-sizing: border-box;
-              }
-              
-              .icon-link i {
-                font-size: 1.5rem;
-                color: var(--text-dark, #2C2C2C);
-              }
-              
-              .icon-item .icon-label {
-                font-size: 0.75rem;
-                font-weight: 500;
-                color: var(--text-dark, #2C2C2C);
-                text-align: center;
-              }
-              
-              /* Gold template icon renkler */
-              .icon-telefon i { color: #4CAF50 !important; }
-              .icon-whatsapp i { color: #25D366 !important; }
-              .icon-email i { color: #FF9800 !important; }
-              .icon-instagram i { color: #E4405F !important; }
-              .icon-website i { color: #607D8B !important; }
-              .icon-qr i { color: #9C27B0 !important; }
-              .icon-card { 
-                display: flex; 
-                flex-direction: column; 
-                align-items: center; 
-                text-align: center; 
-                padding: 16px 8px; 
-                border-radius: 8px; 
-                min-height: 80px;
-                justify-content: center;
-                background: rgba(255,255,255,0.1);
-                border: 1px solid rgba(255,255,255,0.2);
-              }
-              .icon-card a {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 6px;
-                text-decoration: none;
-                color: inherit;
+              .bg-container {
                 width: 100%;
+                height: 100%;
+                background: url('${backgroundImage}') no-repeat center center;
+                background-size: cover;
+                background-position: center center;
+                position: relative;
+                display: flex;
+                align-items: center;
+                justify-content: center;
               }
-              .icon-card i { 
-                font-size: 24px; 
-                color: inherit;
-              }
-              .icon-card .icon-label { 
-                font-size: 12px; 
-                font-weight: 500; 
-                line-height: 1.2; 
-                color: inherit;
-              }
-              .about-section {
-                margin-top: 20px;
-                padding: 16px;
-                background: rgba(255,255,255,0.1);
-                border-radius: 8px;
-              }
-              .about-title {
-                font-size: 18px;
-                font-weight: bold;
-                margin-bottom: 8px;
-                color: inherit;
-              }
-              .about-text {
-                font-size: 14px;
-                line-height: 1.4;
-                color: inherit;
-                opacity: 0.9;
+              .template-overlay {
+                position: absolute;
+                bottom: 10px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(0,0,0,0.7);
+                color: white;
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-size: 10px;
+                font-weight: 500;
+                white-space: nowrap;
               }
             </style>
+            <div class="bg-container">
+              <div class="template-overlay">${template.name}</div>
+            </div>
           `;
 
-          htmls[template.id] = previewCSS + html;
+          htmls[template.id] = simpleHTML;
         }
         
         setPreviewHtmls(htmls);

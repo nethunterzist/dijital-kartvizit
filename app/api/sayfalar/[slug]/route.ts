@@ -87,20 +87,7 @@ export async function GET(
 ) {
   try {
     const slug = params.slug;
-    console.log('🔍 ===== SAYFA API BAŞLADI =====');
-    console.log('📋 Request URL:', request.url);
-    console.log('📋 Slug:', slug);
-    console.log('📋 Headers:', Object.fromEntries(request.headers.entries()));
-    console.log('📋 Method:', request.method);
-    console.log('⏰ Timestamp:', new Date().toISOString());
-    
     logger.info(`[${slug}] HTML/JSON içeriği getirme isteği alındı`, { slug });
-    
-    console.log('💾 Database sorgusu başlıyor...');
-    console.log('🔍 Aranan slug:', slug);
-    console.log('🔍 Environment:', process.env.NODE_ENV);
-    console.log('🔍 Database URL exists:', !!process.env.DATABASE_URL);
-    console.log('🔍 Prisma version:', prisma._clientVersion);
     
     // Firma verisini ilişkili verilerle birlikte çek (Hem eski hem yeni yapıyı destekle)
     const firma = await prisma.firmalar.findFirst({
@@ -131,56 +118,12 @@ export async function GET(
       }
     });
     
-    console.log('📊 Database sorgu sonucu:');
-    console.log('  - Firma bulundu mu?', !!firma);
-    if (firma) {
-      console.log('  - Firma ID:', firma.id);
-      console.log('  - Firma Adı:', firma.firma_adi);
-      console.log('  - Slug:', firma.slug);
-      console.log('  - Template ID:', firma.template_id);
-      console.log('  - İletişim bilgileri sayısı:', firma.iletisim_bilgileri?.length || 0);
-      console.log('  - Sosyal medya hesapları sayısı:', firma.sosyal_medya_hesaplari?.length || 0);
-      console.log('  - Banka hesapları sayısı:', firma.banka_hesaplari?.length || 0);
-      console.log('  - İletişim bilgileri detay:', firma.iletisim_bilgileri);
-      console.log('  - Sosyal medya hesapları detay:', firma.sosyal_medya_hesaplari);
-      console.log('  - Banka hesapları detay:', firma.banka_hesaplari);
-    }
     
     if (!firma) {
-      console.log('❌ Firma bulunamadı, 404 döndürülüyor');
-      console.log('🔍 Database connection status: Attempting count query...');
-      
       try {
-        const totalCount = await prisma.firmalar.count();
-        console.log('✅ Database accessible, total firmalar count:', totalCount);
-        
-        // Check if slug exists with different case
-        const firmaCaseInsensitive = await prisma.firmalar.findFirst({
-          where: { 
-            slug: { 
-              contains: slug, 
-              mode: 'insensitive' 
-            } 
-          },
-          select: { id: true, slug: true, firma_adi: true }
-        });
-        
-        if (firmaCaseInsensitive) {
-          console.log('🔍 Found similar slug with different case:', firmaCaseInsensitive);
-        } else {
-          console.log('🔍 No similar slug found in database');
-        }
-        
-        // Show sample slugs for debugging
-        const sampleSlugs = await prisma.firmalar.findMany({
-          select: { slug: true, firma_adi: true },
-          take: 5,
-          orderBy: { created_at: 'desc' }
-        });
-        console.log('🔍 Sample slugs in database:', sampleSlugs);
-        
+        await prisma.firmalar.count();
       } catch (dbError) {
-        console.log('❌ Database connection error:', dbError);
+        console.error('Database connection error:', dbError);
         logger.error('Database connection failed in sayfalar API', { error: dbError });
       }
       
