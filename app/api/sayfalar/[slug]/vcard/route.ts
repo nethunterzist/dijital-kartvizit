@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+
+// API route - dynamic rendering
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 import prisma from '@/app/lib/db';
 import { generateVCard } from '@/app/lib/vcardGenerator';
 import { logger } from '@/app/lib/logger';

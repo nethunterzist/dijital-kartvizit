@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+
+// API route - dynamic rendering
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/lib/auth';
 import { getAllFirmalar, createFirma, deleteFirma, getPool } from '@/app/lib/direct-db';

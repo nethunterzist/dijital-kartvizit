@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+
+// API route - dynamic rendering
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 import { LocalFileUploadService } from '@/app/lib/services/LocalFileUploadService';
 
 // SECURITY: File upload configuration

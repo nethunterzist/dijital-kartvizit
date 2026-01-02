@@ -1,4 +1,8 @@
 import { NextResponse } from 'next/server';
+
+// API route - dynamic rendering
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 import { getAllFirmalar } from '@/app/lib/db';
 import { generateHtmlForFirma } from '@/app/lib/htmlGenerator';
 import { logger } from '@/app/lib/logger';

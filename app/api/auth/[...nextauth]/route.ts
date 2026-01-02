@@ -1,4 +1,8 @@
 import NextAuth from "next-auth";
+
+// API route - dynamic rendering
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
 import { PrismaClient } from '@prisma/client';

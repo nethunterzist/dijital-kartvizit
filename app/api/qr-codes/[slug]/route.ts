@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+
+// API route - dynamic rendering
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 import Handlebars from 'handlebars';
 import { getFirmaBySlug } from '@/app/lib/direct-db';
 import QRCode from 'qrcode';

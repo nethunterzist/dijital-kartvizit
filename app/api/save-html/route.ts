@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// API route - dynamic rendering
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function POST(req: NextRequest) {
   try {
     const { slug, html } = await req.json();

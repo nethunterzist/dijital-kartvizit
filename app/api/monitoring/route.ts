@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+
+// API route - dynamic rendering
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 import { getDatabaseHealth } from '@/app/lib/db';
 import { logger } from '@/app/lib/logger';
 import { incrementRequestCounter, incrementErrorCounter, getMetricsCache } from '@/app/lib/monitoring';

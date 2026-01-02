@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+
+// API route - dynamic rendering
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 import { getFirmaWithCommunication, getPool } from '@/app/lib/direct-db';
 import { generateHtmlForFirma } from '@/app/lib/htmlGenerator';
 import { generateVCard, VCardData } from '@/app/lib/vcardGenerator';
