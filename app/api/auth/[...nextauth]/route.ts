@@ -16,25 +16,37 @@ const handler = NextAuth({
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
+        console.log('[AUTH] Login attempt started');
+        console.log('[AUTH] Username provided:', !!credentials?.username);
+        console.log('[AUTH] Password provided:', !!credentials?.password);
+
         if (!credentials?.username || !credentials?.password) {
+          console.log('[AUTH] FAILED: Missing credentials');
           return null;
         }
 
         try {
+          console.log('[AUTH] Searching for user:', credentials.username);
           // Database'den kullanıcıyı bul
           const user = await prisma.admins.findFirst({
             where: { username: credentials.username }
           });
 
           if (!user) {
-            // SECURITY: No username logging to prevent enumeration
+            console.log('[AUTH] FAILED: User not found');
             return null;
           }
+
+          console.log('[AUTH] User found, checking password');
+          console.log('[AUTH] Stored hash:', user.password);
 
           // Şifre karşılaştır
           const passwordMatch = await bcrypt.compare(credentials.password, user.password);
 
+          console.log('[AUTH] Password match result:', passwordMatch);
+
           if (passwordMatch) {
+            console.log('[AUTH] SUCCESS: Login successful');
             return {
               id: user.id.toString(),
               name: user.username,
@@ -42,10 +54,11 @@ const handler = NextAuth({
             };
           }
 
+          console.log('[AUTH] FAILED: Password mismatch');
           return null;
         } catch (error) {
-          // SECURITY: Only log error in production-safe way
-          console.error('Authentication error:', error instanceof Error ? error.message : 'Unknown error');
+          console.error('[AUTH] ERROR:', error);
+          console.error('[AUTH] Error stack:', error instanceof Error ? error.stack : 'No stack');
           return null;
         }
       }
