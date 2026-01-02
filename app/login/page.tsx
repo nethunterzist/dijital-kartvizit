@@ -30,22 +30,34 @@ export default function LoginPage() {
         redirect: false
       });
 
+      console.log('[DEBUG] signIn result:', JSON.stringify(result));
+
       if (result?.error) {
+        console.log('[DEBUG] Login failed with error:', result.error);
         setError('Kullanıcı adı veya şifre hatalı.');
         setLoading(false);
         return;
       }
 
       if (result?.ok) {
+        console.log('[DEBUG] Login successful, navigating to /admin');
         logger.info('Giriş başarılı!');
         router.push('/admin');
+        console.log('[DEBUG] router.push() completed');
         // Don't set loading to false - let the navigation complete
         return;
       }
 
       // If we get here, something unexpected happened
+      console.log('[DEBUG] Unexpected: no error, but ok is not true. Result:', result);
       setLoading(false);
     } catch (err) {
+      console.error('[DEBUG] Exception caught in handleSubmit:', err);
+      console.error('[DEBUG] Exception details:', {
+        message: err instanceof Error ? err.message : String(err),
+        stack: err instanceof Error ? err.stack : undefined,
+        name: err instanceof Error ? err.name : undefined
+      });
       logger.error('Giriş hatası:', err);
       setError('Giriş sırasında bir hata oluştu. Lütfen tekrar deneyin.');
       setLoading(false);
