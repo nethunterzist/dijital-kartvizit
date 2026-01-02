@@ -1,7 +1,9 @@
 import { prisma } from '@/app/lib/db';
 import { logger } from '@/app/lib/logger';
 import type { RelationalData } from './FormDataParser';
-import type { firmalar } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+
+type Firmalar = Prisma.firmalarGetPayload<{}>;
 
 export interface BasicFirmaData {
   firma_adi: string;
@@ -33,7 +35,7 @@ export interface FirmaCreateData {
 
 export interface FirmaResult {
   success: boolean;
-  firma?: firmalar;
+  firma?: Firmalar;
   error?: string;
 }
 
