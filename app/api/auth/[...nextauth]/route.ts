@@ -6,6 +6,23 @@ export const revalidate = 0;
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
 import { prisma } from '@/app/lib/db';
+import fs from 'fs';
+
+// Debug logging function
+function debugLog(message: string) {
+  const timestamp = new Date().toISOString();
+  const logMessage = `${timestamp} - ${message}\n`;
+
+  // Console log
+  console.log(message);
+
+  // File log
+  try {
+    fs.appendFileSync('/tmp/auth-debug.log', logMessage);
+  } catch (e) {
+    // Ignore file write errors
+  }
+}
 
 const handler = NextAuth({
   providers: [
@@ -16,37 +33,39 @@ const handler = NextAuth({
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        console.log('[AUTH] Login attempt started');
-        console.log('[AUTH] Username provided:', !!credentials?.username);
-        console.log('[AUTH] Password provided:', !!credentials?.password);
+        debugLog('[AUTH] ========== LOGIN ATTEMPT STARTED ==========');
+        debugLog(`[AUTH] Username provided: ${!!credentials?.username}`);
+        debugLog(`[AUTH] Password provided: ${!!credentials?.password}`);
 
         if (!credentials?.username || !credentials?.password) {
-          console.log('[AUTH] FAILED: Missing credentials');
+          debugLog('[AUTH] FAILED: Missing credentials');
           return null;
         }
 
         try {
-          console.log('[AUTH] Searching for user:', credentials.username);
+          debugLog(`[AUTH] Searching for user: ${credentials.username}`);
+
           // Database'den kullanıcıyı bul
           const user = await prisma.admins.findFirst({
             where: { username: credentials.username }
           });
 
           if (!user) {
-            console.log('[AUTH] FAILED: User not found');
+            debugLog('[AUTH] FAILED: User not found');
             return null;
           }
 
-          console.log('[AUTH] User found, checking password');
-          console.log('[AUTH] Stored hash:', user.password);
+          debugLog('[AUTH] User found, checking password');
+          debugLog(`[AUTH] Stored hash: ${user.password}`);
+          debugLog(`[AUTH] Input password: ${credentials.password}`);
 
           // Şifre karşılaştır
           const passwordMatch = await bcrypt.compare(credentials.password, user.password);
 
-          console.log('[AUTH] Password match result:', passwordMatch);
+          debugLog(`[AUTH] Password match result: ${passwordMatch}`);
 
           if (passwordMatch) {
-            console.log('[AUTH] SUCCESS: Login successful');
+            debugLog('[AUTH] SUCCESS: Login successful');
             return {
               id: user.id.toString(),
               name: user.username,
@@ -54,11 +73,11 @@ const handler = NextAuth({
             };
           }
 
-          console.log('[AUTH] FAILED: Password mismatch');
+          debugLog('[AUTH] FAILED: Password mismatch');
           return null;
         } catch (error) {
-          console.error('[AUTH] ERROR:', error);
-          console.error('[AUTH] Error stack:', error instanceof Error ? error.stack : 'No stack');
+          debugLog(`[AUTH] ERROR: ${error}`);
+          debugLog(`[AUTH] Error stack: ${error instanceof Error ? error.stack : 'No stack'}`);
           return null;
         }
       }
@@ -86,8 +105,8 @@ const handler = NextAuth({
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60 // 30 days
   },
-  // Serverless environment configuration
-  debug: process.env.NODE_ENV === 'development'
+  // Enable debug mode in production too
+  debug: true
 });
 
 export { handler as GET, handler as POST };
