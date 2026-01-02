@@ -5,18 +5,36 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-// Production-ready Prisma configuration for serverless
-export const prisma = globalForPrisma.prisma ?? new PrismaClient({
-  log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-  errorFormat: 'pretty',
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL,
-    },
-  },
-});
+// Lazy initialization function - prevents build-time errors
+function getPrismaClient() {
+  if (globalForPrisma.prisma) {
+    return globalForPrisma.prisma;
+  }
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+  const client = new PrismaClient({
+    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+    errorFormat: 'pretty',
+    datasources: {
+      db: {
+        url: process.env.DATABASE_URL,
+      },
+    },
+  });
+
+  if (process.env.NODE_ENV !== 'production') {
+    globalForPrisma.prisma = client;
+  }
+
+  return client;
+}
+
+// Export prisma instance with lazy initialization
+export const prisma = new Proxy({} as PrismaClient, {
+  get(target, prop) {
+    const client = getPrismaClient();
+    return client[prop as keyof PrismaClient];
+  }
+});
 
 // Prepared statement conflict'ini çözmek için yardımcı fonksiyon
 export async function withFreshPrismaClient<T>(operation: (client: PrismaClient) => Promise<T>): Promise<T> {
