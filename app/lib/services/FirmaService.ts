@@ -1,9 +1,9 @@
 import { prisma } from '@/app/lib/db';
 import { logger } from '@/app/lib/logger';
 import type { RelationalData } from './FormDataParser';
-import type { firmalar } from '@prisma/client';
 
-type Firmalar = firmalar;
+// Prisma type inference from client - production-safe yöntem
+type Firmalar = Awaited<ReturnType<typeof prisma.firmalar.findFirst>>;
 
 export interface BasicFirmaData {
   firma_adi: string;
