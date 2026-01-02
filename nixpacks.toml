@@ -1,2 +1,2 @@
 [start]
-cmd = "next start"
+cmd = "prisma generate && next start"
