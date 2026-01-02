@@ -10,7 +10,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { generateQRCode } from '@/app/lib/qrCodeGenerator';
 import { logger } from '@/app/lib/logger';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/app/lib/db';
 import { LocalFileUploadService } from '@/app/lib/services/LocalFileUploadService';
 import {
   ValidationError,
@@ -25,15 +25,6 @@ import {
   validate,
   validatePartial,
 } from '@/app/lib/validations';
-
-// Prisma singleton
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
-};
-
-const prisma = globalForPrisma.prisma ?? new PrismaClient();
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 
 // SocialMediaData interface tanımı eklendi
 interface SocialMediaData {
