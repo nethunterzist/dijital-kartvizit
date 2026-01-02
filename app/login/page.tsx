@@ -38,8 +38,8 @@ export default function LoginPage() {
       
       if (result?.ok) {
         logger.info('Giriş başarılı!');
-      router.push('/admin');
-        router.refresh();
+        router.push('/admin');
+        // router.refresh() removed - Next.js App Router auto-revalidates
       }
     } catch (err) {
       logger.error('Giriş hatası:', err);
@@ -104,7 +104,8 @@ export default function LoginPage() {
           <div>
             <button
               type="submit"
-              className="group relative flex w-full justify-center rounded-md bg-indigo-600 py-2 px-3 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+              disabled={loading}
+              className="group relative flex w-full justify-center rounded-md bg-indigo-600 py-2 px-3 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Giriş Yapılıyor...' : 'Giriş Yap'}
             </button>

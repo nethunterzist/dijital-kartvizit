@@ -33,9 +33,10 @@ export default function LoginForm() {
       if (result?.error) {
         setError('Kullanıcı adı veya şifre hatalı.');
         logger.error('Giriş hatası:', result.error);
+        setLoading(false);
       } else {
         router.push('/admin');
-        router.refresh();
+        // router.refresh() removed - Next.js App Router auto-revalidates
       }
     } catch (error) {
       setError('Giriş işlemi sırasında bir hata oluştu.');
