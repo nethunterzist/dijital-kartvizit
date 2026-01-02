@@ -24,33 +24,12 @@ export default function LoginPage() {
       setLoading(true);
       setError('');
 
-      const result = await signIn('credentials', {
+      // Use NextAuth's built-in redirect mechanism
+      await signIn('credentials', {
         username,
         password,
-        redirect: false
+        callbackUrl: '/admin',
       });
-
-      console.log('[DEBUG] signIn result:', JSON.stringify(result));
-
-      if (result?.error) {
-        console.log('[DEBUG] Login failed with error:', result.error);
-        setError('Kullanıcı adı veya şifre hatalı.');
-        setLoading(false);
-        return;
-      }
-
-      if (result?.ok) {
-        console.log('[DEBUG] Login successful, navigating to /admin');
-        logger.info('Giriş başarılı!');
-        router.push('/admin');
-        console.log('[DEBUG] router.push() completed');
-        // Don't set loading to false - let the navigation complete
-        return;
-      }
-
-      // If we get here, something unexpected happened
-      console.log('[DEBUG] Unexpected: no error, but ok is not true. Result:', result);
-      setLoading(false);
     } catch (err) {
       console.error('[DEBUG] Exception caught in handleSubmit:', err);
       console.error('[DEBUG] Exception details:', {

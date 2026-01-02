@@ -24,27 +24,12 @@ export default function LoginForm() {
       setLoading(true);
       setError('');
 
-      const result = await signIn('credentials', {
+      // Use NextAuth's built-in redirect mechanism
+      await signIn('credentials', {
         username,
         password,
-        redirect: false,
+        callbackUrl: '/admin',
       });
-
-      if (result?.error) {
-        setError('Kullanıcı adı veya şifre hatalı.');
-        logger.error('Giriş hatası:', result.error);
-        setLoading(false);
-        return;
-      }
-
-      if (result?.ok) {
-        router.push('/admin');
-        // Don't set loading to false - let the navigation complete
-        return;
-      }
-
-      // If we get here, something unexpected happened
-      setLoading(false);
     } catch (error) {
       setError('Giriş işlemi sırasında bir hata oluştu.');
       logger.error('Giriş hatası:', error);
