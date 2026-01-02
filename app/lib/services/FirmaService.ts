@@ -1,9 +1,9 @@
 import { prisma } from '@/app/lib/db';
 import { logger } from '@/app/lib/logger';
 import type { RelationalData } from './FormDataParser';
-import { Prisma } from '@prisma/client';
+import type { firmalar } from '@prisma/client';
 
-type Firmalar = Prisma.$firmalarPayload['scalars'];
+type Firmalar = firmalar;
 
 export interface BasicFirmaData {
   firma_adi: string;
