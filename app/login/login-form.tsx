@@ -48,7 +48,13 @@ export default function LoginForm() {
   return (
     <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
       {error && (
-        <div className="p-3 mb-4 text-sm text-red-800 rounded-lg bg-red-50" role="alert">
+        <div
+          className="p-3 mb-4 text-sm text-red-800 rounded-lg bg-red-50"
+          role="alert"
+          aria-live="assertive"
+          aria-atomic="true"
+        >
+          <span className="sr-only">Hata:</span>
           {error}
         </div>
       )}

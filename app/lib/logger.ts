@@ -1,8 +1,34 @@
-// Serverless-friendly logger for Vercel deployment
-const isDevelopment = process.env.NODE_ENV === 'development';
+// Serverless-friendly logger for Vercel deployment with Winston support
+import winston from 'winston';
 
-// Simple console-based logger for serverless environments
-const createLogger = () => {
+const isDevelopment = process.env.NODE_ENV === 'development';
+const logLevel = process.env.LOG_LEVEL || (isDevelopment ? 'debug' : 'info');
+
+// Winston logger configuration (serverless-compatible)
+const winstonLogger = winston.createLogger({
+  level: logLevel,
+  format: winston.format.combine(
+    winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+    winston.format.errors({ stack: true }),
+    winston.format.json()
+  ),
+  defaultMeta: { service: 'dijital-kartvizit' },
+  transports: [
+    // Console transport for serverless environments
+    new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.printf(({ timestamp, level, message, ...meta }) => {
+          const metaStr = Object.keys(meta).length > 0 ? ` ${JSON.stringify(meta)}` : '';
+          return `[${timestamp}] ${level}: ${message}${metaStr}`;
+        })
+      ),
+    }),
+  ],
+});
+
+// Fallback simple logger for environments where Winston fails
+const createSimpleLogger = () => {
   const log = (level: string, message: string, meta?: any) => {
     const timestamp = new Date().toISOString();
     const metaStr = meta ? ` ${JSON.stringify(meta)}` : '';
@@ -20,7 +46,8 @@ const createLogger = () => {
   };
 };
 
-const Logger = createLogger();
+// Use Winston if available, fallback to simple logger
+const Logger = winstonLogger || createSimpleLogger();
 
 // Custom logging functions
 export const logger = {

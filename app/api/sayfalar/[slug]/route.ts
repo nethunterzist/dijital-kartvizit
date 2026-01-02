@@ -130,13 +130,11 @@ export async function GET(
       return NextResponse.json({ error: 'Firma bulunamadı' }, { status: 404 });
     }
 
-    console.log('🔄 Veri işleme başlıyor...');
 
     // Website bilgilerini iletişim bilgilerinden çek
     let websiteArray: string[] = [];
     const websiteItems = firma.iletisim_bilgileri.filter(item => item.tip === 'website');
     websiteArray = websiteItems.map(item => item.deger);
-    console.log('🌐 Website array:', websiteArray);
 
     // Sosyal medya verilerini yeni normalize edilmiş yapıdan çek
     let socialMediaArray: any[] = [];
@@ -149,7 +147,6 @@ export async function GET(
         platform: item.platform
       });
     });
-    console.log('📱 Social media array:', socialMediaArray);
 
     // İletişim verilerini yeni normalize edilmiş yapıdan çek
     let communicationArray: any[] = [];
@@ -163,7 +160,6 @@ export async function GET(
         tip: item.tip
       });
     });
-    console.log('📞 Communication array:', communicationArray);
 
     // Banka hesaplarını yeni normalize edilmiş yapıdan çek
     let bankaHesaplari: any[] = [];
@@ -179,15 +175,11 @@ export async function GET(
         }))
       });
     });
-    console.log('🏦 Banka hesapları array:', bankaHesaplari);
 
     // Accept header'ına göre response tipi belirle
     const accept = request.headers.get('accept') || '';
-    console.log('📤 Response tipi belirleniyor...');
-    console.log('🔍 Accept header:', accept);
     
     if (accept.includes('application/json') || accept.includes('*/')) {
-      console.log('📄 JSON response döndürülüyor');
       
       const responseData = {
         firma_adi: firma.firma_adi,
@@ -214,8 +206,6 @@ export async function GET(
         profil_foto: firma.profil_foto
       };
       
-      console.log('✅ Final JSON response data:', responseData);
-      console.log('🏁 ===== SAYFA API TAMAMLANDI (JSON) =====');
       
       // JSON response - boş veriler için fallback'ler ekle
       return NextResponse.json(responseData);

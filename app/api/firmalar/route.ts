@@ -1,7 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/lib/auth';
 import { getAllFirmalar, createFirma, deleteFirma, getPool } from '@/app/lib/direct-db';
 import { logger } from '@/app/lib/logger';
 import { LocalFileUploadService } from '@/app/lib/services/LocalFileUploadService';
+import {
+  ValidationError,
+  NotFoundError,
+  DatabaseError,
+  createErrorResponse,
+  getErrorStatusCode,
+  ErrorFormatter,
+} from '@/app/lib/errors';
+import {
+  firmaSchema,
+  iletisimArraySchema,
+  sosyalMedyaArraySchema,
+  bankaHesabiArraySchema,
+  validate,
+  validateSafe,
+  parseAndValidate,
+} from '@/app/lib/validations';
 
 // API yanıt helper fonksiyonları
 function successResponse(data: any, message?: string, status = 200) {
@@ -9,9 +28,18 @@ function successResponse(data: any, message?: string, status = 200) {
 }
 
 function errorResponse(message: string, code?: string, details?: any, status = 400) {
-  return NextResponse.json({ 
-    error: { message, code, details } 
-  }, { status });
+  const isDevelopment = process.env.NODE_ENV === 'development';
+
+  return NextResponse.json(
+    {
+      error: {
+        message,
+        code,
+        ...(details && isDevelopment && { details }),
+      },
+    },
+    { status }
+  );
 }
 
 export async function GET(req: NextRequest) {
@@ -71,23 +99,30 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    logger.info('POST /api/firmalar called');
-    
+    // Authentication check
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      logger.warn('Unauthorized POST attempt to /api/firmalar');
+      return errorResponse('Yetkisiz işlem. Lütfen giriş yapın.', 'UNAUTHORIZED', undefined, 401);
+    }
+
+    logger.info('POST /api/firmalar called', { user: session.user?.email });
+
     // Content-Type kontrolü
     const contentType = req.headers.get('content-type');
-    
+
     let formData;
     let uploadedUrls: { [key: string]: string } = {};
-    
+
     // FormData veya JSON kontrolü
     if (contentType?.includes('multipart/form-data')) {
       const originalFormData = await req.formData();
-      
+
       // Önce dosya upload işlemini yap
       try {
         const uploadService = new LocalFileUploadService();
         const uploadResult = await uploadService.processUploads(originalFormData);
-        
+
         if (uploadResult.success && uploadResult.urls) {
           // LocalFileUploadResult.urls'den string record'a çevir
           if (uploadResult.urls.profilePhotoUrl) {
@@ -100,73 +135,88 @@ export async function POST(req: NextRequest) {
             uploadedUrls.katalog = uploadResult.urls.catalogUrl;
           }
         }
-        
+
         logger.info('Files uploaded successfully', { urls: uploadedUrls });
       } catch (uploadError) {
         logger.error('File upload failed', { error: uploadError });
         return errorResponse('Dosya yükleme hatası', 'UPLOAD_ERROR', { error: uploadError }, 500);
       }
-      
+
       // FormData'yı object'e çevir
       const data: any = {};
       for (const [key, value] of originalFormData.entries()) {
-        data[key] = value;
+        if (!(value instanceof File)) {
+          data[key] = value;
+        }
       }
-      
+
       formData = data;
-      
     } else if (contentType?.includes('application/json')) {
       const jsonData = await req.json();
       formData = jsonData;
-      
     } else {
       logger.warn('Unsupported Content-Type', { contentType });
-      return errorResponse('Desteklenmeyen content type', 'INVALID_CONTENT_TYPE', { contentType }, 400);
+      return errorResponse(
+        'Desteklenmeyen content type',
+        'INVALID_CONTENT_TYPE',
+        { contentType },
+        400
+      );
     }
 
-    // Gerekli alanları kontrol et - hem eski hem yeni field adlarını destekle
-    const firmaAdi = formData.firmaAdi || formData.firma_adi;
-    const slug = formData.slug;
-    
-    const missingFields = [];
-    if (!firmaAdi) missingFields.push('firma_adi');
-    if (!slug) missingFields.push('slug');
-    
-    if (missingFields.length > 0) {
-      logger.warn('Missing required fields', { missingFields });
-      return errorResponse('Gerekli alanlar eksik', 'MISSING_FIELDS', { missingFields }, 400);
-    }
-    
-    // Direct DB - NO PRISMA
-    const newFirma = await createFirma({
-      firma_adi: firmaAdi,
-      slug: slug,
-      yetkili_adi: formData.yetkili_adi || formData.yetkiliAdi || null,
-      yetkili_pozisyon: formData.yetkili_pozisyon || formData.yetkiliPozisyon || null,
+    // Normalize field names (support both camelCase and snake_case)
+    const normalizedData = {
+      firma_adi: formData.firmaAdi || formData.firma_adi,
+      slug: formData.slug,
+      yetkili_adi: formData.yetkili_adi || formData.yetkiliAdi,
+      yetkili_pozisyon: formData.yetkili_pozisyon || formData.yetkiliPozisyon,
+      firma_hakkinda: formData.firma_hakkinda,
+      firma_hakkinda_baslik: formData.firma_hakkinda_baslik || 'Hakkımızda',
+      firma_unvan: formData.firma_unvan,
+      firma_vergi_no: formData.firma_vergi_no,
+      vergi_dairesi: formData.vergi_dairesi,
+      template_id: formData.templateId || formData.template_id ? parseInt(formData.templateId || formData.template_id) : 1,
+      gradient_color: formData.gradientColor || formData.gradient_color,
       profil_foto: uploadedUrls.profilePhoto || formData.profil_foto || null,
       firma_logo: uploadedUrls.logoFile || formData.firma_logo || null,
       katalog: uploadedUrls.katalog || formData.katalog || null,
-      template_id: parseInt(formData.templateId || formData.template_id) || 1,
-      firma_hakkinda: formData.firma_hakkinda || null,
-      firma_hakkinda_baslik: formData.firma_hakkinda_baslik || 'Hakkımızda',
-      firma_unvan: formData.firma_unvan || null,
-      firma_vergi_no: formData.firma_vergi_no || null,
-      vergi_dairesi: formData.vergi_dairesi || null,
-      gradient_color: formData.gradientColor || formData.gradient_color || '#D4AF37,#F7E98E,#B8860B'
-    });
+    };
 
-    logger.info('Firma created successfully', { id: newFirma.id, firma_adi: firmaAdi, slug });
+    // Validate firma data with Zod
+    let validatedFirmaData;
+    try {
+      validatedFirmaData = validate(firmaSchema, normalizedData);
+      logger.info('Firma data validated successfully');
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        logger.warn('Firma validation failed', { errors: error.errors });
+        return NextResponse.json(
+          createErrorResponse(error, process.env.NODE_ENV === 'development'),
+          { status: 400 }
+        );
+      }
+      throw error;
+    }
+    
+    // Direct DB - NO PRISMA - use validated data
+    const newFirma = await createFirma(validatedFirmaData);
+
+    logger.info('Firma created successfully', {
+      id: newFirma.id,
+      firma_adi: validatedFirmaData.firma_adi,
+      slug: validatedFirmaData.slug,
+    });
 
 
     // Save communication data
     
     let saveStatus = {
       iletisim_kaydetme_durumu: 'not_attempted',
-      iletisim_hata: null,
+      iletisim_hata: null as string | null,
       sosyal_kaydetme_durumu: 'not_attempted',
-      sosyal_hata: null,
+      sosyal_hata: null as string | null,
       banka_kaydetme_durumu: 'not_attempted',
-      banka_hata: null
+      banka_hata: null as string | null
     };
     
     try {
@@ -184,33 +234,42 @@ export async function POST(req: NextRequest) {
         
         
         if (Array.isArray(communicationData) && communicationData.length > 0) {
+          // SECURITY: Whitelist allowed communication types
+          const ALLOWED_TYPES = ['telefon', 'eposta', 'whatsapp', 'adres', 'fax', 'website'];
+
           const client = await getPool().connect();
           try {
             for (let i = 0; i < communicationData.length; i++) {
               const item = communicationData[i];
-              if (item.type && item.value) {
-                const result = await client.query(
-                  'INSERT INTO "IletisimBilgisi" (firma_id, tip, deger, etiket, sira) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-                  [newFirma.id, item.type, item.value, item.label || '', i]
-                );
-              } else {
+
+              // SECURITY: Validate input
+              if (!item.type || !item.value) {
+                continue; // Skip invalid items
               }
+
+              // SECURITY: Validate type against whitelist
+              if (!ALLOWED_TYPES.includes(item.type)) {
+                continue; // Skip invalid types
+              }
+
+              // SECURITY: Validate and sanitize lengths
+              const sanitizedValue = String(item.value).substring(0, 255);
+              const sanitizedLabel = String(item.label || '').substring(0, 100);
+
+              const result = await client.query(
+                'INSERT INTO "IletisimBilgisi" (firma_id, tip, deger, etiket, sira) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+                [newFirma.id, item.type, sanitizedValue, sanitizedLabel, i]
+              );
             }
             saveStatus.iletisim_kaydetme_durumu = 'success';
           } catch (dbError) {
             saveStatus.iletisim_kaydetme_durumu = 'database_error';
-            saveStatus.iletisim_hata = dbError.message;
+            saveStatus.iletisim_hata = dbError instanceof Error ? dbError.message : 'Unknown error';
             throw dbError;
           } finally {
             client.release();
           }
         } else {
-          console.log('📞 İletişim verisi array değil veya boş:', {
-            type: typeof communicationData,
-            isArray: Array.isArray(communicationData),
-            length: communicationData?.length,
-            value: communicationData
-          });
           saveStatus.iletisim_kaydetme_durumu = 'invalid_data_format';
           saveStatus.iletisim_hata = 'Array değil veya boş';
         }
@@ -220,7 +279,7 @@ export async function POST(req: NextRequest) {
       }
     } catch (parseError) {
       saveStatus.iletisim_kaydetme_durumu = 'parse_error';
-      saveStatus.iletisim_hata = parseError.message;
+      saveStatus.iletisim_hata = parseError instanceof Error ? parseError.message : 'Unknown parse error';
     }
 
     // Sosyal medya hesaplarını kaydet
@@ -239,33 +298,42 @@ export async function POST(req: NextRequest) {
         
         
         if (Array.isArray(sosyalData) && sosyalData.length > 0) {
+          // SECURITY: Whitelist allowed platforms
+          const ALLOWED_PLATFORMS = ['instagram', 'facebook', 'twitter', 'linkedin', 'youtube', 'tiktok', 'whatsapp', 'telegram'];
+
           const client = await getPool().connect();
           try {
             for (let i = 0; i < sosyalData.length; i++) {
               const item = sosyalData[i];
-              if (item.platform && item.url) {
-                const result = await client.query(
-                  'INSERT INTO "SosyalMedyaHesabi" (firma_id, platform, url, etiket, sira) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-                  [newFirma.id, item.platform, item.url, item.label || '', i]
-                );
-              } else {
+
+              // SECURITY: Validate input
+              if (!item.platform || !item.url) {
+                continue;
               }
+
+              // SECURITY: Validate platform against whitelist
+              if (!ALLOWED_PLATFORMS.includes(item.platform)) {
+                continue;
+              }
+
+              // SECURITY: Validate and sanitize lengths
+              const sanitizedUrl = String(item.url).substring(0, 500);
+              const sanitizedLabel = String(item.label || '').substring(0, 100);
+
+              const result = await client.query(
+                'INSERT INTO "SosyalMedyaHesabi" (firma_id, platform, url, etiket, sira) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+                [newFirma.id, item.platform, sanitizedUrl, sanitizedLabel, i]
+              );
             }
             saveStatus.sosyal_kaydetme_durumu = 'success';
           } catch (dbError) {
             saveStatus.sosyal_kaydetme_durumu = 'database_error';
-            saveStatus.sosyal_hata = dbError.message;
+            saveStatus.sosyal_hata = dbError instanceof Error ? dbError.message : 'Unknown error';
             throw dbError;
           } finally {
             client.release();
           }
         } else {
-          console.log('📱 Sosyal medya verisi array değil veya boş:', {
-            type: typeof sosyalData,
-            isArray: Array.isArray(sosyalData),
-            length: sosyalData?.length,
-            value: sosyalData
-          });
           saveStatus.sosyal_kaydetme_durumu = 'invalid_data_format';
           saveStatus.sosyal_hata = 'Array değil veya boş';
         }
@@ -275,7 +343,7 @@ export async function POST(req: NextRequest) {
       }
     } catch (parseError) {
       saveStatus.sosyal_kaydetme_durumu = 'parse_error';
-      saveStatus.sosyal_hata = parseError.message;
+      saveStatus.sosyal_hata = parseError instanceof Error ? parseError.message : 'Unknown parse error';
     }
 
     // Banka hesaplarını kaydet
@@ -339,18 +407,12 @@ export async function POST(req: NextRequest) {
             saveStatus.banka_kaydetme_durumu = 'success';
           } catch (dbError) {
             saveStatus.banka_kaydetme_durumu = 'database_error';
-            saveStatus.banka_hata = dbError.message;
+            saveStatus.banka_hata = dbError instanceof Error ? dbError.message : 'Unknown error';
             throw dbError;
           } finally {
             client.release();
           }
         } else {
-          console.log('🏦 Banka verisi array değil veya boş:', {
-            type: typeof bankaData,
-            isArray: Array.isArray(bankaData),
-            length: bankaData?.length,
-            value: bankaData
-          });
           saveStatus.banka_kaydetme_durumu = 'invalid_data_format';
           saveStatus.banka_hata = 'Array değil veya boş';
         }
@@ -360,7 +422,7 @@ export async function POST(req: NextRequest) {
       }
     } catch (parseError) {
       saveStatus.banka_kaydetme_durumu = 'parse_error';
-      saveStatus.banka_hata = parseError.message;
+      saveStatus.banka_hata = parseError instanceof Error ? parseError.message : 'Unknown parse error';
     }
 
     // Final verification - check if data was actually saved
@@ -406,19 +468,51 @@ export async function POST(req: NextRequest) {
     }, 'Firma başarıyla oluşturuldu', 201);
 
   } catch (error) {
-    
-    return errorResponse(
-      'Firma oluşturulurken bir hata oluştu',
-      'CREATE_ERROR',
-      error instanceof Error ? error.message : 'Bilinmeyen hata',
-      500
+    logger.error('POST /api/firmalar error', { error });
+
+    // Handle database errors
+    if (error && typeof error === 'object' && 'code' in error) {
+      const dbError = ErrorFormatter.formatDatabaseError(error);
+      return NextResponse.json(
+        createErrorResponse(dbError, process.env.NODE_ENV === 'development'),
+        { status: getErrorStatusCode(dbError) }
+      );
+    }
+
+    // Handle validation errors
+    if (error instanceof ValidationError) {
+      return NextResponse.json(
+        createErrorResponse(error, process.env.NODE_ENV === 'development'),
+        { status: 400 }
+      );
+    }
+
+    // Generic error
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    return NextResponse.json(
+      {
+        error: {
+          message: 'Firma oluşturulurken bir hata oluştu',
+          code: 'CREATE_ERROR',
+          ...(isDevelopment && error instanceof Error && { details: error.message }),
+        },
+      },
+      { status: 500 }
     );
   }
 }
 
 export async function DELETE(req: NextRequest) {
   try {
-    
+    // Authentication check
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      logger.warn('Unauthorized DELETE attempt to /api/firmalar');
+      return errorResponse('Yetkisiz işlem. Lütfen giriş yapın.', 'UNAUTHORIZED', undefined, 401);
+    }
+
+    logger.info('DELETE /api/firmalar called', { user: session.user?.email });
+
     const { searchParams } = new URL(req.url);
     const firmaId = searchParams.get('id');
     

@@ -1,12 +1,12 @@
 import { logger } from '@/app/lib/logger';
-import { 
-  createFirmaSchema, 
+import {
+  createFirmaSchema,
   iletisimBilgisiSchema,
   sosyalMedyaHesabiSchema,
   bankaHesabiSchema,
   safeHtmlSchema,
   slugSchema
-} from '@/app/lib/validation';
+} from '@/app/lib/validations';
 
 export interface ParseResult<T> {
   success: boolean;
@@ -78,7 +78,7 @@ export class FormDataParser {
       logger.info('Basic form data parsed successfully', {
         firma_adi: validatedData.firma_adi,
         slug: validatedData.slug,
-        templateId: validatedData.templateId
+        template_id: validatedData.template_id
       });
 
       return { 

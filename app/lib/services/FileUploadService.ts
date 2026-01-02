@@ -1,6 +1,6 @@
 import cloudinary from '@/app/lib/cloudinary';
 import { logger } from '@/app/lib/logger';
-import { fileUploadSchema, pdfUploadSchema } from '@/app/lib/validation';
+import { fileUploadSchema, pdfUploadSchema } from '@/app/lib/validations';
 import { ImageOptimizationService } from './ImageOptimizationService';
 
 export interface FileUploadResult {
@@ -140,56 +140,17 @@ export class FileUploadService {
     }
     
     try {
-      // Use next-generation optimization for profile photos
-      const context = {
-        usage: 'profile' as const,
-        targetAudience: 'all' as const,
-        priority: 'high' as const,
-        contentType: 'photo' as const
-      };
-
-      const optimizationResult = await ImageOptimizationService.optimize(file, {
-        neuralEnhancement: true,
-        adaptiveCompression: true,
-        contextAwareOptimization: true,
-        responsiveImageGeneration: true,
-        webpFallbackGeneration: true,
-        avifGeneration: true,
-        seoOptimization: true,
-        performanceOptimization: true
-      });
-      
+      // Use optimizeProfilePhoto for profile photos
+      const optimizationResult = await ImageOptimizationService.optimizeProfilePhoto(file);
       if (!optimizationResult.success) {
-        // Fallback to standard optimization
-        logger.warn('Next-gen optimization failed, falling back to standard optimization', {
-          fileName: file.name,
-          error: optimizationResult.error
-        });
-        
-        const fallbackResult = await ImageOptimizationService.optimizeProfilePhoto(file);
-        if (!fallbackResult.success) {
-          throw new Error(fallbackResult.error || 'Profile photo optimization failed');
-        }
-
-        return {
-          url: fallbackResult.urls!.optimized,
-          metadata: {
-            originalSize: fallbackResult.metadata!.originalSize,
-            optimizedSize: fallbackResult.metadata!.optimizedSize,
-            compressionRatio: fallbackResult.metadata!.compressionRatio,
-            variants: fallbackResult.urls!.variants,
-            optimizationType: 'standard'
-          }
-        };
+        throw new Error(optimizationResult.error || 'Profile photo optimization failed');
       }
 
-      logger.info('Next-gen optimized profile photo uploaded successfully', {
+      logger.info('Optimized profile photo uploaded successfully', {
         originalName: file.name,
         originalSize: optimizationResult.metadata?.originalSize,
         optimizedSize: optimizationResult.metadata?.optimizedSize,
         compressionRatio: optimizationResult.metadata?.compressionRatio,
-        neuralEnhancements: optimizationResult.neuralEnhancements,
-        responsiveImages: optimizationResult.responsiveImages,
         url: optimizationResult.urls?.optimized
       });
 
@@ -200,12 +161,7 @@ export class FileUploadService {
           optimizedSize: optimizationResult.metadata!.optimizedSize,
           compressionRatio: optimizationResult.metadata!.compressionRatio,
           variants: optimizationResult.urls!.variants,
-          optimizationType: 'next-gen',
-          neuralEnhancements: optimizationResult.neuralEnhancements,
-          adaptiveCompression: optimizationResult.adaptiveCompression,
-          responsiveImages: optimizationResult.responsiveImages,
-          nextGenPerformanceMetrics: optimizationResult.nextGenPerformanceMetrics,
-          seoOptimization: optimizationResult.seoOptimization
+          optimizationType: 'standard'
         }
       };
     } catch (error) {

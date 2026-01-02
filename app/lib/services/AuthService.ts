@@ -67,7 +67,8 @@ export class AuthService {
    * @returns AuthResult with admin validation status
    */
   static async validateAdminSession(req: NextRequest): Promise<AuthResult> {
-    const authResult = await this.validateSession(req);
+    const authService = new AuthService();
+    const authResult = await authService.validateSession(req);
     
     if (!authResult.isValid) {
       return authResult;

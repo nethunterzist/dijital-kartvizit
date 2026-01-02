@@ -31,7 +31,7 @@ class ServiceRegistry {
 
   // Preload critical services (optional)
   async preloadCriticalServices() {
-    const criticalServices = [
+    const criticalServices: Array<{ name: string; loader: () => Promise<any> }> = [
       { name: 'AuthService', loader: () => import('./AuthService').then(m => m.AuthService) },
       { name: 'FirmaService', loader: () => import('./FirmaService').then(m => m.FirmaService) }
     ];

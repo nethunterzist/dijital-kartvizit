@@ -5,15 +5,24 @@ let pool: Pool | null = null;
 
 export function getPool() {
   if (!pool) {
-    // SSL tamamen devre dışı - sslmode=disable DATABASE_URL'de zaten var
+    // Serverless-friendly configuration
+    // Production: Lower pool size to prevent connection exhaustion
+    // Development: Smaller pool for local testing
+    const isProduction = process.env.NODE_ENV === 'production';
+
     pool = new Pool({
       connectionString: process.env.DATABASE_URL,
-      max: 20,
+      // Reduced max connections for serverless environments
+      max: isProduction ? 10 : 5,
+      // Shorter idle timeout to release connections faster in serverless
       idleTimeoutMillis: 30000,
+      // Faster connection timeout for quick failure detection
       connectionTimeoutMillis: 5000,
-      ssl: false // SSL tamamen kapat
+      // Allow graceful shutdown in serverless environments
+      allowExitOnIdle: true,
+      ssl: false // SSL disabled (sslmode=disable in DATABASE_URL)
     });
-    
+
     // Connection error handling
     pool.on('error', (err) => {
       console.error('Unexpected error on idle client', err);
@@ -24,98 +33,112 @@ export function getPool() {
 
 export async function getAllFirmalar(search?: string, page = 1, limit = 1000) {
   const client = await getPool().connect();
-  
+
   try {
     const offset = (page - 1) * limit;
-    
+
     let countQuery = 'SELECT COUNT(*) FROM firmalar';
+
+    // OPTIMIZED: Single query with LEFT JOINs and json_agg to get all data in one go
     let dataQuery = `
-      SELECT 
+      SELECT
         f.id, f.firma_adi, f.slug, f.profil_foto, f.firma_logo,
         f.yetkili_adi, f.yetkili_pozisyon, f.created_at, f.updated_at,
         f.goruntulenme, f.template_id, f.onay,
-        -- Get the first phone number from IletisimBilgisi table
-        (SELECT ib.deger FROM "IletisimBilgisi" ib WHERE ib.firma_id = f.id AND ib.tip = 'telefon' ORDER BY ib.sira LIMIT 1) as telefon,
-        -- Get the first email from IletisimBilgisi table
-        (SELECT ib.deger FROM "IletisimBilgisi" ib WHERE ib.firma_id = f.id AND ib.tip = 'eposta' ORDER BY ib.sira LIMIT 1) as eposta
+        -- Get first telefon for backward compatibility
+        (SELECT ib.deger FROM "IletisimBilgisi" ib
+         WHERE ib.firma_id = f.id AND ib.tip = 'telefon' AND ib.aktif = true
+         ORDER BY ib.sira LIMIT 1) as telefon,
+        -- Get first eposta for backward compatibility
+        (SELECT ib.deger FROM "IletisimBilgisi" ib
+         WHERE ib.firma_id = f.id AND ib.tip = 'eposta' AND ib.aktif = true
+         ORDER BY ib.sira LIMIT 1) as eposta,
+        -- Aggregate all communication data using json_agg
+        COALESCE(
+          json_agg(
+            DISTINCT jsonb_build_object(
+              'tip', ib.tip,
+              'deger', ib.deger,
+              'etiket', ib.etiket,
+              'sira', ib.sira
+            )
+          ) FILTER (WHERE ib.id IS NOT NULL),
+          '[]'::json
+        ) as iletisim_data
       FROM firmalar f
+      LEFT JOIN "IletisimBilgisi" ib ON ib.firma_id = f.id AND ib.aktif = true
     `;
-    
+
     const params: any[] = [];
-    
+
     if (search) {
       const searchCondition = ` WHERE f.firma_adi ILIKE $1 OR f.slug ILIKE $1 OR f.yetkili_adi ILIKE $1`;
       countQuery += searchCondition;
       dataQuery += searchCondition;
       params.push(`%${search}%`);
     }
-    
-    dataQuery += ` ORDER BY f.created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
+
+    dataQuery += ` GROUP BY f.id ORDER BY f.created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
     params.push(limit, offset);
-    
-    // Execute queries
+
+    // Execute queries in parallel
     const [countResult, dataResult] = await Promise.all([
       client.query(countQuery, search ? [`%${search}%`] : []),
       client.query(dataQuery, params)
     ]);
-    
+
     const totalCount = parseInt(countResult.rows[0].count);
-    
-    // Now fetch communication data for each company and build the structure
-    const firmalar = await Promise.all(dataResult.rows.map(async (row) => {
-      try {
-        // Get all communication data for this company
-        const commQuery = `
-          SELECT tip, deger, etiket, sira 
-          FROM "IletisimBilgisi" 
-          WHERE firma_id = $1 
-          ORDER BY sira
-        `;
-        const commResult = await client.query(commQuery, [row.id]);
-        
-        // Build communication_data structure
-        const telefonlar: any[] = [];
-        const epostalar: any[] = [];
-        
-        commResult.rows.forEach(comm => {
-          if (comm.tip === 'telefon') {
-            telefonlar.push({
-              value: comm.deger,
-              label: comm.etiket || 'Telefon',
-              type: 'telefon'
-            });
-          } else if (comm.tip === 'eposta') {
-            epostalar.push({
-              value: comm.deger,
-              label: comm.etiket || 'E-posta',
-              type: 'eposta'
-            });
-          }
-        });
-        
-        return {
-          ...row,
-          goruntulenme: row.goruntulenme || 0,
-          communication_data: JSON.stringify({
-            telefonlar,
-            epostalar
-          })
-        };
-      } catch (error) {
-        console.error('Error fetching communication data for firma', row.id, error);
-        return {
-          ...row,
-          goruntulenme: row.goruntulenme || 0,
-          telefon: null,
-          eposta: null,
-          communication_data: JSON.stringify({
-            telefonlar: [],
-            epostalar: []
-          })
-        };
-      }
-    }));
-    
+
+    // Process the aggregated data without additional queries
+    const firmalar = dataResult.rows.map((row) => {
+      const telefonlar: any[] = [];
+      const epostalar: any[] = [];
+
+      // Parse the aggregated communication data
+      const iletisimData = Array.isArray(row.iletisim_data) ? row.iletisim_data : [];
+
+      iletisimData.forEach((comm: any) => {
+        if (comm && comm.tip === 'telefon') {
+          telefonlar.push({
+            value: comm.deger,
+            label: comm.etiket || 'Telefon',
+            type: 'telefon'
+          });
+        } else if (comm && comm.tip === 'eposta') {
+          epostalar.push({
+            value: comm.deger,
+            label: comm.etiket || 'E-posta',
+            type: 'eposta'
+          });
+        }
+      });
+
+      // Sort by sira field
+      telefonlar.sort((a, b) => (a.sira || 0) - (b.sira || 0));
+      epostalar.sort((a, b) => (a.sira || 0) - (b.sira || 0));
+
+      return {
+        id: row.id,
+        firma_adi: row.firma_adi,
+        slug: row.slug,
+        profil_foto: row.profil_foto,
+        firma_logo: row.firma_logo,
+        yetkili_adi: row.yetkili_adi,
+        yetkili_pozisyon: row.yetkili_pozisyon,
+        created_at: row.created_at,
+        updated_at: row.updated_at,
+        goruntulenme: row.goruntulenme || 0,
+        template_id: row.template_id,
+        onay: row.onay,
+        telefon: row.telefon,
+        eposta: row.eposta,
+        communication_data: JSON.stringify({
+          telefonlar,
+          epostalar
+        })
+      };
+    });
+
     return {
       data: firmalar,
       total: totalCount,
@@ -123,7 +146,7 @@ export async function getAllFirmalar(search?: string, page = 1, limit = 1000) {
       limit,
       totalPages: Math.ceil(totalCount / limit)
     };
-    
+
   } finally {
     client.release();
   }
@@ -234,39 +257,31 @@ export async function getFirmaWithCommunication(slug: string) {
   const client = await getPool().connect();
   
   try {
-    console.log('🔍 getFirmaWithCommunication çağrıldı, slug:', slug);
-    
     // Firma bilgilerini al
     const firmaQuery = 'SELECT * FROM firmalar WHERE slug = $1';
     const firmaResult = await client.query(firmaQuery, [slug]);
-    
-    console.log('👤 Firma sorgusu sonucu:', firmaResult.rows.length, 'kayıt');
-    
+
     if (firmaResult.rows.length === 0) {
-      console.log('❌ Firma bulunamadı');
       return null;  // 404 sayfası göstermek için null döndür
     }
-    
+
     const firma = firmaResult.rows[0];
-    console.log('✅ Firma bulundu:', firma.firma_adi);
-    
+
     // İletişim bilgilerini al
     const iletisimQuery = `
-      SELECT * FROM "IletisimBilgisi" 
-      WHERE firma_id = $1 AND aktif = true 
+      SELECT * FROM "IletisimBilgisi"
+      WHERE firma_id = $1 AND aktif = true
       ORDER BY sira ASC
     `;
     const iletisimResult = await client.query(iletisimQuery, [firma.id]);
-    console.log('📞 İletişim sorgusu sonucu:', iletisimResult.rows.length, 'kayıt');
-    
+
     // Sosyal medya hesaplarını al
     const sosyalQuery = `
-      SELECT * FROM "SosyalMedyaHesabi" 
-      WHERE firma_id = $1 AND aktif = true 
+      SELECT * FROM "SosyalMedyaHesabi"
+      WHERE firma_id = $1 AND aktif = true
       ORDER BY sira ASC
     `;
     const sosyalResult = await client.query(sosyalQuery, [firma.id]);
-    console.log('📱 Sosyal medya sorgusu sonucu:', sosyalResult.rows.length, 'kayıt');
     
     // Banka hesaplarını al (yoksa boş array)
     const bankaQuery = `

@@ -2,11 +2,9 @@ import useSWR from 'swr';
 
 // Fetcher fonksiyonu
 const fetcher = async (url: string) => {
-  console.log('🔄 Fetching data from:', url);
   
   const res = await fetch(url);
   
-  console.log('📡 Response status:', res.status, res.statusText);
   
   if (!res.ok) {
     let errorMessage = `HTTP ${res.status}: ${res.statusText}`;
@@ -23,7 +21,6 @@ const fetcher = async (url: string) => {
   }
   
   const data = await res.json();
-  console.log('✅ Data fetched successfully:', data);
   return data;
 };
 

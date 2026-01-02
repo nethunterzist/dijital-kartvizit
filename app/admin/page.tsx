@@ -34,7 +34,6 @@ export default function AdminDashboard() {
         }
         
         const data = await response.json();
-        console.log('Genel bakış - alınan firma verileri:', data);
         
         if (data && data.data) {
           setFirmaCount(data.data.length);

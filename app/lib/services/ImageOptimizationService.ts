@@ -1,6 +1,6 @@
 import cloudinary from '@/app/lib/cloudinary';
 import { logger } from '@/app/lib/logger';
-import { fileUploadSchema } from '@/app/lib/validation';
+import { fileUploadSchema } from '@/app/lib/validations';
 
 export interface ImageOptimizationOptions {
   quality?: 'auto' | number;

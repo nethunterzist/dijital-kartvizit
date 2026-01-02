@@ -162,17 +162,18 @@ export default function PricingSection() {
                 {/* CTA Button */}
                 <button
                   onClick={() => handlePurchase(pkg.id)}
-                  className={`w-full py-4 rounded-lg font-bold text-lg transition-all transform hover:-translate-y-0.5 hover:shadow-lg ${
+                  aria-label={`${pkg.name} paketini seç - ₺${pkg.price} tek seferlik ödeme ile ${pkg.cardCount} dijital kartvizit`}
+                  className={`w-full py-4 rounded-lg font-bold text-lg transition-all transform hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                     pkg.popular
-                      ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white'
+                      ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white focus:ring-purple-500'
                       : pkg.color === 'blue'
-                      ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white'
-                      : 'bg-gradient-to-r from-green-600 to-green-700 text-white'
+                      ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white focus:ring-blue-500'
+                      : 'bg-gradient-to-r from-green-600 to-green-700 text-white focus:ring-green-500'
                   }`}
                 >
                   {pkg.popular ? (
                     <>
-                      <i className="fas fa-rocket mr-2"></i>
+                      <i className="fas fa-rocket mr-2" aria-hidden="true"></i>
                       Hemen Başla
                     </>
                   ) : (

@@ -69,13 +69,19 @@ export default function SmartFaq() {
               style={{
                 animation: 'slide-in-left 0.5s cubic-bezier(0.4,0,0.2,1)'
               }}
+              role="img"
+              aria-label={`${faqs[lastOpen].label} özelliğini gösteren ekran görüntüsü`}
             >
-              <Image 
-                src={faqs[lastOpen].image} 
-                alt={faqs[lastOpen].label} 
-                fill 
-                className="object-contain" 
-                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              <Image
+                src={faqs[lastOpen].image}
+                alt={`${faqs[lastOpen].label} özelliğini gösteren detaylı ekran görüntüsü`}
+                fill
+                className="object-contain"
+                loading="lazy"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.setAttribute('alt', 'Görsel yüklenemedi');
+                }}
               />
             </div>
           </div>
@@ -84,25 +90,40 @@ export default function SmartFaq() {
             {faqs.map((faq, i) => (
               <div key={faq.label} className="flex flex-col gap-0">
                 {/* Accordion başlık */}
-                <div
-                  className={`w-full flex items-center gap-4 px-6 py-5 text-left transition group cursor-pointer
-                    ${open === i ? 'bg-blue-50 border border-blue-200 rounded-t-2xl text-blue-700 font-semibold shadow-md' : 'bg-[#f8fafc] border border-gray-200 rounded-2xl text-gray-800 font-semibold hover:bg-blue-50'}`}
-                  onClick={() => handleAccordion(i)}
-                  aria-expanded={open === i}
-                >
-                  <span className="flex-shrink-0 w-10 h-10 flex items-center justify-center bg-white rounded-full border border-gray-200 group-hover:border-blue-400">
-                    {faq.icon}
-                  </span>
-                  <span className={`font-semibold text-lg flex-1 ${open === i ? 'text-blue-700' : 'text-gray-800'}`}>{faq.label}</span>
-                  <svg className={`w-5 h-5 ml-2 transition-transform ${open === i ? 'rotate-180 text-blue-600' : 'text-gray-400'}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" /></svg>
-                </div>
+                <h3>
+                  <button
+                    type="button"
+                    id={`faq-button-${i}`}
+                    aria-expanded={open === i}
+                    aria-controls={`faq-panel-${i}`}
+                    className={`w-full flex items-center gap-4 px-6 py-5 text-left transition group
+                      ${open === i ? 'bg-blue-50 border border-blue-200 rounded-t-2xl text-blue-700 font-semibold shadow-md' : 'bg-[#f8fafc] border border-gray-200 rounded-2xl text-gray-800 font-semibold hover:bg-blue-50'}
+                      focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
+                    onClick={() => handleAccordion(i)}
+                  >
+                    <span className="flex-shrink-0 w-10 h-10 flex items-center justify-center bg-white rounded-full border border-gray-200 group-hover:border-blue-400" aria-hidden="true">
+                      {faq.icon}
+                    </span>
+                    <span className={`font-semibold text-lg flex-1 ${open === i ? 'text-blue-700' : 'text-gray-800'}`}>{faq.label}</span>
+                    <svg aria-hidden="true" className={`w-5 h-5 ml-2 transition-transform ${open === i ? 'rotate-180 text-blue-600' : 'text-gray-400'}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" /></svg>
+                  </button>
+                </h3>
                 {/* Accordion içeriği */}
                 {open === i && (
                   <div
+                    id={`faq-panel-${i}`}
+                    role="region"
+                    aria-labelledby={`faq-button-${i}`}
                     className="transition-all duration-500 bg-white border border-blue-200 border-t-0 rounded-b-2xl shadow-md py-4 px-6 animate-fade-in"
                   >
                     <p className="text-gray-600 mb-4 mt-2 text-base md:text-lg">{faq.desc}</p>
-                    <a href="#" className="inline-block px-6 py-2 rounded-lg border border-blue-700 text-blue-700 font-medium hover:bg-blue-50 transition">Learn More</a>
+                    <a
+                      href="#"
+                      className="inline-block px-6 py-2 rounded-lg border border-blue-700 text-blue-700 font-medium hover:bg-blue-50 transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                      aria-label={`${faq.label} hakkında daha fazla bilgi edinin`}
+                    >
+                      Daha Fazla Bilgi
+                    </a>
                   </div>
                 )}
               </div>

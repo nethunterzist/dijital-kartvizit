@@ -30,10 +30,6 @@ export default function FirmalarPage() {
   const itemsPerPage = 10;
   
   // Detaylı console log'ları
-  console.log('🔍 FirmalarPage render edildi');
-  console.log('📊 Firmalar state:', { firmalar, isLoading, isError });
-  console.log('🔢 Firmalar array length:', Array.isArray(firmalar) ? firmalar.length : 'Not array');
-  console.log('📋 Firmalar data type:', typeof firmalar);
   
   // Memoized filtered data for better performance
   const filteredFirmalar = useMemo(() => {

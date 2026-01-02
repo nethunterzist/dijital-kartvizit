@@ -24,15 +24,15 @@ export async function GET(
     let website = '';
     
     // Find first phone number
-    const telefonItem = firma.iletisim_bilgileri.find(item => item.tip === 'telefon');
+    const telefonItem = firma.iletisim_bilgileri.find((item: any) => item.tip === 'telefon');
     if (telefonItem) telefon = telefonItem.deger;
-    
+
     // Find first email
-    const emailItem = firma.iletisim_bilgileri.find(item => item.tip === 'eposta');
+    const emailItem = firma.iletisim_bilgileri.find((item: any) => item.tip === 'eposta');
     if (emailItem) eposta = emailItem.deger;
-    
+
     // Find first website
-    const websiteItem = firma.iletisim_bilgileri.find(item => item.tip === 'website');
+    const websiteItem = firma.iletisim_bilgileri.find((item: any) => item.tip === 'website');
     if (websiteItem) website = websiteItem.deger;
 
     const vcardContent = await generateVCard({

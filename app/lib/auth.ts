@@ -25,22 +25,18 @@ export const authOptions: NextAuthOptions = {
           
           // Kullanıcı bulunmazsa null döndür
           if (!user) {
-            logger.info('Kullanıcı bulunamadı:', credentials.username);
+            // SECURITY: Generic log without username to prevent enumeration
+            logger.warn('Authentication attempt failed - user not found');
             return null;
           }
-          
-          logger.info('Kullanıcı bulundu:', { username: user.username, hashedPassword: user.password });
-          
+
           // Şifre karşılaştırması yap
           const passwordMatch = await bcrypt.compare(credentials.password, user.password);
-          
-          logger.info('Şifre karşılaştırması:', { 
-            inputPassword: credentials.password, 
-            hashedPassword: user.password, 
-            match: passwordMatch 
-          });
-          
+
           if (passwordMatch) {
+            // SECURITY: Log success without sensitive details
+            logger.info('Authentication successful', { userId: user.id });
+
             // Eşleşirse kimlik bilgilerini döndür
             return {
               id: user.id.toString(),
@@ -48,11 +44,15 @@ export const authOptions: NextAuthOptions = {
               email: null
             };
           } else {
-            // Eşleşmezse null döndür
+            // SECURITY: Generic log without revealing password mismatch
+            logger.warn('Authentication attempt failed - invalid credentials');
             return null;
           }
         } catch (error) {
-          logger.error('Kimlik doğrulama hatası', { error, username: credentials.username });
+          // SECURITY: Log error without exposing username or details
+          logger.error('Authentication error occurred', {
+            errorType: error instanceof Error ? error.constructor.name : 'Unknown'
+          });
           return null;
         }
       }

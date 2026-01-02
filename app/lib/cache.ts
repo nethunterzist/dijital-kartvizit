@@ -51,7 +51,11 @@ export class VercelKVCache {
       
       return data;
     } catch (error) {
-      logger.error('Cache get error:', { key, error: error.message, stack: error.stack });
+      logger.error('Cache get error:', {
+        key,
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       return null; // Graceful degradation
     }
   }
@@ -80,7 +84,11 @@ export class VercelKVCache {
       
       return true;
     } catch (error) {
-      logger.error('Cache set error:', { key, error: error.message, stack: error.stack });
+      logger.error('Cache set error:', {
+        key,
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       return false; // Graceful degradation
     }
   }

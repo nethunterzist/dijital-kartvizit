@@ -1,5 +1,6 @@
 generator client {
   provider      = "prisma-client-js"
+  output        = "../node_modules/.prisma/client"
   binaryTargets = ["native", "rhel-openssl-1.0.x", "linux-musl-arm64-openssl-3.0.x"]
 }
 
@@ -48,6 +49,14 @@ model firmalar {
   ilce                   ilceler?            @relation(fields: [ilce_id], references: [id])
   kategori               kategoriler?        @relation(fields: [kategori_id], references: [id])
   sektor                 sektorler?          @relation(fields: [sektor_id], references: [id])
+
+  @@index([created_at])
+  @@index([goruntulenme])
+  @@index([onay])
+  @@index([sektor_id, kategori_id])
+  @@index([firma_adi])
+  @@index([il_id])
+  @@index([ilce_id])
 }
 
 model IletisimBilgisi {
@@ -63,6 +72,9 @@ model IletisimBilgisi {
 
   @@index([firma_id])
   @@index([tip])
+  @@index([firma_id, tip])
+  @@index([aktif])
+  @@index([sira])
 }
 
 model SosyalMedyaHesabi {
@@ -78,6 +90,9 @@ model SosyalMedyaHesabi {
 
   @@index([firma_id])
   @@index([platform])
+  @@index([firma_id, platform])
+  @@index([aktif])
+  @@index([sira])
 }
 
 model BankaHesabi {
@@ -94,6 +109,7 @@ model BankaHesabi {
   hesaplar     BankaHesapDetay[]
 
   @@index([firma_id])
+  @@index([sira])
 }
 
 model BankaHesapDetay {

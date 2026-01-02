@@ -4,11 +4,23 @@ import { generateHtmlForFirma } from '@/app/lib/htmlGenerator';
 import { generateVCard, VCardData } from '@/app/lib/vcardGenerator';
 import * as fs from 'fs';
 import * as path from 'path';
-import { parseForm, processImages } from '@/app/lib/multerHelper';
 import { generateQRCode } from '@/app/lib/qrCodeGenerator';
 import { logger } from '@/app/lib/logger';
 import { PrismaClient } from '@prisma/client';
 import { LocalFileUploadService } from '@/app/lib/services/LocalFileUploadService';
+import {
+  ValidationError,
+  NotFoundError,
+  DatabaseError,
+  createErrorResponse,
+  getErrorStatusCode,
+  ErrorFormatter,
+} from '@/app/lib/errors';
+import {
+  firmaUpdateSchema,
+  validate,
+  validatePartial,
+} from '@/app/lib/validations';
 
 // Prisma singleton
 const globalForPrisma = globalThis as unknown as {
@@ -198,7 +210,7 @@ export async function GET(
         ...firma,
         // İletişim verilerini eski formata çevir
         communication_data: JSON.stringify(
-          firma.iletisim_bilgileri.reduce((acc: any, item) => {
+          firma.iletisim_bilgileri.reduce((acc: any, item: any) => {
             const key = item.tip + 'lar';
             if (!acc[key]) acc[key] = [];
             acc[key].push({
@@ -210,7 +222,7 @@ export async function GET(
         ),
       // Sosyal medya verilerini eski formata çevir
       social_media_data: JSON.stringify(
-        firma.sosyal_medya_hesaplari.reduce((acc: any, item) => {
+        firma.sosyal_medya_hesaplari.reduce((acc: any, item: any) => {
           const key = item.platform + 'lar';
           if (!acc[key]) acc[key] = [];
           acc[key].push({
@@ -222,7 +234,7 @@ export async function GET(
       ),
       // Banka hesaplarını eski formata çevir
       bank_accounts: JSON.stringify(
-        firma.bankaHesaplari.map(banka => {
+        firma.bankaHesaplari.map((banka: any) => {
           // Banka adından ID'yi çıkar (ters mapping)
           const BANKA_ID_MAP: {[key: string]: string} = {
             'Ziraat Bankası': 'ziraat',
@@ -250,7 +262,7 @@ export async function GET(
             bank_label: banka.banka_adi, // Label olarak tam adı gönder
             bank_logo: banka.banka_logo,
             account_holder: banka.hesap_sahibi,
-            accounts: banka.hesaplar.map(hesap => ({
+            accounts: banka.hesaplar.map((hesap: any) => ({
               iban: hesap.iban,
               currency: hesap.para_birimi
             }))
@@ -342,23 +354,57 @@ export async function PUT(
       }
     }
 
+    // Normalize field names (support both camelCase and snake_case)
+    const normalizedData = {
+      ...(data.firma_adi || data.firmaAdi ? { firma_adi: data.firma_adi || data.firmaAdi } : {}),
+      ...(data.slug ? { slug: data.slug } : {}),
+      ...(data.yetkili_adi || data.yetkiliAdi ? { yetkili_adi: data.yetkili_adi || data.yetkiliAdi } : {}),
+      ...(data.yetkili_pozisyon || data.yetkiliPozisyon ? { yetkili_pozisyon: data.yetkili_pozisyon || data.yetkiliPozisyon } : {}),
+      ...(data.firma_hakkinda ? { firma_hakkinda: data.firma_hakkinda } : {}),
+      ...(data.firma_hakkinda_baslik ? { firma_hakkinda_baslik: data.firma_hakkinda_baslik } : {}),
+      ...(data.firma_unvan ? { firma_unvan: data.firma_unvan } : {}),
+      ...(data.firma_vergi_no ? { firma_vergi_no: data.firma_vergi_no } : {}),
+      ...(data.vergi_dairesi ? { vergi_dairesi: data.vergi_dairesi } : {}),
+      ...(data.template_id || data.templateId ? { template_id: parseInt(data.template_id || data.templateId) } : {}),
+      ...(data.gradient_color || data.gradientColor ? { gradient_color: data.gradient_color || data.gradientColor } : {}),
+      ...(data.profil_foto ? { profil_foto: data.profil_foto } : {}),
+      ...(data.firma_logo ? { firma_logo: data.firma_logo } : {}),
+      ...(data.katalog ? { katalog: data.katalog } : {}),
+    };
+
+    // Validate update data with Zod
+    let validatedUpdateData;
+    try {
+      validatedUpdateData = validatePartial(firmaUpdateSchema, normalizedData);
+      logger.info('Firma update data validated successfully');
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        logger.warn('Firma validation failed', { errors: error.errors });
+        return NextResponse.json(
+          createErrorResponse(error, process.env.NODE_ENV === 'development'),
+          { status: 400 }
+        );
+      }
+      throw error;
+    }
+
     // Mevcut firmayı sorgula - Direct DB kullan
     const client = await getPool().connect();
     let existingFirma;
     let updatedFirma;
-    
+
     try {
       const existingResult = await client.query('SELECT * FROM firmalar WHERE id = $1', [id]);
       if (existingResult.rows.length === 0) {
-        return NextResponse.json({ error: 'Firma bulunamadı' }, { status: 404 });
+        throw new NotFoundError('Firma bulunamadı');
       }
       existingFirma = existingResult.rows[0];
 
       // Slug değişikliği kontrolü
       const oldSlug = existingFirma.slug;
-      const newSlug = data.slug || oldSlug;
+      const newSlug = validatedUpdateData.slug || oldSlug;
 
-      // Firmayı güncelle - Direct DB kullan
+      // Firmayı güncelle - Direct DB kullan - use validated data
       const updateResult = await client.query(`
         UPDATE firmalar SET
           firma_adi = $1,
@@ -379,20 +425,20 @@ export async function PUT(
         WHERE id = $15
         RETURNING *
       `, [
-        data.firma_adi || data.firmaAdi || existingFirma.firma_adi,
+        validatedUpdateData.firma_adi ?? existingFirma.firma_adi,
         newSlug,
-        data.yetkili_adi || data.yetkiliAdi || existingFirma.yetkili_adi,
-        data.yetkili_pozisyon || data.yetkiliPozisyon || existingFirma.yetkili_pozisyon,
-        data.firma_hakkinda || existingFirma.firma_hakkinda,
-        data.firma_hakkinda_baslik || existingFirma.firma_hakkinda_baslik,
-        data.firma_unvan || existingFirma.firma_unvan,
-        data.firma_vergi_no || existingFirma.firma_vergi_no,
-        data.vergi_dairesi || existingFirma.vergi_dairesi,
-        data.template_id || data.templateId ? parseInt(data.template_id || data.templateId) : existingFirma.template_id,
-        data.profil_foto || existingFirma.profil_foto,
-        data.firma_logo || existingFirma.firma_logo,
-        data.katalog || existingFirma.katalog,
-        data.gradientColor || data.gradient_color || existingFirma.gradient_color,
+        validatedUpdateData.yetkili_adi ?? existingFirma.yetkili_adi,
+        validatedUpdateData.yetkili_pozisyon ?? existingFirma.yetkili_pozisyon,
+        validatedUpdateData.firma_hakkinda ?? existingFirma.firma_hakkinda,
+        validatedUpdateData.firma_hakkinda_baslik ?? existingFirma.firma_hakkinda_baslik,
+        validatedUpdateData.firma_unvan ?? existingFirma.firma_unvan,
+        validatedUpdateData.firma_vergi_no ?? existingFirma.firma_vergi_no,
+        validatedUpdateData.vergi_dairesi ?? existingFirma.vergi_dairesi,
+        validatedUpdateData.template_id ?? existingFirma.template_id,
+        validatedUpdateData.profil_foto ?? existingFirma.profil_foto,
+        validatedUpdateData.firma_logo ?? existingFirma.firma_logo,
+        validatedUpdateData.katalog ?? existingFirma.katalog,
+        validatedUpdateData.gradient_color ?? existingFirma.gradient_color,
         id
       ]);
       
@@ -515,8 +561,45 @@ export async function PUT(
 
     return NextResponse.json(updatedFirma);
   } catch (error) {
-    logger.error('PUT [id] genel hata:', error);
-    return NextResponse.json({ error: 'Firma güncellenirken beklenmeyen bir hata oluştu', details: String(error) }, { status: 500 });
+    logger.error('PUT /api/firmalar/[id] error', { error });
+
+    // Handle not found errors
+    if (error instanceof NotFoundError) {
+      return NextResponse.json(
+        createErrorResponse(error, process.env.NODE_ENV === 'development'),
+        { status: 404 }
+      );
+    }
+
+    // Handle database errors
+    if (error && typeof error === 'object' && 'code' in error) {
+      const dbError = ErrorFormatter.formatDatabaseError(error);
+      return NextResponse.json(
+        createErrorResponse(dbError, process.env.NODE_ENV === 'development'),
+        { status: getErrorStatusCode(dbError) }
+      );
+    }
+
+    // Handle validation errors
+    if (error instanceof ValidationError) {
+      return NextResponse.json(
+        createErrorResponse(error, process.env.NODE_ENV === 'development'),
+        { status: 400 }
+      );
+    }
+
+    // Generic error
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    return NextResponse.json(
+      {
+        error: {
+          message: 'Firma güncellenirken beklenmeyen bir hata oluştu',
+          code: 'UPDATE_ERROR',
+          ...(isDevelopment && error instanceof Error && { details: error.message }),
+        },
+      },
+      { status: 500 }
+    );
   }
 }
 

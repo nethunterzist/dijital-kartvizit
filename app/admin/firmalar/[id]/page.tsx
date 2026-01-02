@@ -185,25 +185,19 @@ export default function FirmaDuzenlePage({ params }: { params: { id: string } })
 
   // Firma bilgilerini getirme işlemi
   useEffect(() => {
-    console.log("🔥 useEffect ÇALIŞTI! params.id:", params.id);
     
     if (!params.id) {
-      console.log("❌ params.id yok, useEffect sonlandırılıyor");
       return;
     }
 
     const fetchFirma = async () => {
-      console.log("🚀 BAŞLANGIC: fetchFirma fonksiyonu çalışıyor, params.id:", params.id);
       setLoading(true);
       setError(null); // Error'u temizle
 
       try {
-        console.log("📡 API çağrısı yapılıyor:", `/api/firmalar/${params.id}`);
         const response = await fetch(`/api/firmalar/${params.id}`);
-        console.log("📡 API Response status:", response.status, response.statusText);
         
         const data = await response.json();
-        console.log("📦 API Response data:", data);
         
         if (!response.ok) {
           console.error("❌ API Response not OK:", response.status, data);
@@ -218,11 +212,9 @@ export default function FirmaDuzenlePage({ params }: { params: { id: string } })
         }
 
         const firma = data.data;
-        console.log("✅ Firma verisi başarıyla alındı:", firma);
         
         // Konsola gelen veriyi yazdır
         logger.info("API'den gelen firma verisi:", { firma });
-        console.log("✅ Firma verisi başarıyla yüklendi:", firma);
         
         // Ana firma bilgilerini state'e ata
         setFirmaAdi(firma.firma_adi || "");
@@ -392,7 +384,6 @@ export default function FirmaDuzenlePage({ params }: { params: { id: string } })
           setBankAccounts([newBankAccount()]); // Hata durumunda yeni boş hesap
         }
         
-        console.log("🎯 BAŞARILI: setLoading(false) ve setDataLoaded(true) çağrılıyor");
         setDataLoaded(true);
         setLoading(false);
       } catch (error) {
@@ -400,12 +391,9 @@ export default function FirmaDuzenlePage({ params }: { params: { id: string } })
         console.error("💥 Error type:", typeof error);
         console.error("💥 Error message:", error instanceof Error ? error.message : String(error));
         console.error("💥 Error stack:", error instanceof Error ? error.stack : 'No stack');
-        console.log("🔍 CATCH BLOĞU: Mevcut firmaAdi state:", firmaAdi);
         
         // Hata uyarısı tamamen kaldırıldı - veriler düzgün yükleniyor
-        console.log("✅ CATCH BLOĞU: Hata uyarısı gösterilmiyor, veriler yüklendi");
         
-        console.log("🎯 CATCH BLOĞU: setLoading(false) çağrılıyor");
         setLoading(false);
       }
     };

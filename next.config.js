@@ -1,4 +1,10 @@
 /** @type {import('next').NextConfig} */
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
+
+// Polyfill removed - not needed with proper webpack configuration
+
 const nextConfig = {
   images: {
     domains: ['localhost', 'res.cloudinary.com'],
@@ -6,28 +12,28 @@ const nextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
+
   // Performance optimizations
   swcMinify: true,
   experimental: {
     optimizeCss: true,
     optimizePackageImports: ['@heroicons/react', 'lucide-react', 'react-icons'],
-    serverComponentsExternalPackages: ['bcrypt', 'prisma'],
+    serverComponentsExternalPackages: ['bcrypt', 'prisma', '@hello-pangea/dnd', '@dnd-kit/core', '@dnd-kit/sortable', 'cheerio', 'isomorphic-dompurify', 'dompurify'],
     optimizeServerReact: true,
     ...(process.env.NODE_ENV === 'production' && {
       outputFileTracingRoot: process.cwd(),
     }),
   },
-  
+
   // Production optimizations
   ...(process.env.NODE_ENV === 'production' && {
-    // output: 'standalone', // DISABLED - causing static asset issues
+    // output: 'standalone', // DISABLED - Not needed for Coolify deployment
     poweredByHeader: false,
     generateEtags: true,
-    
+
     // Static file serving configuration
     trailingSlash: false,
-    
-    
+
     // Advanced optimizations for production
     compiler: {
       removeConsole: {
@@ -36,19 +42,23 @@ const nextConfig = {
       reactRemoveProperties: true,
     },
   }),
+
   // TypeScript configuration
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false, // Enable type checking for production safety
   },
+
+  // ESLint configuration
   eslint: {
+    // Temporarily ignore during builds to allow deployment with warnings
+    // TODO: Fix all ESLint warnings and re-enable strict linting
     ignoreDuringBuilds: true,
+    dirs: ['app', 'pages', 'components', 'lib'], // Specify directories to lint
   },
-  // Standalone modu için output yapılandırması (development için kapatıldı)
-  // output: 'standalone',
-  
+
   // Compression
   compress: true,
-  
+
   // Security and performance headers
   async headers() {
     return [
@@ -77,7 +87,7 @@ const nextConfig = {
           },
           {
             key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin'
+            value: 'origin-when-cross-origin'
           },
           {
             key: 'Permissions-Policy',
@@ -85,7 +95,7 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://api.vercel.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https: blob:; connect-src 'self' https: wss:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';"
+            value: "default-src 'self'; script-src 'self' https://vercel.live https://api.vercel.com https://cdnjs.cloudflare.com https://kit.fontawesome.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://ka-f.fontawesome.com; img-src 'self' data: https: blob:; connect-src 'self' https: wss:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';"
           },
           {
             key: 'X-Powered-By',
@@ -128,7 +138,7 @@ const nextConfig = {
       }
     ]
   },
-  
+
   // Redirects for SEO
   async redirects() {
     return [
@@ -144,15 +154,15 @@ const nextConfig = {
       }
     ]
   },
-  
+
   // Webpack optimizations
   webpack: (config, { dev, isServer }) => {
-    // Fix for handlebars webpack issue
+    // Fix for handlebars and cheerio webpack issue
     config.externals = config.externals || [];
     if (isServer) {
-      config.externals.push('handlebars');
+      config.externals.push('handlebars', 'cheerio', 'jsdom');
     }
-    
+
     // Fix for 'self is not defined' error
     if (!isServer) {
       config.resolve.fallback = {
@@ -162,9 +172,10 @@ const nextConfig = {
         tls: false,
       };
     }
-    
-    // Advanced production optimizations
-    if (!dev) {
+
+    // Advanced production optimizations - DISABLED to fix build issues
+    // TODO: Re-enable after resolving webpack runtime errors
+    /* if (!dev) {
       config.optimization.splitChunks = {
         chunks: 'all',
         minSize: 20000,
@@ -207,27 +218,16 @@ const nextConfig = {
           },
         },
       };
-    }
-    
-    // Bundle analyzer (uncomment to analyze bundle)
-    // if (!dev && !isServer) {
-    //   const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
-    //   config.plugins.push(
-    //     new BundleAnalyzerPlugin({
-    //       analyzerMode: 'static',
-    //       openAnalyzer: false,
-    //     })
-    //   );
-    // }
-    
+    } */
+
     return config;
   },
-  
+
   // Environment variables
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
-  
+
   // Logging
   logging: {
     fetches: {
@@ -236,4 +236,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+module.exports = withBundleAnalyzer(nextConfig);

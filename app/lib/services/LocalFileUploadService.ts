@@ -2,7 +2,7 @@ import { writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import { join } from 'path';
 import { logger } from '@/app/lib/logger';
-import { fileUploadSchema, pdfUploadSchema } from '@/app/lib/validation';
+import { fileUploadSchema, pdfUploadSchema } from '@/app/lib/validations';
 
 export interface LocalFileUploadResult {
   success: boolean;

@@ -69,9 +69,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     try {
         // Direct database access instead of internal API call (same as main component)
         const { getFirmaBySlug } = await import('@/app/lib/direct-db');
-        
+
         const firma = await getFirmaBySlug(slug);
-        
+
         if (!firma) {
             return {
                 title: 'Kartvizit Bulunamadı',
@@ -82,17 +82,64 @@ export async function generateMetadata({ params }: { params: { slug: string } })
         // Use direct database data
         const data = {
             firma_adi: firma.firma_adi,
+            yetkili_adi: firma.yetkili_adi,
+            yetkili_pozisyon: firma.yetkili_pozisyon,
             firma_hakkinda: firma.firma_hakkinda,
-            profil_foto: firma.profil_foto
+            profil_foto: firma.profil_foto,
+            firma_logo: firma.firma_logo
         };
-        
+
+        // Create rich title with person name if available
+        const pageTitle = data.yetkili_adi
+            ? `${data.firma_adi} - ${data.yetkili_adi}${data.yetkili_pozisyon ? ' (' + data.yetkili_pozisyon + ')' : ''}`
+            : data.firma_adi;
+
+        // Create description
+        const description = data.firma_hakkinda
+            ? data.firma_hakkinda.substring(0, 160)
+            : `${data.firma_adi} dijital kartvizit sayfası. İletişim bilgileri, sosyal medya hesapları ve daha fazlası.`;
+
+        // Select best image for OG
+        const ogImage = data.firma_logo || data.profil_foto || '/images/default-og.png';
+        const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+
         return {
-            title: `${data.firma_adi} - Dijital Kartvizit`,
-            description: data.firma_hakkinda ? data.firma_hakkinda.substring(0, 160) : `${data.firma_adi} dijital kartvizit sayfası`,
+            title: pageTitle,
+            description: description,
+            keywords: [
+                data.firma_adi,
+                data.yetkili_adi || '',
+                'dijital kartvizit',
+                'iletişim',
+                'kartvizit',
+                'QR kod'
+            ].filter(Boolean),
             openGraph: {
-                title: `${data.firma_adi} - Dijital Kartvizit`,
-                description: data.firma_hakkinda ? data.firma_hakkinda.substring(0, 160) : `${data.firma_adi} dijital kartvizit sayfası`,
-                images: data.profil_foto ? [data.profil_foto] : [],
+                type: 'profile',
+                locale: 'tr_TR',
+                url: `${baseUrl}/${slug}`,
+                title: pageTitle,
+                description: description,
+                siteName: 'Dijital Kartvizit',
+                images: [{
+                    url: ogImage,
+                    width: 1200,
+                    height: 630,
+                    alt: `${data.firma_adi} Dijital Kartvizit`,
+                }],
+            },
+            twitter: {
+                card: 'summary_large_image',
+                title: pageTitle,
+                description: description,
+                images: [ogImage],
+            },
+            robots: {
+                index: true,
+                follow: true,
+            },
+            alternates: {
+                canonical: `${baseUrl}/${slug}`,
             },
             other: {
                 'font-preload': 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css'
@@ -156,13 +203,13 @@ export default async function KartvizitPage({ params }: { params: { slug: string
 
         // Website bilgilerini iletişim bilgilerinden çek
         let websiteArray: string[] = [];
-        const websiteItems = firma.iletisim_bilgileri.filter(item => item.tip === 'website');
-        websiteArray = websiteItems.map(item => item.deger);
+        const websiteItems = firma.iletisim_bilgileri.filter((item: any) => item.tip === 'website');
+        websiteArray = websiteItems.map((item: any) => item.deger);
 
         // Sosyal medya verilerini normalize et - TÜM HESAPLARI GÖSTER!
         let socialMediaArray: any[] = [];
-        
-        firma.sosyal_medya_hesaplari.forEach((item) => {
+
+        firma.sosyal_medya_hesaplari.forEach((item: any) => {
             const meta = SOCIAL_MEDIA_META[item.platform] || {};
             socialMediaArray.push({
                 icon: meta.icon || '',
@@ -174,8 +221,8 @@ export default async function KartvizitPage({ params }: { params: { slug: string
 
         // İletişim verilerini normalize et - TÜM BİLGİLERİ GÖSTER!
         let communicationArray: any[] = [];
-        
-        firma.iletisim_bilgileri.forEach((item) => {
+
+        firma.iletisim_bilgileri.forEach((item: any) => {
             const meta = COMM_META[item.tip] || {};
             communicationArray.push({
                 icon: meta.icon || '',
@@ -188,12 +235,12 @@ export default async function KartvizitPage({ params }: { params: { slug: string
 
         // Banka hesaplarını normalize et
         let bankaHesaplari: any[] = [];
-        firma.banka_hesaplari.forEach((banka) => {
+        firma.banka_hesaplari.forEach((banka: any) => {
             bankaHesaplari.push({
                 banka_adi: banka.banka_adi,
                 banka_logo: banka.banka_logo,
                 hesap_sahibi: banka.hesap_sahibi,
-                hesaplar: banka.hesaplar.map(hesap => ({
+                hesaplar: banka.hesaplar.map((hesap: any) => ({
                     iban: hesap.iban,
                     para_birimi: hesap.para_birimi,
                     hesap_turu: hesap.hesap_turu
@@ -208,41 +255,41 @@ export default async function KartvizitPage({ params }: { params: { slug: string
         let adres: string = '';
         
         // Extract first phone number
-        const telefonItem = firma.iletisim_bilgileri.find(item => item.tip === 'telefon');
+        const telefonItem = firma.iletisim_bilgileri.find((item: any) => item.tip === 'telefon');
         if (telefonItem) telefon = telefonItem.deger;
-        
+
         // Extract first email
-        const emailItem = firma.iletisim_bilgileri.find(item => item.tip === 'eposta');
+        const emailItem = firma.iletisim_bilgileri.find((item: any) => item.tip === 'eposta');
         if (emailItem) email = emailItem.deger;
-        
+
         // Extract WhatsApp number
-        const whatsappItem = firma.iletisim_bilgileri.find(item => item.tip === 'whatsapp');
+        const whatsappItem = firma.iletisim_bilgileri.find((item: any) => item.tip === 'whatsapp');
         if (whatsappItem) whatsapp = whatsappItem.deger;
-        
+
         // Extract address
-        const adresItem = firma.iletisim_bilgileri.find(item => item.tip === 'adres');
+        const adresItem = firma.iletisim_bilgileri.find((item: any) => item.tip === 'adres');
         if (adresItem) adres = adresItem.deger;
-        
+
         // Extract social media URLs
         let facebook: string = '';
         let linkedin: string = '';
         let twitter: string = '';
-        
-        const facebookItem = firma.sosyal_medya_hesaplari.find(item => item.platform === 'facebook');
+
+        const facebookItem = firma.sosyal_medya_hesaplari.find((item: any) => item.platform === 'facebook');
         if (facebookItem) facebook = facebookItem.url.startsWith('http') ? facebookItem.url : `https://${facebookItem.url}`;
-        
-        const linkedinItem = firma.sosyal_medya_hesaplari.find(item => item.platform === 'linkedin');
+
+        const linkedinItem = firma.sosyal_medya_hesaplari.find((item: any) => item.platform === 'linkedin');
         if (linkedinItem) linkedin = linkedinItem.url.startsWith('http') ? linkedinItem.url : `https://${linkedinItem.url}`;
-        
-        const twitterItem = firma.sosyal_medya_hesaplari.find(item => item.platform === 'twitter');
+
+        const twitterItem = firma.sosyal_medya_hesaplari.find((item: any) => item.platform === 'twitter');
         if (twitterItem) twitter = twitterItem.url.startsWith('http') ? twitterItem.url : `https://twitter.com/${twitterItem.url.replace('@', '')}`;
 
 
         // Transform communication data for new template structure - TÜM DEĞERLER!
         const communication_data: Record<string, Array<{value: string, label: string}>> = {};
-        
+
         // Group by type - all values!
-        firma.iletisim_bilgileri.forEach(item => {
+        firma.iletisim_bilgileri.forEach((item: any) => {
             const key = `${item.tip}lar`; // telefon -> telefonlar
             if (!communication_data[key]) {
                 communication_data[key] = [];
@@ -333,10 +380,9 @@ export default async function KartvizitPage({ params }: { params: { slug: string
             ...(slug === 'test-firma-1756037177823' ? {
                 firma_hakkinda: 'Test Teknoloji A.Ş. olarak 2020 yılından bu yana teknoloji sektöründe hizmet vermekteyiz.',
                 firma_hakkinda_baslik: 'Hakkımızda',
-                firma_unvan: 'Test Teknoloji Anonim Şirketi', 
+                firma_unvan: 'Test Teknoloji Anonim Şirketi',
                 firma_vergi_no: '1234567890',
                 vergi_dairesi: 'Merkez Vergi Dairesi',
-                katalog: 'https://example.com/test-katalog.pdf',
                 about: { 
                     icon: '/img/about.png', 
                     label: 'Hakkımızda', 
@@ -401,10 +447,61 @@ export default async function KartvizitPage({ params }: { params: { slug: string
         };
         
         const html = compiledTemplate(templateData);
-        
+
+        // JSON-LD Structured Data for SEO
+        const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+
+        // Build contact points array
+        const contactPoints: any[] = [];
+
+        if (telefon) {
+            contactPoints.push({
+                '@type': 'ContactPoint',
+                'telephone': telefon,
+                'contactType': 'customer service',
+            });
+        }
+
+        if (email) {
+            contactPoints.push({
+                '@type': 'ContactPoint',
+                'email': email,
+                'contactType': 'customer service',
+            });
+        }
+
+        // JSON-LD schema for Organization/Person
+        const jsonLd = {
+            '@context': 'https://schema.org',
+            '@type': data.yetkili_adi ? 'Person' : 'Organization',
+            'name': data.yetkili_adi || data.firma_adi,
+            'url': `${baseUrl}/${slug}`,
+            'logo': data.firma_logo,
+            'image': data.profil_foto || data.firma_logo,
+            ...(data.yetkili_pozisyon && { 'jobTitle': data.yetkili_pozisyon }),
+            ...(data.firma_adi && data.yetkili_adi && { 'worksFor': { '@type': 'Organization', 'name': data.firma_adi } }),
+            ...(data.firma_hakkinda && { 'description': data.firma_hakkinda }),
+            ...(contactPoints.length > 0 && { 'contactPoint': contactPoints }),
+            ...(adres && { 'address': adres }),
+        };
+
+        // Social media profiles
+        const socialProfiles = socialMediaArray
+            .map(sm => sm.url)
+            .filter(url => url && url.startsWith('http'));
+
+        if (socialProfiles.length > 0) {
+            jsonLd['sameAs'] = socialProfiles;
+        }
+
         // HTML'i döndür
         return (
             <FontAwesomeLoader>
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+                />
+                {/* HTML is generated server-side from trusted Handlebars template - no client-side sanitization needed */}
                 <div dangerouslySetInnerHTML={{ __html: html }} />
             </FontAwesomeLoader>
         );

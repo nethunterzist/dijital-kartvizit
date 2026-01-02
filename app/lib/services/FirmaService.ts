@@ -1,9 +1,28 @@
 import { prisma } from '@/app/lib/db';
 import { logger } from '@/app/lib/logger';
 import type { RelationalData } from './FormDataParser';
+import type { firmalar } from '@prisma/client';
+
+export interface BasicFirmaData {
+  firma_adi: string;
+  slug: string;
+  yetkili_adi?: string | null;
+  yetkili_pozisyon?: string | null;
+  firma_hakkinda?: string | null;
+  firma_hakkinda_baslik?: string | null;
+  firma_unvan?: string | null;
+  firma_vergi_no?: string | null;
+  vergi_dairesi?: string | null;
+  sektor_id?: number | null;
+  kategori_id?: number | null;
+  il_id?: number | null;
+  ilce_id?: number | null;
+  template_id?: number;
+  gradient_color?: string | null;
+}
 
 export interface FirmaCreateData {
-  basicData: any;
+  basicData: BasicFirmaData;
   relationalData: RelationalData;
   fileUrls: {
     profilePhotoUrl: string | null;
@@ -14,7 +33,7 @@ export interface FirmaCreateData {
 
 export interface FirmaResult {
   success: boolean;
-  firma?: any;
+  firma?: firmalar;
   error?: string;
 }
 
@@ -63,7 +82,7 @@ export class FirmaService {
             vergi_dairesi: data.basicData.vergi_dairesi || null,
             firma_hakkinda: data.basicData.firma_hakkinda || null,
             firma_hakkinda_baslik: data.basicData.firma_hakkinda_baslik || null,
-            template_id: data.basicData.templateId,
+            template_id: data.basicData.template_id,
             
             // File URLs
             profil_foto: data.fileUrls.profilePhotoUrl,
@@ -227,7 +246,7 @@ export class FirmaService {
             vergi_dairesi: data.basicData.vergi_dairesi || null,
             firma_hakkinda: data.basicData.firma_hakkinda || null,
             firma_hakkinda_baslik: data.basicData.firma_hakkinda_baslik || null,
-            template_id: data.basicData.templateId,
+            template_id: data.basicData.template_id,
             updated_at: new Date(),
             
             // File URLs (keep existing if no new files)

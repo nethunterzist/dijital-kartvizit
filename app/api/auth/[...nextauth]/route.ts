@@ -15,43 +15,35 @@ const handler = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.username || !credentials?.password) {
-          console.log('❌ Credentials eksik');
           return null;
         }
 
         try {
-          console.log('🔍 Auth deneniyor:', credentials.username);
-          
           // Database'den kullanıcıyı bul
           const user = await prisma.admins.findFirst({
             where: { username: credentials.username }
           });
-          
+
           if (!user) {
-            console.log('❌ Kullanıcı bulunamadı:', credentials.username);
+            // SECURITY: No username logging to prevent enumeration
             return null;
           }
-          
-          console.log('✅ Kullanıcı bulundu, şifre kontrol ediliyor');
-          
+
           // Şifre karşılaştır
           const passwordMatch = await bcrypt.compare(credentials.password, user.password);
-          
-          console.log('🔐 Şifre karşılaştırması:', passwordMatch);
-          
+
           if (passwordMatch) {
-            console.log('✅ Login başarılı!');
             return {
               id: user.id.toString(),
               name: user.username,
               email: null,
             };
           }
-          
-          console.log('❌ Şifre yanlış');
+
           return null;
         } catch (error) {
-          console.error('💥 Auth error:', error);
+          // SECURITY: Only log error in production-safe way
+          console.error('Authentication error:', error instanceof Error ? error.message : 'Unknown error');
           return null;
         } finally {
           await prisma.$disconnect();
@@ -82,8 +74,7 @@ const handler = NextAuth({
     maxAge: 30 * 24 * 60 * 60 // 30 days
   },
   // Serverless environment configuration
-  debug: process.env.NODE_ENV === 'development',
-  trustHost: true
+  debug: process.env.NODE_ENV === 'development'
 });
 
 export { handler as GET, handler as POST };

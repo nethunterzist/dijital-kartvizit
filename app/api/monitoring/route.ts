@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDatabaseHealth } from '@/app/lib/db';
 import { logger } from '@/app/lib/logger';
+import { incrementRequestCounter, incrementErrorCounter, getMetricsCache } from '@/app/lib/monitoring';
 
 // System metrics interface
 interface SystemMetrics {
@@ -30,23 +31,6 @@ interface SystemMetrics {
   }>;
 }
 
-// In-memory metrics storage (in production, use Redis or external service)
-let metricsCache: {
-  requests: { total: number; errors: number; lastReset: number };
-} = {
-  requests: { total: 0, errors: 0, lastReset: Date.now() }
-};
-
-// Increment request counter
-export function incrementRequestCounter() {
-  metricsCache.requests.total++;
-}
-
-// Increment error counter
-export function incrementErrorCounter() {
-  metricsCache.requests.errors++;
-}
-
 // Get system metrics
 async function getSystemMetrics(): Promise<SystemMetrics> {
   const timestamp = new Date().toISOString();
@@ -60,14 +44,9 @@ async function getSystemMetrics(): Promise<SystemMetrics> {
   // Database health
   const dbHealth = await getDatabaseHealth();
 
-  // Request metrics (reset daily)
-  const now = Date.now();
-  const dayInMs = 24 * 60 * 60 * 1000;
-  if (now - metricsCache.requests.lastReset > dayInMs) {
-    metricsCache.requests = { total: 0, errors: 0, lastReset: now };
-  }
-
-  const errorRate = metricsCache.requests.total > 0 
+  // Request metrics
+  const metricsCache = getMetricsCache();
+  const errorRate = metricsCache.requests.total > 0
     ? Math.round((metricsCache.requests.errors / metricsCache.requests.total) * 100)
     : 0;
 

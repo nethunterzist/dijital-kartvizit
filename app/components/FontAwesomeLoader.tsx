@@ -38,7 +38,6 @@ export default function FontAwesomeLoader({ children }: FontAwesomeLoaderProps) 
                                 computed.getPropertyValue('font-weight') === '900';
 
             if (isFontAwesome) {
-                console.log('✅ Font Awesome loaded successfully');
                 // Mark all icons as loaded
                 const icons = document.querySelectorAll('i[class*="fa-"]');
                 icons.forEach(icon => icon.classList.add('fa-loaded'));

@@ -16,7 +16,7 @@ export default function VideoFaqSection() {
     <section id="diger-bilgiler" className="relative w-full min-h-[700px] flex flex-col items-center justify-center pt-48" style={{background: "linear-gradient(120deg, #f8fbfa 0%, #f8e8fa 100%)"}}>
       {/* Arka plan görseli (slider görseli) */}
       <div className="absolute inset-0 w-full h-full z-0">
-        <img src="/img/home-1.png" alt="Background" className="w-full h-full object-cover opacity-80" />
+        <img src="/img/video-poster.jpg" alt="Background" className="w-full h-full object-cover opacity-80" />
       </div>
       {/* Video kutusu */}
       <div className="relative z-10 flex justify-center w-full" style={{marginTop: '-120px'}}>
