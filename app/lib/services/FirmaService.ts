@@ -1,5 +1,6 @@
 import { prisma } from '@/app/lib/db';
 import { logger } from '@/app/lib/logger';
+import type { Prisma } from '@prisma/client';
 import type { RelationalData } from './FormDataParser';
 
 // Prisma type inference from client - production-safe yöntem
@@ -71,7 +72,7 @@ export class FirmaService {
       }
 
       // Create firma with transaction for data consistency
-      const newFirm = await prisma.$transaction(async (tx) => {
+      const newFirm = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const firma = await tx.firmalar.create({
           data: {
             // Basic firma data
@@ -209,7 +210,7 @@ export class FirmaService {
       }
 
       // Update firma with transaction
-      const updatedFirm = await prisma.$transaction(async (tx) => {
+      const updatedFirm = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         // Delete existing related data
         await tx.iletisimBilgisi.deleteMany({
           where: { firma_id: data.firmaId }
