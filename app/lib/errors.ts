@@ -293,3 +293,40 @@ export function createErrorResponse(error: Error | AppError, includeStack = fals
 export function getErrorStatusCode(error: Error | AppError): number {
   return ErrorResponse.getStatusCode(error);
 }
+
+/**
+ * Helper function to create Next.js error response
+ * Used by API routes to return proper error responses
+ */
+export function errorResponse(error: any) {
+  const { NextResponse } = require('next/server');
+
+  // Handle Zod validation errors
+  if (error.name === 'ZodError') {
+    const formatted = ErrorFormatter.formatZodError(error);
+    return NextResponse.json({
+      error: {
+        message: 'Validation failed',
+        code: 'VALIDATION_ERROR',
+        statusCode: 400,
+        details: formatted
+      }
+    }, { status: 400 });
+  }
+
+  // Handle AppError instances
+  if (error instanceof AppError) {
+    return NextResponse.json(error.toJSON(), { status: error.statusCode });
+  }
+
+  // Handle unknown errors
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  return NextResponse.json({
+    error: {
+      message: isDevelopment ? error.message : 'Bir hata oluştu',
+      code: 'INTERNAL_ERROR',
+      statusCode: 500,
+      ...(isDevelopment && { stack: error.stack })
+    }
+  }, { status: 500 });
+}

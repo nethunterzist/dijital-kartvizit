@@ -577,3 +577,41 @@ export const getCachedFirmaBySlug = withCache(
   (slug: string) => `firma-slug-${slug}`,
   CACHE_DURATIONS.MEDIUM
 );
+
+/**
+ * Simple cache interface for API routes
+ * Provides a unified interface for get/set/del operations
+ */
+export const cache = {
+  /**
+   * Get value from cache
+   */
+  async get<T = any>(key: string): Promise<T | null> {
+    const kvCache = VercelKVCache.getInstance();
+    return await kvCache.get<T>(key);
+  },
+
+  /**
+   * Set value in cache with optional TTL
+   */
+  async set<T = any>(key: string, value: T, ttl?: number): Promise<boolean> {
+    const kvCache = VercelKVCache.getInstance();
+    return await kvCache.set(key, value, ttl);
+  },
+
+  /**
+   * Delete keys matching pattern
+   */
+  async del(pattern: string): Promise<number> {
+    const kvCache = VercelKVCache.getInstance();
+    return await kvCache.del(pattern);
+  },
+
+  /**
+   * Invalidate cache by pattern
+   */
+  async invalidate(pattern: string): Promise<void> {
+    const kvCache = VercelKVCache.getInstance();
+    await kvCache.invalidatePattern(pattern);
+  }
+};

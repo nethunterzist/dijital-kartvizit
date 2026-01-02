@@ -1,18 +1,42 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
 const menuItems = [
-  { label: 'Kartvizit Oluştur', href: '#kartvizit-olustur' },
+  { label: 'Dijital Kartvizit', href: '#' },
   { label: 'Fiyatlar', href: '#pricing' },
+  { label: 'Soru & Cevap', href: '#diger-bilgiler' },
   { label: 'Müşteri Yorumları', href: '#yorumlar' },
-  { label: 'SSS', href: '#sss' },
 ];
+
+interface SiteSettings {
+  site_name: string;
+  site_logo: string | null;
+}
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const [settings, setSettings] = useState<SiteSettings>({
+    site_name: 'Dijital Kartvizit Merkezi',
+    site_logo: '/img/logo/logo.png',
+  });
+
+  useEffect(() => {
+    fetch('/api/settings/site')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.site_name) {
+          setSettings({
+            site_name: data.site_name,
+            site_logo: data.site_logo || '/img/logo/logo.png',
+          });
+        }
+      })
+      .catch(err => console.error('Ayarlar yüklenemedi:', err));
+  }, []);
+
   return (
     <nav className="w-full sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-gray-100 shadow-sm" aria-label="Ana navigasyon">
       {/* Skip to main content link for keyboard users */}
@@ -26,7 +50,13 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-3">
         <Link href="/" aria-label="Ana sayfaya dön">
           <span className="flex items-center gap-2 font-bold text-xl text-blue-900">
-            <Image src="/img/logo/logo.png" alt="Dijital Kartvizit logosu" width={120} height={120} className="rounded-full" />
+            <Image
+              src={settings.site_logo || '/img/logo/logo.png'}
+              alt={`${settings.site_name} logosu`}
+              width={120}
+              height={120}
+              className="rounded-full"
+            />
           </span>
         </Link>
         <div className="hidden md:flex gap-2 items-center" role="menubar">

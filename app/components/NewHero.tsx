@@ -1,9 +1,38 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Typewriter } from 'react-simple-typewriter';
+
+interface SliderImage {
+  id: number;
+  image_url: string;
+  alt_text: string | null;
+  active: boolean;
+  display_order: number;
+}
 
 export default function NewHero() {
   const [showModal, setShowModal] = useState(false);
+  const [sliderImages, setSliderImages] = useState<SliderImage[]>([]);
+
+  useEffect(() => {
+    // Fetch slider images from API
+    fetch('/api/settings/slider')
+      .then(res => res.json())
+      .then((data: SliderImage[]) => {
+        // Filter only active images and sort by display_order
+        const activeImages = data.filter(img => img.active);
+        setSliderImages(activeImages);
+      })
+      .catch(error => {
+        console.error('Failed to load slider images:', error);
+        // Fallback to default images if API fails
+        setSliderImages([
+          { id: 1, image_url: '/img/hero/1.jpg', alt_text: null, active: true, display_order: 0 },
+          { id: 2, image_url: '/img/hero/2.jpg', alt_text: null, active: true, display_order: 1 },
+          { id: 3, image_url: '/img/hero/3.jpg', alt_text: null, active: true, display_order: 2 },
+        ]);
+      });
+  }, []);
 
   const scrollToCardCreator = () => {
     const element = document.getElementById('card-creator');
@@ -96,249 +125,38 @@ export default function NewHero() {
         <div className="relative left-1/2 transform -translate-x-1/2 w-screen overflow-hidden mt-16">
           <div className="h-[600px] flex items-center">
             <div className="flex animate-scroll gap-8">
-              {/* iPhone Mockup 1 */}
-              <div className="flex-shrink-0">
-                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
-                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
-                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
-                    <img 
-                      src="/img/hero/1.jpg" 
-                      alt="Digital Business Card"
-                      className="w-full h-full object-cover"
-                    />
+              {/* First set of images */}
+              {sliderImages.map((image) => (
+                <div key={`first-${image.id}`} className="flex-shrink-0">
+                  <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
+                    <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
+                      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
+                      <img
+                        src={image.image_url}
+                        alt={image.alt_text || 'Digital Business Card'}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
+              ))}
 
-              {/* iPhone Mockup 2 */}
-              <div className="flex-shrink-0">
-                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
-                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
-                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
-                    <img 
-                      src="/img/hero/2.jpg" 
-                      alt="Digital Business Card"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
-              </div>
 
-              {/* iPhone Mockup 3 */}
-              <div className="flex-shrink-0">
-                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
-                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
-                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
-                    <img 
-                      src="/img/hero/3.jpg" 
-                      alt="Digital Business Card"
-                      className="w-full h-full object-cover"
-                    />
+              {/* Duplicate set for infinite scroll effect */}
+              {sliderImages.map((image) => (
+                <div key={`second-${image.id}`} className="flex-shrink-0">
+                  <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
+                    <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
+                      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
+                      <img
+                        src={image.image_url}
+                        alt={image.alt_text || 'Digital Business Card'}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-
-              {/* iPhone Mockup 4 */}
-              <div className="flex-shrink-0">
-                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
-                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
-                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
-                    <img 
-                      src="/img/hero/4.jpg" 
-                      alt="Digital Business Card"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* iPhone Mockup 5 */}
-              <div className="flex-shrink-0">
-                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
-                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
-                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
-                    <img 
-                      src="/img/hero/5.jpg" 
-                      alt="Digital Business Card"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* iPhone Mockup 6 */}
-              <div className="flex-shrink-0">
-                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
-                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
-                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
-                    <img 
-                      src="/img/hero/6.jpg" 
-                      alt="Digital Business Card"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* iPhone Mockup 7 */}
-              <div className="flex-shrink-0">
-                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
-                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
-                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
-                    <img 
-                      src="/img/hero/7.jpg" 
-                      alt="Digital Business Card"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* iPhone Mockup 8 */}
-              <div className="flex-shrink-0">
-                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
-                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
-                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
-                    <img 
-                      src="/img/hero/8.jpg" 
-                      alt="Digital Business Card"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* iPhone Mockup 9 */}
-              <div className="flex-shrink-0">
-                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
-                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
-                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
-                    <img 
-                      src="/img/hero/9.jpg" 
-                      alt="Digital Business Card"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Repeat for infinite scroll effect - Full duplicate set */}
-              <div className="flex-shrink-0">
-                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
-                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
-                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
-                    <img 
-                      src="/img/hero/1.jpg" 
-                      alt="Digital Business Card"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex-shrink-0">
-                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
-                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
-                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
-                    <img 
-                      src="/img/hero/2.jpg" 
-                      alt="Digital Business Card"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex-shrink-0">
-                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
-                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
-                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
-                    <img 
-                      src="/img/hero/3.jpg" 
-                      alt="Digital Business Card"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex-shrink-0">
-                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
-                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
-                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
-                    <img 
-                      src="/img/hero/4.jpg" 
-                      alt="Digital Business Card"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex-shrink-0">
-                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
-                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
-                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
-                    <img 
-                      src="/img/hero/5.jpg" 
-                      alt="Digital Business Card"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex-shrink-0">
-                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
-                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
-                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
-                    <img 
-                      src="/img/hero/6.jpg" 
-                      alt="Digital Business Card"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex-shrink-0">
-                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
-                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
-                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
-                    <img 
-                      src="/img/hero/7.jpg" 
-                      alt="Digital Business Card"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex-shrink-0">
-                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
-                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
-                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
-                    <img 
-                      src="/img/hero/8.jpg" 
-                      alt="Digital Business Card"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex-shrink-0">
-                <div className="w-64 h-[520px] bg-black rounded-[3rem] p-3 shadow-2xl">
-                  <div className="w-full h-full bg-gray-900 rounded-[2.5rem] overflow-hidden relative">
-                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
-                    <img 
-                      src="/img/hero/9.jpg" 
-                      alt="Digital Business Card"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>

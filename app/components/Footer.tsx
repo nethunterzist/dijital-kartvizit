@@ -1,36 +1,105 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Icon, CustomIcons } from '@/app/lib/icons';
+
+interface SocialMedia {
+  id: number;
+  platform: string;
+  url: string;
+  active: boolean;
+}
+
+interface SiteSettings {
+  site_name: string;
+  site_logo: string | null;
+}
 
 export default function Footer() {
   const [modal, setModal] = useState<null | 'terms' | 'privacy'>(null);
+  const [socialMedia, setSocialMedia] = useState<SocialMedia[]>([]);
+  const [siteName, setSiteName] = useState('Dijitalkartvizitim');
+  const [siteLogo, setSiteLogo] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Sosyal medya linklerini yükle
+    fetch('/api/settings/social')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          const activeLinks = data.filter((s: SocialMedia) => s.active);
+          setSocialMedia(activeLinks);
+        }
+      })
+      .catch(err => console.error('Sosyal medya yüklenemedi:', err));
+
+    // Site ayarlarını yükle
+    fetch('/api/settings/site')
+      .then(res => res.json())
+      .then((data: SiteSettings) => {
+        if (data) {
+          if (data.site_name) setSiteName(data.site_name);
+          if (data.site_logo) setSiteLogo(data.site_logo);
+        }
+      })
+      .catch(err => console.error('Site ayarları yüklenemedi:', err));
+  }, []);
   return (
     <footer className="w-full bg-white pt-12 pb-4 px-4 md:px-0 border-0 relative">
       <div className="max-w-4xl mx-auto flex flex-col items-center text-center">
-        {/* Logo ve Marka Adı */}
+        {/* Logo */}
         <div className="flex flex-col items-center mb-4">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="inline-block w-8 h-8 bg-blue-600 rounded-md flex items-center justify-center">
-              {/* Logo placeholder */}
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="4" fill="#2563eb"/><rect x="6" y="6" width="12" height="12" rx="2" fill="#fff"/></svg>
-            </span>
-            <span className="font-bold text-2xl text-gray-900">Dijitalkartvizitim</span>
-          </div>
-          <p className="text-gray-500 text-base max-w-xl mb-4">Dijitalkartvizitim, dijital kartvizit ve QR çözümleriyle işinizi modern, hızlı ve güvenli şekilde dijitalleştirir. Tüm iletişim ve tanıtım araçlarınızı tek bir platformda birleştirir.</p>
+          {siteLogo && (
+            <div className="mb-4">
+              <img
+                src={siteLogo}
+                alt={`${siteName} logosu`}
+                className="h-24 w-auto object-contain"
+              />
+            </div>
+          )}
+          <p className="text-gray-500 text-base max-w-xl mb-4">Dijital kartvizit ve QR çözümleriyle işinizi modern, hızlı ve güvenli şekilde dijitalleştirir. Tüm iletişim ve tanıtım araçlarınızı tek bir platformda birleştirir.</p>
         </div>
         {/* Sosyal Medya İkonları */}
-        <div className="flex gap-6 justify-center mb-8">
-          <a href="#" className="text-gray-900 hover:text-red-600 text-2xl transition" aria-label="YouTube"><Icon name="youtube" size={24} /></a>
-          <a href="#" className="text-gray-900 hover:text-pink-600 text-2xl transition" aria-label="Instagram"><Icon name="instagram" size={24} /></a>
-          <a href="#" className="text-gray-900 hover:text-blue-600 text-2xl transition" aria-label="Facebook"><Icon name="facebook" size={24} /></a>
-          <a href="#" className="text-gray-900 hover:text-black text-2xl transition" aria-label="X"><CustomIcons.x size={24} className="text-current" /></a>
-        </div>
+        {socialMedia.length > 0 && (
+          <div className="flex gap-6 justify-center mb-8">
+            {socialMedia.map((social) => {
+              const iconProps = { size: 24, className: "text-current" };
+              const platformConfig: Record<string, { icon: JSX.Element; hoverColor: string; label: string }> = {
+                youtube: { icon: <Icon name="youtube" {...iconProps} />, hoverColor: "hover:text-red-600", label: "YouTube" },
+                instagram: { icon: <Icon name="instagram" {...iconProps} />, hoverColor: "hover:text-pink-600", label: "Instagram" },
+                facebook: { icon: <Icon name="facebook" {...iconProps} />, hoverColor: "hover:text-blue-600", label: "Facebook" },
+                twitter: { icon: <CustomIcons.x {...iconProps} />, hoverColor: "hover:text-black", label: "X (Twitter)" },
+                linkedin: { icon: <Icon name="linkedin" {...iconProps} />, hoverColor: "hover:text-blue-700", label: "LinkedIn" },
+                tiktok: { icon: <Icon name="tiktok" {...iconProps} />, hoverColor: "hover:text-black", label: "TikTok" },
+              };
+
+              const config = platformConfig[social.platform] || {
+                icon: <Icon name="globe" {...iconProps} />,
+                hoverColor: "hover:text-blue-600",
+                label: social.platform
+              };
+
+              return (
+                <a
+                  key={social.id}
+                  href={social.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`text-gray-900 ${config.hoverColor} text-2xl transition`}
+                  aria-label={config.label}
+                >
+                  {config.icon}
+                </a>
+              );
+            })}
+          </div>
+        )}
       </div>
       {/* Alt çizgi */}
       <div className="w-full border-t border-gray-200 my-4" />
       {/* Alt Bilgi ve Linkler */}
       <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between text-gray-700 text-sm px-2">
-        <div className="mb-2 md:mb-0">© 2025 Dijitalkartvizitim. Tüm hakları saklıdır.</div>
+        <div className="mb-2 md:mb-0">© 2025 {siteName}. Tüm hakları saklıdır.</div>
         <div className="flex gap-4">
           <button onClick={() => setModal('terms')} className="hover:text-blue-600 transition bg-transparent border-0 p-0 m-0 cursor-pointer">Kullanım Koşulları</button>
           <span className="hidden md:inline">|</span>

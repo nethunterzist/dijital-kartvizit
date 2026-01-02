@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
+import PricingFormSlider from './PricingFormSlider';
 
 interface Package {
   id: number;
@@ -12,11 +13,16 @@ interface Package {
   popular: boolean;
   display_order: number;
   features: string[];
+  active: boolean;
+  sira: number;
+  created_at: string;
 }
 
 export default function PricingSection() {
   const [packages, setPackages] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
 
   useEffect(() => {
     fetchPackages();
@@ -37,9 +43,14 @@ export default function PricingSection() {
     }
   };
 
-  const handlePurchase = (packageKey: string) => {
-    // İletişim sayfasına yönlendir
-    alert('Bu paket için lütfen bizimle iletişime geçin: info@dijitalkartvizit.com');
+  const handlePurchase = (pkg: Package) => {
+    setSelectedPackage(pkg);
+    setShowForm(true);
+  };
+
+  const handleCloseForm = () => {
+    setShowForm(false);
+    setSelectedPackage(null);
   };
 
   if (loading) {
@@ -155,7 +166,7 @@ export default function PricingSection() {
 
                 {/* CTA Button */}
                 <button
-                  onClick={() => handlePurchase(pkg.package_key)}
+                  onClick={() => handlePurchase(pkg)}
                   aria-label={`${pkg.name} paketini seç - ₺${pkg.price} tek seferlik ödeme ile ${pkg.card_count} dijital kartvizit`}
                   className={`w-full py-4 rounded-lg font-bold text-lg transition-all transform hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                     pkg.popular
@@ -228,6 +239,13 @@ export default function PricingSection() {
         </div>
 
       </div>
+
+      {/* Pricing Form Slider */}
+      <PricingFormSlider
+        isOpen={showForm}
+        onClose={handleCloseForm}
+        selectedPackage={selectedPackage}
+      />
     </section>
   );
 }

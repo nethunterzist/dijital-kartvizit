@@ -253,6 +253,8 @@ export function validatePhone(phone: string): boolean {
 export * from './firma.schema';
 export * from './auth.schema';
 export * from './package.schema';
+export * from './settings.schema';
+export * from './package-inquiry.schema';
 
 // Alias exports for backward compatibility
 export {

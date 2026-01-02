@@ -181,3 +181,84 @@ model packages {
   @@index([package_key])
 }
 
+model SiteSettings {
+  id                Int      @id @default(autoincrement())
+  site_name         String   @default("Dijital Kartvizit Merkezi")
+  site_logo         String?
+  favicon           String?
+  meta_title        String?
+  meta_description  String?
+  meta_keywords     String?
+  google_analytics  String?
+  contact_email     String?
+  contact_phone     String?
+  contact_address   String?
+  faq_video_url     String?
+  updated_at        DateTime @default(now()) @updatedAt
+  created_at        DateTime @default(now())
+}
+
+model SocialMediaSettings {
+  id            Int      @id @default(autoincrement())
+  platform      String
+  url           String
+  active        Boolean  @default(true)
+  display_order Int      @default(0)
+  created_at    DateTime @default(now())
+
+  @@index([active])
+  @@index([display_order])
+}
+
+model Testimonial {
+  id            Int      @id @default(autoincrement())
+  name          String
+  title         String
+  avatar_url    String?
+  text          String   @db.Text
+  rating        Int?     @default(5)
+  active        Boolean  @default(true)
+  display_order Int      @default(0)
+  created_at    DateTime @default(now())
+
+  @@index([active])
+  @@index([display_order])
+}
+
+model Faq {
+  id            Int      @id @default(autoincrement())
+  question      String   @db.Text
+  answer        String   @db.Text
+  category      String?
+  active        Boolean  @default(true)
+  display_order Int      @default(0)
+  created_at    DateTime @default(now())
+
+  @@index([active])
+  @@index([display_order])
+  @@index([category])
+}
+
+model AdminPasswordHistory {
+  id                Int      @id @default(autoincrement())
+  admin_id          Int
+  old_password_hash String
+  changed_at        DateTime @default(now())
+  changed_by        String?
+
+  @@index([admin_id])
+  @@index([changed_at])
+}
+
+model SliderImage {
+  id            Int      @id @default(autoincrement())
+  image_url     String
+  display_order Int      @default(0)
+  active        Boolean  @default(true)
+  alt_text      String?
+  created_at    DateTime @default(now())
+
+  @@index([active])
+  @@index([display_order])
+}
+

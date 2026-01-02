@@ -1,17 +1,43 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-const FAQS = [
-  { q: "Dijital kartviziti kimler kullanabilir?", a: "Bireysel ve kurumsal kullanıcılar, girişimciler, KOBİ'ler, şirketler ve profesyoneller dijital kartviziti kolayca kullanabilir." },
-  { q: "Kartvizitime hangi bilgileri ekleyebilirim?", a: "Sosyal medya hesapları, iletişim bilgileri, banka hesapları, web sitesi, katalog PDF, firma logosu, profil fotoğrafı ve daha fazlasını ekleyebilirsiniz." },
-  { q: "Dijital kartvizit neden avantajlıdır?", a: "Her yerden erişim, hızlı paylaşım, güncellenebilirlik, sürdürülebilirlik ve modern görünüm gibi birçok avantaj sunar." },
-  { q: "Bilgilerim güvende mi?", a: "Tüm verileriniz güvenli altyapı ve modern güvenlik standartları ile korunur. Sadece sizin belirlediğiniz bilgiler paylaşılır." },
-  { q: "Kartvizitimi nasıl paylaşabilirim?", a: "QR kod, kısa link veya vCard (Rehbere Ekle) ile kartvizitinizi kolayca paylaşabilirsiniz." },
-  { q: "Başka sistemlerle entegrasyon mümkün mü?", a: "Evet, dijital kartvizit platformu çeşitli entegrasyonlara ve API desteğine sahiptir." },
-];
+interface Faq {
+  id: number;
+  question: string;
+  answer: string;
+  category: string | null;
+  active: boolean;
+}
+
+interface SiteSettings {
+  faq_video_url: string | null;
+}
 
 export default function VideoFaqSection() {
   const [open, setOpen] = useState<number | null>(null);
+  const [faqs, setFaqs] = useState<Faq[]>([]);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Fetch FAQs
+    fetch('/api/settings/faq')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          const activeFaqs = data.filter((f: Faq) => f.active);
+          setFaqs(activeFaqs);
+        }
+      })
+      .catch(err => console.error('SSS yüklenemedi:', err));
+
+    // Fetch video URL from site settings
+    fetch('/api/settings/site')
+      .then(res => res.json())
+      .then((data: SiteSettings) => {
+        setVideoUrl(data.faq_video_url);
+      })
+      .catch(err => console.error('Video URL yüklenemedi:', err));
+  }, []);
   return (
     <section id="diger-bilgiler" className="relative w-full min-h-[700px] flex flex-col items-center justify-center pt-48" style={{background: "linear-gradient(120deg, #f8fbfa 0%, #f8e8fa 100%)"}}>
       {/* Arka plan görseli (slider görseli) */}
@@ -19,22 +45,20 @@ export default function VideoFaqSection() {
         <img src="/img/video-poster.jpg" alt="Background" className="w-full h-full object-cover opacity-80" />
       </div>
       {/* Video kutusu */}
-      <div className="relative z-10 flex justify-center w-full" style={{marginTop: '-120px'}}>
-        <div className="bg-white/80 rounded-2xl shadow-2xl overflow-hidden w-full max-w-2xl border border-gray-200 backdrop-blur-md">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            controls={false}
-            poster="/img/video-poster.jpg"
-            className="w-full h-[340px] object-cover pointer-events-none select-none"
-          >
-            <source src="/img/hero/video5_.mp4" type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
+      {videoUrl && (
+        <div className="relative z-10 flex justify-center w-full" style={{marginTop: '-120px'}}>
+          <div className="bg-white/80 rounded-2xl shadow-2xl overflow-hidden w-full max-w-2xl border border-gray-200 backdrop-blur-md">
+            <video
+              controls
+              poster="/img/video-poster.jpg"
+              className="w-full h-[340px] object-cover"
+            >
+              <source src={videoUrl} type="video/mp4" />
+              Tarayıcınız video etiketini desteklemiyor.
+            </video>
+          </div>
         </div>
-      </div>
+      )}
       {/* FAQ alanı */}
       <div className="relative z-10 w-full max-w-3xl mx-auto mt-12 px-4 pb-20">
         <div className="flex flex-col items-center mb-8">
@@ -43,28 +67,34 @@ export default function VideoFaqSection() {
             Merak ettiğiniz bir konu mu var? <span className="text-[#5b6fff]">Cevabınızı</span> burada bulamazsanız, iletişim formumuzdan bize ulaşabilirsiniz.
           </h2>
         </div>
-        <div className="flex flex-col gap-4">
-          {FAQS.map((item, idx) => (
-            <div key={idx} className="bg-white/80 rounded-lg shadow p-4">
-              <button
-                className="w-full flex justify-between items-center text-left font-medium text-gray-800 text-base focus:outline-none"
-                onClick={() => setOpen(open === idx ? null : idx)}
-                aria-expanded={open === idx}
-                aria-controls={`faq-content-${idx}`}
-              >
-                <span>{item.q}</span>
-                <span className="ml-2 text-[#5b6fff]">{open === idx ? "-" : "+"}</span>
-              </button>
-              <div
-                id={`faq-content-${idx}`}
-                className={`overflow-hidden transition-all duration-400 ease-in-out mt-2 text-gray-600 text-sm ${open === idx ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}
-                style={{ transitionProperty: 'max-height, opacity' }}
-              >
-                {open === idx && <div>{item.a}</div>}
+        {faqs.length > 0 ? (
+          <div className="flex flex-col gap-4">
+            {faqs.map((item) => (
+              <div key={item.id} className="bg-white/80 rounded-lg shadow p-4">
+                <button
+                  className="w-full flex justify-between items-center text-left font-medium text-gray-800 text-base focus:outline-none"
+                  onClick={() => setOpen(open === item.id ? null : item.id)}
+                  aria-expanded={open === item.id}
+                  aria-controls={`faq-content-${item.id}`}
+                >
+                  <span>{item.question}</span>
+                  <span className="ml-2 text-[#5b6fff]">{open === item.id ? "-" : "+"}</span>
+                </button>
+                <div
+                  id={`faq-content-${item.id}`}
+                  className={`overflow-hidden transition-all duration-400 ease-in-out mt-2 text-gray-600 text-sm ${open === item.id ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}
+                  style={{ transitionProperty: 'max-height, opacity' }}
+                >
+                  {open === item.id && <div className="whitespace-pre-wrap">{item.answer}</div>}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center text-gray-500">
+            <p>Henüz sıkça sorulan soru eklenmemiş.</p>
+          </div>
+        )}
       </div>
     </section>
   );
