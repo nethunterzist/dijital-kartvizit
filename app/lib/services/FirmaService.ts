@@ -3,7 +3,7 @@ import { logger } from '@/app/lib/logger';
 import type { RelationalData } from './FormDataParser';
 import { Prisma } from '@prisma/client';
 
-type Firmalar = Prisma.firmalarGetPayload<{}>;
+type Firmalar = Prisma.$firmalarPayload['scalars'];
 
 export interface BasicFirmaData {
   firma_adi: string;
