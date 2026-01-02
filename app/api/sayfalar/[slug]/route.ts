@@ -142,7 +142,7 @@ export async function GET(
 
     // Sosyal medya verilerini yeni normalize edilmiş yapıdan çek
     let socialMediaArray: any[] = [];
-    firma.sosyal_medya_hesaplari.forEach((item) => {
+    firma.sosyal_medya_hesaplari.forEach((item: any) => {
       const meta = SOCIAL_MEDIA_META[item.platform] || {};
       socialMediaArray.push({
         icon: meta.icon || '',
@@ -154,7 +154,7 @@ export async function GET(
 
     // İletişim verilerini yeni normalize edilmiş yapıdan çek
     let communicationArray: any[] = [];
-    firma.iletisim_bilgileri.forEach((item) => {
+    firma.iletisim_bilgileri.forEach((item: any) => {
       const meta = COMM_META[item.tip] || {};
       communicationArray.push({
         icon: meta.icon || '',
@@ -167,12 +167,12 @@ export async function GET(
 
     // Banka hesaplarını yeni normalize edilmiş yapıdan çek
     let bankaHesaplari: any[] = [];
-    firma.banka_hesaplari.forEach((banka) => {
+    firma.banka_hesaplari.forEach((banka: any) => {
       bankaHesaplari.push({
         banka_adi: banka.banka_adi,
         banka_logo: banka.banka_logo,
         hesap_sahibi: banka.hesap_sahibi,
-        hesaplar: banka.hesaplar.map(hesap => ({
+        hesaplar: banka.hesaplar.map((hesap: any) => ({
           iban: hesap.iban,
           para_birimi: hesap.para_birimi,
           hesap_turu: hesap.hesap_turu
