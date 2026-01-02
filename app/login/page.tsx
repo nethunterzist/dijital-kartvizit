@@ -40,6 +40,7 @@ export default function LoginPage() {
         logger.info('Giriş başarılı!');
         router.push('/admin');
         // router.refresh() removed - Next.js App Router auto-revalidates
+        return; // Early return to prevent setLoading(false) after navigation
       }
     } catch (err) {
       logger.error('Giriş hatası:', err);

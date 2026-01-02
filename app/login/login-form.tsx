@@ -37,6 +37,7 @@ export default function LoginForm() {
       } else {
         router.push('/admin');
         // router.refresh() removed - Next.js App Router auto-revalidates
+        return; // Early return to prevent setLoading(false) after navigation
       }
     } catch (error) {
       setError('Giriş işlemi sırasında bir hata oluştu.');
