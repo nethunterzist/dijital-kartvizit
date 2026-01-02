@@ -4,6 +4,7 @@ import handlebars from 'handlebars';
 import { cardTemplate } from '../lib/cardTemplate';
 import { getServerBaseUrl } from '../lib/utils/getBaseUrl';
 import FontAwesomeLoader from '../components/FontAwesomeLoader';
+import ViewTracker from '../components/ViewTracker';
 
 // Handlebars helper fonksiyonunu kaydet
 handlebars.registerHelper('ifEquals', function(this: any, arg1: any, arg2: any, options: any) {
@@ -497,6 +498,8 @@ export default async function KartvizitPage({ params }: { params: { slug: string
         // HTML'i döndür
         return (
             <FontAwesomeLoader>
+                {/* View counter tracking - client-side */}
+                <ViewTracker slug={slug} />
                 <script
                     type="application/ld+json"
                     dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
