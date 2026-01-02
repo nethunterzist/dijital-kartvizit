@@ -137,8 +137,8 @@ export async function GET(
 
     // Website bilgilerini iletişim bilgilerinden çek
     let websiteArray: string[] = [];
-    const websiteItems = firma.iletisim_bilgileri.filter(item => item.tip === 'website');
-    websiteArray = websiteItems.map(item => item.deger);
+    const websiteItems = firma.iletisim_bilgileri.filter((item: any) => item.tip === 'website');
+    websiteArray = websiteItems.map((item: any) => item.deger);
 
     // Sosyal medya verilerini yeni normalize edilmiş yapıdan çek
     let socialMediaArray: any[] = [];
