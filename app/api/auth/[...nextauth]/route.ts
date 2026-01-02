@@ -5,9 +5,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/app/lib/db';
 
 const handler = NextAuth({
   providers: [
@@ -49,8 +47,6 @@ const handler = NextAuth({
           // SECURITY: Only log error in production-safe way
           console.error('Authentication error:', error instanceof Error ? error.message : 'Unknown error');
           return null;
-        } finally {
-          await prisma.$disconnect();
         }
       }
     })
