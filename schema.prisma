@@ -161,3 +161,23 @@ model ilceler {
   @@index([il_id])
 }
 
+model packages {
+  id             Int      @id @default(autoincrement())
+  package_key    String   @unique
+  name           String
+  description    String
+  price          Int
+  card_count     Int
+  color          String   @default("blue")
+  popular        Boolean  @default(false)
+  display_order  Int      @default(0)
+  features       Json
+  active         Boolean  @default(true)
+  created_at     DateTime @default(now())
+  updated_at     DateTime @default(now()) @updatedAt
+
+  @@index([display_order])
+  @@index([active])
+  @@index([package_key])
+}
+

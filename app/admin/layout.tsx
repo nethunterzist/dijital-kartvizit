@@ -148,6 +148,20 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
 
             <Link
+              href="/admin/packages"
+              className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                isActive('/admin/packages')
+                  ? 'text-white bg-blue-600 shadow-sm'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
+              }`}
+            >
+              <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              </svg>
+              Paketler
+            </Link>
+
+            <Link
               href="/admin/ayarlar"
               className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                 isActive('/admin/ayarlar')

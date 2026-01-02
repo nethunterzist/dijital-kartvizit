@@ -252,6 +252,7 @@ export function validatePhone(phone: string): boolean {
  */
 export * from './firma.schema';
 export * from './auth.schema';
+export * from './package.schema';
 
 // Alias exports for backward compatibility
 export {

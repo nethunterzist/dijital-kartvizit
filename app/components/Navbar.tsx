@@ -6,7 +6,7 @@ import Image from 'next/image';
 
 const menuItems = [
   { label: 'Kartvizit Oluştur', href: '#kartvizit-olustur' },
-  { label: 'Fiyatlar', href: '#fiyatlar' },
+  { label: 'Fiyatlar', href: '#pricing' },
   { label: 'Müşteri Yorumları', href: '#yorumlar' },
   { label: 'SSS', href: '#sss' },
 ];
