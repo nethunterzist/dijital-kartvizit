@@ -20,27 +20,31 @@ export default function LoginPage() {
       return;
     }
 
-    try {
-      setLoading(true);
-      setError('');
+    setLoading(true);
+    setError('');
 
-      // Use NextAuth's built-in redirect mechanism
-      await signIn('credentials', {
-        username,
-        password,
-        callbackUrl: '/admin',
-      });
-    } catch (err) {
-      console.error('[DEBUG] Exception caught in handleSubmit:', err);
-      console.error('[DEBUG] Exception details:', {
-        message: err instanceof Error ? err.message : String(err),
-        stack: err instanceof Error ? err.stack : undefined,
-        name: err instanceof Error ? err.name : undefined
-      });
-      logger.error('Giriş hatası:', err);
-      setError('Giriş sırasında bir hata oluştu. Lütfen tekrar deneyin.');
+    const result = await signIn('credentials', {
+      username,
+      password,
+      redirect: false,
+    });
+
+    if (result?.error) {
+      setError('Kullanıcı adı veya şifre hatalı.');
       setLoading(false);
+      return;
     }
+
+    // If successful, redirect to admin
+    if (result?.ok) {
+      window.location.href = '/admin';
+      // Don't set loading false - page is navigating
+      return;
+    }
+
+    // Unexpected case
+    setError('Beklenmeyen bir hata oluştu.');
+    setLoading(false);
   };
 
   return (
