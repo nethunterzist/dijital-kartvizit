@@ -32,12 +32,13 @@ export function getPool() {
 }
 
 export async function getAllFirmalar(search?: string, page = 1, limit = 1000) {
-  const client = await getPool().connect();
-
   try {
-    const offset = (page - 1) * limit;
+    const client = await getPool().connect();
 
-    let countQuery = 'SELECT COUNT(*) FROM firmalar';
+    try {
+      const offset = (page - 1) * limit;
+
+      let countQuery = 'SELECT COUNT(*) FROM firmalar';
 
     // OPTIMIZED: Single query with LEFT JOINs and json_agg to get all data in one go
     let dataQuery = `
@@ -139,16 +140,27 @@ export async function getAllFirmalar(search?: string, page = 1, limit = 1000) {
       };
     });
 
+      return {
+        data: firmalar,
+        total: totalCount,
+        page,
+        limit,
+        totalPages: Math.ceil(totalCount / limit)
+      };
+
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    // Graceful error handling for build-time database unavailability
+    console.error('Database query error (possibly during build):', error instanceof Error ? error.message : 'Unknown error');
     return {
-      data: firmalar,
-      total: totalCount,
+      data: [],
+      total: 0,
       page,
       limit,
-      totalPages: Math.ceil(totalCount / limit)
+      totalPages: 0
     };
-
-  } finally {
-    client.release();
   }
 }
 
