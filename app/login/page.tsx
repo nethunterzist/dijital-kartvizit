@@ -14,38 +14,40 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!username || !password) {
       setError('Lütfen kullanıcı adı ve şifre girin.');
       return;
     }
-    
+
     try {
       setLoading(true);
       setError('');
-      
+
       const result = await signIn('credentials', {
         username,
         password,
         redirect: false
       });
-      
+
       if (result?.error) {
         setError('Kullanıcı adı veya şifre hatalı.');
         setLoading(false);
         return;
       }
-      
+
       if (result?.ok) {
         logger.info('Giriş başarılı!');
         router.push('/admin');
-        // router.refresh() removed - Next.js App Router auto-revalidates
-        return; // Early return to prevent setLoading(false) after navigation
+        // Don't set loading to false - let the navigation complete
+        return;
       }
+
+      // If we get here, something unexpected happened
+      setLoading(false);
     } catch (err) {
       logger.error('Giriş hatası:', err);
       setError('Giriş sırasında bir hata oluştu. Lütfen tekrar deneyin.');
-    } finally {
       setLoading(false);
     }
   };
