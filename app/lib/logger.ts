@@ -1,38 +1,22 @@
-// Serverless-friendly logger for Vercel deployment with Winston support
-import winston from 'winston';
+// Browser-safe logger with server-side Winston support
+// Client-side (browser): Simple console logger
+// Server-side (Node.js): Winston logger with full features
 
+const isBrowser = typeof window !== 'undefined';
 const isDevelopment = process.env.NODE_ENV === 'development';
-const logLevel = process.env.LOG_LEVEL || (isDevelopment ? 'debug' : 'info');
 
-// Winston logger configuration (serverless-compatible)
-const winstonLogger = winston.createLogger({
-  level: logLevel,
-  format: winston.format.combine(
-    winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-    winston.format.errors({ stack: true }),
-    winston.format.json()
-  ),
-  defaultMeta: { service: 'dijital-kartvizit' },
-  transports: [
-    // Console transport for serverless environments
-    new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.printf(({ timestamp, level, message, ...meta }) => {
-          const metaStr = Object.keys(meta).length > 0 ? ` ${JSON.stringify(meta)}` : '';
-          return `[${timestamp}] ${level}: ${message}${metaStr}`;
-        })
-      ),
-    }),
-  ],
-});
-
-// Fallback simple logger for environments where Winston fails
+// Simple browser-safe logger for client-side
 const createSimpleLogger = () => {
   const log = (level: string, message: string, meta?: any) => {
     const timestamp = new Date().toISOString();
     const metaStr = meta ? ` ${JSON.stringify(meta)}` : '';
-    console.log(`[${timestamp}] ${level.toUpperCase()}: ${message}${metaStr}`);
+    const logMessage = `[${timestamp}] ${level.toUpperCase()}: ${message}${metaStr}`;
+
+    // Use appropriate console method
+    if (level === 'error') console.error(logMessage);
+    else if (level === 'warn') console.warn(logMessage);
+    else if (level === 'debug' && isDevelopment) console.debug(logMessage);
+    else console.log(logMessage);
   };
 
   return {
@@ -46,8 +30,49 @@ const createSimpleLogger = () => {
   };
 };
 
-// Use Winston if available, fallback to simple logger
-const Logger = winstonLogger || createSimpleLogger();
+// Winston logger for server-side only (lazy-loaded)
+let winstonLogger: any = null;
+const getWinstonLogger = () => {
+  if (winstonLogger) return winstonLogger;
+
+  // Only import Winston on server-side
+  if (!isBrowser) {
+    try {
+      const winston = require('winston');
+      const logLevel = process.env.LOG_LEVEL || (isDevelopment ? 'debug' : 'info');
+
+      winstonLogger = winston.createLogger({
+        level: logLevel,
+        format: winston.format.combine(
+          winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+          winston.format.errors({ stack: true }),
+          winston.format.json()
+        ),
+        defaultMeta: { service: 'dijital-kartvizit' },
+        transports: [
+          new winston.transports.Console({
+            format: winston.format.combine(
+              winston.format.colorize(),
+              winston.format.printf(({ timestamp, level, message, ...meta }: any) => {
+                const metaStr = Object.keys(meta).length > 0 ? ` ${JSON.stringify(meta)}` : '';
+                return `[${timestamp}] ${level}: ${message}${metaStr}`;
+              })
+            ),
+          }),
+        ],
+      });
+      return winstonLogger;
+    } catch (error) {
+      console.warn('Winston logger initialization failed, using simple logger:', error);
+      return createSimpleLogger();
+    }
+  }
+
+  return createSimpleLogger();
+};
+
+// Use simple logger for browser, Winston for server
+const Logger = isBrowser ? createSimpleLogger() : getWinstonLogger();
 
 // Custom logging functions
 export const logger = {
