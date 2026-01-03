@@ -143,7 +143,7 @@ export const bulkDisplayOrderSchema = z.array(displayOrderSchema);
  * Validates homepage slider image data
  */
 export const sliderImageSchema = z.object({
-  image_url: z.string().url('Geçerli bir URL olmalıdır').min(1, 'Resim URL gereklidir'),
+  image_url: z.string().min(1, 'Resim URL gereklidir').url('Geçerli bir URL olmalıdır'),
   alt_text: z.string().max(200, 'Alt metin en fazla 200 karakter olabilir').optional().nullable(),
   active: z.boolean().default(true),
   display_order: z.number().int().min(0).default(0),
@@ -152,9 +152,14 @@ export const sliderImageSchema = z.object({
 /**
  * Slider Image Update Schema
  * For updating existing slider images
+ * Accepts both full URLs and relative paths
  */
-export const sliderImageUpdateSchema = sliderImageSchema.partial().extend({
+export const sliderImageUpdateSchema = z.object({
   id: z.number().int().positive(),
+  image_url: z.string().min(1, 'Resim URL gereklidir').optional(),
+  alt_text: z.string().max(200, 'Alt metin en fazla 200 karakter olabilir').optional().nullable(),
+  active: z.boolean().optional(),
+  display_order: z.number().int().min(0).optional(),
 });
 
 /**
