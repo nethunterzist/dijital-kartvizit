@@ -7,6 +7,10 @@ import { errorResponse } from '@/app/lib/errors';
 import { cache } from '@/app/lib/cache';
 import { authOptions } from '@/app/lib/auth';
 
+// Force dynamic rendering to fix PUT method 405 error in production
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const CACHE_KEY = 'settings:site';
 const CACHE_TTL = 3600; // 1 hour
 
