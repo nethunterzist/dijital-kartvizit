@@ -7,6 +7,10 @@ import { errorResponse } from '@/app/lib/errors';
 import { cache } from '@/app/lib/cache';
 import { authOptions } from '@/app/lib/auth';
 
+// Force dynamic rendering to fix PUT method 400 error in production
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const CACHE_KEY = 'settings:slider';
 const CACHE_TTL = 3600; // 1 hour
 
