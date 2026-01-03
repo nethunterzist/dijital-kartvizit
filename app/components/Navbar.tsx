@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 const menuItems = [
-  { label: 'Dijital Kartvizit', href: '#' },
+  { label: 'Dijital Kartvizit', href: '#top' },
   { label: 'Fiyatlar', href: '#pricing' },
   { label: 'Soru & Cevap', href: '#diger-bilgiler' },
   { label: 'Müşteri Yorumları', href: '#yorumlar' },
@@ -18,24 +18,34 @@ interface SiteSettings {
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
-  const [settings, setSettings] = useState<SiteSettings>({
-    site_name: 'Dijital Kartvizit Merkezi',
-    site_logo: '/img/logo/logo.png',
-  });
+  const [siteName, setSiteName] = useState('Dijital Kartvizit Merkezi');
+  const [siteLogo, setSiteLogo] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/settings/site')
       .then(res => res.json())
-      .then(data => {
-        if (data && data.site_name) {
-          setSettings({
-            site_name: data.site_name,
-            site_logo: data.site_logo || '/img/logo/logo.png',
-          });
+      .then((data: SiteSettings) => {
+        if (data) {
+          if (data.site_name) setSiteName(data.site_name);
+          if (data.site_logo) setSiteLogo(data.site_logo);
         }
       })
-      .catch(err => console.error('Ayarlar yüklenemedi:', err));
+      .catch(err => console.error('Site ayarları yüklenemedi:', err));
   }, []);
+
+  const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+
+    if (href === '#top') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      const targetId = href.replace('#', '');
+      const element = document.getElementById(targetId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  };
 
   return (
     <nav className="w-full sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-gray-100 shadow-sm" aria-label="Ana navigasyon">
@@ -48,22 +58,32 @@ export default function Navbar() {
       </a>
 
       <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-3">
-        <Link href="/" aria-label="Ana sayfaya dön">
-          <span className="flex items-center gap-2 font-bold text-xl text-blue-900">
-            <Image
-              src={settings.site_logo || '/img/logo/logo.png'}
-              alt={`${settings.site_name} logosu`}
-              width={120}
-              height={120}
-              className="rounded-full"
-            />
-          </span>
+        <Link
+          href="/"
+          aria-label="Ana sayfaya dön"
+          onClick={(e) => {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+        >
+          {siteLogo && (
+            <span className="flex items-center gap-2">
+              <Image
+                src={siteLogo}
+                alt={`${siteName} logosu`}
+                width={120}
+                height={120}
+                className="rounded-full"
+              />
+            </span>
+          )}
         </Link>
         <div className="hidden md:flex gap-2 items-center" role="menubar">
           {menuItems.map((item) => (
             <Link
               key={item.label}
               href={item.href}
+              onClick={(e) => handleSmoothScroll(e, item.href)}
               className="px-4 py-2 rounded transition font-medium text-gray-700 hover:text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               role="menuitem"
             >
@@ -95,7 +115,10 @@ export default function Navbar() {
               href={item.href}
               className="py-2 px-2 rounded text-gray-700 hover:text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               role="menuitem"
-              onClick={() => setOpen(false)}
+              onClick={(e) => {
+                handleSmoothScroll(e, item.href);
+                setOpen(false);
+              }}
             >
               {item.label}
             </Link>

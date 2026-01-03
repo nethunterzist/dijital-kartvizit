@@ -194,6 +194,9 @@ model SiteSettings {
   contact_phone     String?
   contact_address   String?
   faq_video_url     String?
+  whatsapp_number   String?
+  whatsapp_message  String?
+  whatsapp_enabled  Boolean  @default(true)
   updated_at        DateTime @default(now()) @updatedAt
   created_at        DateTime @default(now())
 }
@@ -260,5 +263,31 @@ model SliderImage {
 
   @@index([active])
   @@index([display_order])
+}
+
+model PackageInquiry {
+  id               Int       @id @default(autoincrement())
+  name             String
+  surname          String
+  phone            String
+  email            String?
+  package_key      String
+  package_name     String
+  package_price    Int
+  package_features Json
+  status           String    @default("pending")
+  ip_address       String?
+  user_agent       String?   @db.Text
+  admin_notes      String?   @db.Text
+  contacted_at     DateTime?
+  completed_at     DateTime?
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @default(now()) @updatedAt
+
+  @@index([status])
+  @@index([created_at])
+  @@index([phone])
+  @@index([email])
+  @@index([package_key])
 }
 

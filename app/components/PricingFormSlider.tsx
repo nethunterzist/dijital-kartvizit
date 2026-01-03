@@ -29,12 +29,14 @@ interface FormData {
   name: string;
   surname: string;
   phone: string;
+  email: string;
 }
 
 interface FormErrors {
   name?: string;
   surname?: string;
   phone?: string;
+  email?: string;
 }
 
 export default function PricingFormSlider({
@@ -46,6 +48,7 @@ export default function PricingFormSlider({
     name: '',
     surname: '',
     phone: '',
+    email: '',
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -55,7 +58,7 @@ export default function PricingFormSlider({
   // Reset form when modal opens/closes
   useEffect(() => {
     if (isOpen) {
-      setFormData({ name: '', surname: '', phone: '' });
+      setFormData({ name: '', surname: '', phone: '', email: '' });
       setErrors({});
       setShowSuccess(false);
     }
@@ -344,6 +347,29 @@ export default function PricingFormSlider({
                     {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
                     <p className="mt-1 text-xs text-gray-500">
                       Örnek: 05XX XXX XX XX veya +90 5XX XXX XX XX
+                    </p>
+                  </div>
+
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                      E-posta <span className="text-gray-400 text-xs">(İsteğe bağlı)</span>
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-colors ${
+                        errors.email
+                          ? 'border-red-500 focus:ring-red-500'
+                          : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                      }`}
+                      placeholder="ornek@email.com"
+                    />
+                    {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+                    <p className="mt-1 text-xs text-gray-500">
+                      E-posta adresinizi girerek onay mesajı alabilirsiniz
                     </p>
                   </div>
 

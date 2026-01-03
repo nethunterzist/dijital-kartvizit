@@ -50,7 +50,11 @@ export default function FaqVideoSettingsPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        toast.error(data.error || 'Güncelleme başarısız');
+        const errorMessage = typeof data.error === 'string'
+          ? data.error
+          : data.message || 'Güncelleme başarısız';
+        toast.error(errorMessage);
+        console.error('Save error response:', data);
         return;
       }
 
@@ -113,6 +117,9 @@ export default function FaqVideoSettingsPage() {
                 <video
                   src={videoUrl}
                   controls
+                  autoPlay
+                  muted
+                  loop
                   className="w-full h-full"
                   onError={() => toast.error('Video yüklenemedi. URL\'yi kontrol edin.')}
                 >
@@ -150,7 +157,8 @@ export default function FaqVideoSettingsPage() {
             <li>• Video URL'si MP4 formatında olmalıdır</li>
             <li>• Video, SSS bölümünün hemen üstünde gösterilir</li>
             <li>• Boş bırakırsanız video alanı gizlenir</li>
-            <li>• Video otomatik oynatılmaz, kullanıcı kontrolündedir</li>
+            <li>• Video otomatik olarak sessiz başlar ve döngü halinde oynar</li>
+            <li>• Kullanıcılar kontrollerden sesi açabilir ve videoyu kontrol edebilir</li>
           </ul>
         </div>
       </div>

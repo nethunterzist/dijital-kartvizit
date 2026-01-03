@@ -16,6 +16,9 @@ interface SiteSettings {
   contact_email: string | null;
   contact_phone: string | null;
   contact_address: string | null;
+  whatsapp_number: string | null;
+  whatsapp_message: string | null;
+  whatsapp_enabled: boolean;
 }
 
 export default function GeneralSettingsPage() {
@@ -35,6 +38,9 @@ export default function GeneralSettingsPage() {
     contact_email: null,
     contact_phone: null,
     contact_address: null,
+    whatsapp_number: null,
+    whatsapp_message: null,
+    whatsapp_enabled: true,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -376,6 +382,66 @@ export default function GeneralSettingsPage() {
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
                   placeholder="Adres bilgisi"
                 />
+              </div>
+            </div>
+          </div>
+
+          {/* WhatsApp Widget Section */}
+          <div className="bg-gray-50 dark:bg-gray-900 p-6 rounded-lg">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              WhatsApp Widget Ayarları
+            </h3>
+
+            <div className="space-y-4">
+              {/* Enable/Disable Toggle */}
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="whatsapp_enabled"
+                  checked={settings.whatsapp_enabled}
+                  onChange={(e) => setSettings({ ...settings, whatsapp_enabled: e.target.checked })}
+                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                />
+                <label htmlFor="whatsapp_enabled" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  WhatsApp widget'ı aktif et
+                </label>
+              </div>
+
+              {/* WhatsApp Number */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  WhatsApp Numarası
+                </label>
+                <input
+                  type="tel"
+                  value={settings.whatsapp_number || ''}
+                  onChange={(e) => setSettings({ ...settings, whatsapp_number: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                  placeholder="+905551234567"
+                />
+                <p className="mt-1 text-xs text-gray-500">Ülke kodu ile birlikte yazın (örn: +905551234567)</p>
+                {errors.whatsapp_number && (
+                  <p className="mt-1 text-xs text-red-600">{errors.whatsapp_number}</p>
+                )}
+              </div>
+
+              {/* Default Message */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Varsayılan Karşılama Mesajı
+                </label>
+                <textarea
+                  value={settings.whatsapp_message || ''}
+                  onChange={(e) => setSettings({ ...settings, whatsapp_message: e.target.value })}
+                  rows={2}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                  placeholder="Merhaba 👋 Size nasıl yardımcı olabilirim?"
+                  maxLength={500}
+                />
+                <p className="mt-1 text-xs text-gray-500">Widget'ta görünecek karşılama mesajı (Max: 500 karakter)</p>
+                {errors.whatsapp_message && (
+                  <p className="mt-1 text-xs text-red-600">{errors.whatsapp_message}</p>
+                )}
               </div>
             </div>
           </div>

@@ -25,6 +25,12 @@ export const packageInquirySchema = z.object({
       return val.replace(/[\s\-()]/g, '');
     }),
 
+  email: z
+    .string()
+    .email('Geçerli bir e-posta adresi giriniz')
+    .optional()
+    .or(z.literal('')),
+
   packageKey: z.string().min(1, 'Paket seçimi zorunludur'),
   packageName: z.string().min(1, 'Paket adı zorunludur'),
   packagePrice: z.number().positive('Paket fiyatı pozitif olmalıdır'),
@@ -38,6 +44,7 @@ export const packageInquiryFormSchema = z.object({
   name: packageInquirySchema.shape.name,
   surname: packageInquirySchema.shape.surname,
   phone: packageInquirySchema.shape.phone,
+  email: packageInquirySchema.shape.email,
 });
 
 export type PackageInquiryForm = z.infer<typeof packageInquiryFormSchema>;

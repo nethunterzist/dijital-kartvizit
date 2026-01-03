@@ -48,6 +48,16 @@ export const siteSettingsSchema = z.object({
   contact_email: z.string().email('Geçerli bir e-posta adresi giriniz').optional().nullable(),
   contact_phone: z.string().max(20).optional().nullable(),
   contact_address: z.string().max(500).optional().nullable(),
+  faq_video_url: z.string().url('Geçerli bir video URL olmalıdır').optional().nullable(),
+  whatsapp_number: z.string()
+    .regex(/^\+?[1-9]\d{1,14}$/, 'Geçerli bir telefon numarası giriniz (örn: +905551234567)')
+    .optional()
+    .nullable(),
+  whatsapp_message: z.string()
+    .max(500, 'Mesaj en fazla 500 karakter olabilir')
+    .optional()
+    .nullable(),
+  whatsapp_enabled: z.boolean().default(true),
 });
 
 /**

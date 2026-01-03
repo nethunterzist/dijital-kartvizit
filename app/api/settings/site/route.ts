@@ -76,7 +76,7 @@ export async function PUT(request: NextRequest) {
 
     // 2. Parse and validate request body
     const body = await request.json();
-    const validated = siteSettingsSchema.parse(body);
+    const validated = siteSettingsSchema.partial().parse(body);
 
     logger.info('Site settings update request', {
       username: session.user.name,

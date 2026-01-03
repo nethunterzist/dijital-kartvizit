@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { packageInquirySchema } from '@/app/lib/validations/package-inquiry.schema';
-import { sendPackageInquiryEmail } from '@/app/lib/email';
+import { sendPackageInquiryEmail, sendCustomerConfirmationEmail } from '@/app/lib/email';
+import { prisma } from '@/app/lib/db';
 import { ZodError } from 'zod';
 
 export async function POST(request: NextRequest) {
@@ -29,6 +30,7 @@ export async function POST(request: NextRequest) {
       name: validatedData.name,
       surname: validatedData.surname,
       phone: validatedData.phone,
+      email: validatedData.email,
       packageName: validatedData.packageName,
       packagePrice: validatedData.packagePrice,
       packageFeatures: validatedData.packageFeatures,
@@ -37,8 +39,38 @@ export async function POST(request: NextRequest) {
       userAgent,
     };
 
-    // Send email
+    // Send admin notification email
     await sendPackageInquiryEmail(emailData);
+
+    // Send customer confirmation email (if email provided)
+    if (validatedData.email) {
+      await sendCustomerConfirmationEmail({
+        name: validatedData.name,
+        email: validatedData.email,
+        packageName: validatedData.packageName,
+      });
+    }
+
+    // Save to database
+    try {
+      await prisma.packageInquiry.create({
+        data: {
+          name: validatedData.name,
+          surname: validatedData.surname,
+          phone: validatedData.phone,
+          email: validatedData.email || null,
+          package_key: validatedData.packageKey,
+          package_name: validatedData.packageName,
+          package_price: validatedData.packagePrice,
+          package_features: validatedData.packageFeatures,
+          ip_address: ip.split(',')[0].trim(),
+          user_agent: userAgent,
+        },
+      });
+    } catch (dbError) {
+      // Log database error but don't fail the request if email was successful
+      console.error('Database save error:', dbError);
+    }
 
     // Return success response
     return NextResponse.json(

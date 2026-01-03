@@ -7,6 +7,7 @@ import { useFirmalar } from '@/app/lib/hooks/useFirmalar';
 import { TableSkeleton, LoadingSpinner } from '@/app/components/ui/Skeleton';
 import { formatDate, copyToClipboard } from '@/app/lib/utils';
 import { logger } from '@/app/lib/logger';
+import * as XLSX from 'xlsx';
 
 interface Firma {
   id: number;
@@ -121,6 +122,63 @@ export default function FirmalarPage() {
       return firma.telefon || "-";
     }
   };
+
+  const handleExportToExcel = () => {
+    try {
+      // Use filtered data for export
+      const dataToExport = filteredFirmalar;
+
+      if (dataToExport.length === 0) {
+        alert('Dışa aktarılacak veri bulunamadı');
+        return;
+      }
+
+      // Prepare data for Excel
+      const excelData = dataToExport.map((firma) => ({
+        'ID': firma.id,
+        'Firma Adı': firma.firma_adi,
+        'Slug': firma.slug,
+        'Yetkili': firma.yetkili_adi || '-',
+        'Telefon': getPhoneNumber(firma),
+        'E-posta': firma.eposta || '-',
+        'Görüntülenme': firma.goruntulenme || 0,
+        'Oluşturma Tarihi': formatDate(firma.created_at),
+      }));
+
+      // Create worksheet
+      const worksheet = XLSX.utils.json_to_sheet(excelData);
+
+      // Set column widths
+      const columnWidths = [
+        { wch: 8 },  // ID
+        { wch: 30 }, // Firma Adı
+        { wch: 20 }, // Slug
+        { wch: 20 }, // Yetkili
+        { wch: 15 }, // Telefon
+        { wch: 25 }, // E-posta
+        { wch: 15 }, // Görüntülenme
+        { wch: 18 }, // Oluşturma Tarihi
+      ];
+      worksheet['!cols'] = columnWidths;
+
+      // Create workbook
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Firmalar');
+
+      // Generate filename with current date
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('tr-TR').replace(/\./g, '-');
+      const filename = `firmalar-${dateStr}.xlsx`;
+
+      // Download file
+      XLSX.writeFile(workbook, filename);
+
+      alert(`${dataToExport.length} firma Excel dosyasına aktarıldı`);
+    } catch (error) {
+      console.error('Export error:', error);
+      alert('Excel dosyası oluşturulurken hata oluştu');
+    }
+  };
   
   return (
     <>
@@ -131,15 +189,26 @@ export default function FirmalarPage() {
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Firmalar</h1>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Tüm firmaları görüntüleyin ve yönetin</p>
           </div>
-          <Link 
-            href="/admin/firmalar/yeni" 
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
-          >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            Yeni Firma Ekle
-          </Link>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleExportToExcel}
+              className="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors shadow-sm"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Excel&apos;e Aktar
+            </button>
+            <Link
+              href="/admin/firmalar/yeni"
+              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              Yeni Firma Ekle
+            </Link>
+          </div>
         </div>
       </div>
 
