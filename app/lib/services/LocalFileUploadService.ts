@@ -3,6 +3,7 @@ import { existsSync } from 'fs';
 import { join } from 'path';
 import { logger } from '@/app/lib/logger';
 import { fileUploadSchema, pdfUploadSchema } from '@/app/lib/validations';
+import { uploadToCloudinary } from '@/app/lib/cloudinary';
 
 export interface LocalFileUploadResult {
   success: boolean;
@@ -228,11 +229,11 @@ export class LocalFileUploadService {
   }
 
   /**
-   * Dosya validasyonu yapıp local'e yükler
+   * Dosya validasyonu yapıp production'da Cloudinary'ye, development'ta local'e yükler
    */
   private static async validateAndUploadFile(
-    file: File, 
-    folder: string, 
+    file: File,
+    folder: string,
     isPdf = false
   ): Promise<string> {
     try {
@@ -248,31 +249,55 @@ export class LocalFileUploadService {
         throw new Error(`Dosya validasyon hatası: ${errorMessages}`);
       }
 
-      // Dosyayı buffer'a çevir
-      const arrayBuffer = await file.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-      
-      // Benzersiz dosya adı oluştur
-      const uniqueFileName = this.generateUniqueFileName(file.name);
-      
-      // Dosya yolunu oluştur
-      const filePath = join(this.uploadDir, folder, uniqueFileName);
-      
-      // Dosyayı kaydet
-      await writeFile(filePath, buffer);
-      
-      // Public URL'i döndür
-      const publicUrl = `/uploads/${folder}/${uniqueFileName}`;
-      
-      logger.info('Dosya başarıyla kaydedildi', {
-        originalName: file.name,
-        uniqueFileName,
-        filePath,
-        publicUrl,
-        fileSize: buffer.length
-      });
+      // Production'da Cloudinary, development'ta local storage kullan
+      if (process.env.NODE_ENV === 'production' && process.env.CLOUDINARY_CLOUD_NAME) {
+        // Production: Cloudinary'ye yükle
+        try {
+          const cloudinaryUrl = await uploadToCloudinary(file, folder);
 
-      return publicUrl;
+          logger.info('Dosya Cloudinary\'ye başarıyla yüklendi', {
+            originalName: file.name,
+            cloudinaryUrl,
+            fileSize: file.size,
+            folder
+          });
+
+          return cloudinaryUrl;
+        } catch (cloudinaryError) {
+          logger.error('Cloudinary upload failed', {
+            error: cloudinaryError instanceof Error ? cloudinaryError.message : 'Bilinmeyen hata',
+            fileName: file.name,
+            folder
+          });
+          throw new Error(`Cloudinary yükleme hatası: ${cloudinaryError instanceof Error ? cloudinaryError.message : 'Bilinmeyen hata'}`);
+        }
+      } else {
+        // Development: Local storage'a yükle
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+
+        // Benzersiz dosya adı oluştur
+        const uniqueFileName = this.generateUniqueFileName(file.name);
+
+        // Dosya yolunu oluştur
+        const filePath = join(this.uploadDir, folder, uniqueFileName);
+
+        // Dosyayı kaydet
+        await writeFile(filePath, buffer);
+
+        // Public URL'i döndür
+        const publicUrl = `/uploads/${folder}/${uniqueFileName}`;
+
+        logger.info('Dosya local storage\'a başarıyla kaydedildi', {
+          originalName: file.name,
+          uniqueFileName,
+          filePath,
+          publicUrl,
+          fileSize: buffer.length
+        });
+
+        return publicUrl;
+      }
     } catch (error) {
       logger.error('Dosya yükleme/validasyon hatası:', {
         error: error instanceof Error ? error.message : 'Bilinmeyen hata',
