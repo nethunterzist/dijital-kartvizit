@@ -20,8 +20,9 @@ export async function uploadToCloudinary(file: File, folder: string = 'uploads')
       // PDF'ler için orijinal dosya adını koru - download sırasında .pdf uzantısı olsun
       ...(isPdf && {
         use_filename: true,
-        unique_filename: false,
-        format: 'pdf'
+        unique_filename: true,  // Cache sorunlarını önlemek için unique filename
+        format: 'pdf',
+        flags: 'attachment'  // PDF'lerin indirilebilir olması için
       })
     };
 

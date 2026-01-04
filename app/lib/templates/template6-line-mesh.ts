@@ -946,7 +946,7 @@ export const lineMeshTemplate = `<!DOCTYPE html>
                 {{#ifEquals this.id 'katalog'}}
                 {{#if ../katalog}}
                 <div class="icon-item">
-                    <a href="{{../katalog.url}}" class="icon-link" target="_blank">
+                    <a href="{{../katalog.url}}" class="icon-link" download>
                         <i class="fas fa-book"></i>
                     </a>
                     <span class="icon-label">{{../katalog.label}}</span>
