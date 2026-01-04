@@ -646,9 +646,8 @@ export default function FirmaDuzenlePage({ params }: { params: { id: string } })
       }
       
       if (katalogDosya) {
-        // Local storage'a yükle
-        const katalogUrl = await uploadFileToLocal(katalogDosya, 'firma_kataloglari');
-        formData.append('katalog', katalogUrl);
+        formData.append('katalog', katalogDosya);
+        logger.info('Catalog PDF added', { name: katalogDosya.name, size: katalogDosya.size });
       }
       
       if (yetkiliAdi) {

@@ -491,14 +491,8 @@ Uzman ekibimizle birlikte web tasarım, mobil uygulama geliştirme, e-ticaret ç
       }
       
       if (katalogDosya) {
-        try {
-          const katalogUrl = await uploadFileToLocal(katalogDosya, 'firma_kataloglari');
-          formData.append('katalog', katalogUrl);
-          logger.info('Catalog PDF uploaded successfully', { url: katalogUrl });
-        } catch (pdfError) {
-          logger.error('PDF upload failed', { error: pdfError });
-          throw new Error('Katalog PDF yüklenirken hata oluştu');
-        }
+        formData.append('katalog', katalogDosya);
+        logger.info('Catalog PDF added', { name: katalogDosya.name, size: katalogDosya.size });
       }
       
       if (yetkiliAdi) {
