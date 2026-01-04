@@ -17,6 +17,12 @@ export async function uploadToCloudinary(file: File, folder: string = 'uploads')
     const uploadOptions: any = {
       folder: folder,
       resource_type: isPdf ? 'raw' : 'auto',
+      // PDF'ler için orijinal dosya adını koru - download sırasında .pdf uzantısı olsun
+      ...(isPdf && {
+        use_filename: true,
+        unique_filename: false,
+        format: 'pdf'
+      })
     };
 
     // PDF'ler için q_auto kullanma (Cloudinary hatası önleme)
