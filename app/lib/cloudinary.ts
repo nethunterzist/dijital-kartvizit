@@ -12,12 +12,21 @@ export async function uploadToCloudinary(file: File, folder: string = 'uploads')
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
+    // PDF dosyaları için özel ayarlar
+    const isPdf = file.type === 'application/pdf';
+    const uploadOptions: any = {
+      folder: folder,
+      resource_type: isPdf ? 'raw' : 'auto',
+    };
+
+    // PDF'ler için q_auto kullanma (Cloudinary hatası önleme)
+    if (!isPdf) {
+      uploadOptions.quality = 'auto';
+    }
+
     return new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream(
-        {
-          folder: folder,
-          resource_type: 'auto',
-        },
+        uploadOptions,
         (error, result) => {
           if (error) {
             reject(error);
