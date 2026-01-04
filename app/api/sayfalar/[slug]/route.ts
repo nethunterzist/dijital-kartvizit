@@ -6,6 +6,7 @@ export const revalidate = 0;
 import Handlebars from 'handlebars';
 import prisma from '@/app/lib/db';
 import { logger } from '@/app/lib/logger';
+import { addCloudinaryAttachmentFlag } from '@/app/lib/utils/cloudinary';
 
 // HTML şablonunu kod içinde string olarak tut
 const pageTemplate = `
@@ -197,7 +198,7 @@ export async function GET(
         communication: communicationArray.length > 0 ? communicationArray : [],
         firma_hakkinda: firma.firma_hakkinda,
         firma_hakkinda_baslik: firma.firma_hakkinda_baslik || 'Hakkımızda',
-        katalog: firma.katalog ? { icon: EXTRA_META.katalog.icon, label: EXTRA_META.katalog.label, url: firma.katalog } : null,
+        katalog: firma.katalog ? { icon: EXTRA_META.katalog.icon, label: EXTRA_META.katalog.label, url: addCloudinaryAttachmentFlag(firma.katalog) || firma.katalog } : null,
         iban: bankaHesaplari.length > 0 ? { icon: EXTRA_META.iban.icon, label: EXTRA_META.iban.label, value: JSON.stringify(bankaHesaplari) } : null,
         tax: (firma.firma_unvan || firma.firma_vergi_no || firma.vergi_dairesi) ? {
           icon: EXTRA_META.tax.icon,

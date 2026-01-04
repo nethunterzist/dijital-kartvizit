@@ -3,6 +3,7 @@ import { Metadata } from 'next';
 import handlebars from 'handlebars';
 import { cardTemplate } from '../lib/cardTemplate';
 import { getServerBaseUrl } from '../lib/utils/getBaseUrl';
+import { addCloudinaryAttachmentFlag } from '../lib/utils/cloudinary';
 import FontAwesomeLoader from '../components/FontAwesomeLoader';
 import ViewTracker from '../components/ViewTracker';
 
@@ -353,7 +354,7 @@ export default async function KartvizitPage({ params }: { params: { slug: string
             
             firma_hakkinda: firma.firma_hakkinda,
             firma_hakkinda_baslik: firma.firma_hakkinda_baslik || 'Hakkımızda',
-            katalog: firma.katalog ? { icon: EXTRA_META.katalog.icon, label: EXTRA_META.katalog.label, url: firma.katalog } : null,
+            katalog: firma.katalog ? { icon: EXTRA_META.katalog.icon, label: EXTRA_META.katalog.label, url: addCloudinaryAttachmentFlag(firma.katalog) || firma.katalog } : null,
             bankaHesaplari: bankaHesaplari.length > 0 ? bankaHesaplari : [],
             tax: (firma.firma_unvan || firma.firma_vergi_no || firma.vergi_dairesi) ? {
                 icon: EXTRA_META.tax.icon,
