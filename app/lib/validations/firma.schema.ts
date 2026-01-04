@@ -109,22 +109,22 @@ export const firmaSchema = z.object({
 
   profil_foto: z
     .string()
-    .url('Geçersiz profil foto URL')
-    .max(500)
+    .regex(/^(https?:\/\/|\/)/, 'Geçersiz profil foto formatı (URL veya path bekleniyor)')
+    .max(500, 'Profil foto yolu en fazla 500 karakter olabilir')
     .optional()
     .nullable(),
 
   firma_logo: z
     .string()
-    .url('Geçersiz firma logo URL')
-    .max(500)
+    .regex(/^(https?:\/\/|\/)/, 'Geçersiz firma logo formatı (URL veya path bekleniyor)')
+    .max(500, 'Firma logo yolu en fazla 500 karakter olabilir')
     .optional()
     .nullable(),
 
   katalog: z
     .string()
-    .url('Geçersiz katalog URL')
-    .max(500)
+    .regex(/^(https?:\/\/|\/)/, 'Geçersiz katalog formatı (URL veya path bekleniyor)')
+    .max(500, 'Katalog yolu en fazla 500 karakter olabilir')
     .optional()
     .nullable(),
 });
@@ -257,8 +257,8 @@ export const bankaHesabiSchema = z.object({
 
   banka_logo: z
     .string()
-    .url('Geçersiz banka logo URL')
-    .max(500)
+    .regex(/^(https?:\/\/|\/)/, 'Geçersiz banka logo formatı (URL veya path bekleniyor)')
+    .max(500, 'Banka logo yolu en fazla 500 karakter olabilir')
     .optional()
     .nullable(),
 
