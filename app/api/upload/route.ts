@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 import { LocalFileUploadService } from '@/app/lib/services/LocalFileUploadService';
+import { uploadToCloudinary } from '@/app/lib/cloudinary';
 
 // SECURITY: File upload configuration
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -98,18 +99,36 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Geçersiz klasör' }, { status: 400 });
     }
 
-    // Tek dosya yükleme için local service kullan
-    const result = await LocalFileUploadService.uploadSingleFile(
-      file, 
-      folder,
-      isPdf
-    );
+    // Production'da Cloudinary, development'ta local storage kullan
+    let fileUrl: string;
 
-    if (!result.success) {
-      return NextResponse.json({ error: result.error }, { status: 500 });
+    if (process.env.NODE_ENV === 'production' && process.env.CLOUDINARY_CLOUD_NAME) {
+      // Production: Cloudinary'ye yükle
+      try {
+        fileUrl = await uploadToCloudinary(file, folder);
+      } catch (error) {
+        console.error('Cloudinary upload error:', error);
+        return NextResponse.json({
+          error: 'Cloudinary yüklemesi başarısız',
+          details: error instanceof Error ? error.message : 'Unknown error'
+        }, { status: 500 });
+      }
+    } else {
+      // Development: Local file system'e yükle
+      const result = await LocalFileUploadService.uploadSingleFile(
+        file,
+        folder,
+        isPdf
+      );
+
+      if (!result.success || !result.url) {
+        return NextResponse.json({ error: result.error || 'Dosya yükleme başarısız' }, { status: 500 });
+      }
+
+      fileUrl = result.url;
     }
 
-    return NextResponse.json({ url: result.url });
+    return NextResponse.json({ url: fileUrl });
   } catch (error) {
     // SECURITY: Environment-aware error handling
     if (process.env.NODE_ENV === 'production') {
