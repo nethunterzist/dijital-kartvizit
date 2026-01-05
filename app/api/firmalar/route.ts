@@ -127,7 +127,17 @@ export async function POST(req: NextRequest) {
         const uploadService = new LocalFileUploadService();
         const uploadResult = await uploadService.processUploads(originalFormData);
 
-        if (uploadResult.success && uploadResult.urls) {
+        if (!uploadResult.success) {
+          // Upload başarısız - hata mesajı ile dön
+          const errorMessage = uploadResult.error || 'Dosya yükleme hatası';
+          logger.error('File upload failed', {
+            error: errorMessage,
+            hasError: !!uploadResult.error
+          });
+          return errorResponse(errorMessage, 'UPLOAD_ERROR', { details: uploadResult.error }, 400);
+        }
+
+        if (uploadResult.urls) {
           // LocalFileUploadResult.urls'den string record'a çevir
           if (uploadResult.urls.profilePhotoUrl) {
             uploadedUrls.profilePhoto = uploadResult.urls.profilePhotoUrl;
@@ -140,10 +150,23 @@ export async function POST(req: NextRequest) {
           }
         }
 
-        logger.info('Files uploaded successfully', { urls: uploadedUrls });
+        logger.info('Files uploaded successfully', {
+          urls: uploadedUrls,
+          hasProfilePhoto: !!uploadedUrls.profilePhoto,
+          hasLogo: !!uploadedUrls.logoFile,
+          hasCatalog: !!uploadedUrls.katalog
+        });
       } catch (uploadError) {
-        logger.error('File upload failed', { error: uploadError });
-        return errorResponse('Dosya yükleme hatası', 'UPLOAD_ERROR', { error: uploadError }, 500);
+        logger.error('File upload exception caught', {
+          error: uploadError,
+          message: uploadError instanceof Error ? uploadError.message : 'Unknown error'
+        });
+        return errorResponse(
+          uploadError instanceof Error ? uploadError.message : 'Dosya yükleme hatası',
+          'UPLOAD_ERROR',
+          { error: uploadError },
+          500
+        );
       }
 
       // FormData'yı object'e çevir

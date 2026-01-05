@@ -278,7 +278,40 @@ Uzman ekibimizle birlikte web tasarım, mobil uygulama geliştirme, e-ticaret ç
   const handleKatalogChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
+
+      // Dosya boyutu kontrolü
+      if (file.size === 0) {
+        setError('PDF dosyası boş olamaz. Lütfen geçerli bir PDF dosyası seçin.');
+        setKatalogDosya(null);
+        e.target.value = ''; // Input'u temizle
+        return;
+      }
+
+      // PDF MIME type kontrolü
+      if (file.type !== 'application/pdf') {
+        setError('Sadece PDF dosyaları kabul edilir. Seçilen dosya: ' + file.type);
+        setKatalogDosya(null);
+        e.target.value = ''; // Input'u temizle
+        return;
+      }
+
+      // Maksimum boyut kontrolü (10MB)
+      const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+      if (file.size > maxSize) {
+        setError(`PDF dosyası çok büyük. Maksimum boyut: 10MB. Seçilen dosya: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+        setKatalogDosya(null);
+        e.target.value = ''; // Input'u temizle
+        return;
+      }
+
+      // Tüm kontroller geçti, dosyayı kaydet
       setKatalogDosya(file);
+      setError(null); // Önceki hataları temizle
+      logger.info('Katalog dosyası seçildi', {
+        name: file.name,
+        size: file.size,
+        type: file.type
+      });
     }
   };
 

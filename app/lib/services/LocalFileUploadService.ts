@@ -85,11 +85,17 @@ export class LocalFileUploadService {
         .filter(({ result }) => result.status === 'rejected')
         .map(({ result, index }) => {
           const fileTypes = ['profil fotoğrafı', 'logo', 'katalog'];
-          return `${fileTypes[index]}: ${(result as PromiseRejectedResult).reason}`;
+          const error = (result as PromiseRejectedResult).reason;
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          return `${fileTypes[index]}: ${errorMessage}`;
         });
 
       if (failures.length > 0) {
-        logger.error('Dosya yükleme hataları', { failures });
+        logger.error('Dosya yükleme hataları', {
+          failures,
+          failureCount: failures.length,
+          totalFiles: results.length
+        });
         return {
           success: false,
           error: `Dosya yükleme hatası: ${failures.join(', ')}`
@@ -133,24 +139,25 @@ export class LocalFileUploadService {
    * Profil fotoğrafı yükler
    */
   private static async uploadProfilePhoto(file: File): Promise<string | null> {
+    // Profil fotoğrafı optional - boş dosya için null döndür
     if (!file || file.size === 0) {
-      logger.debug('Profil fotoğrafı bulunamadı');
+      logger.debug('Profil fotoğrafı bulunamadı veya boş');
       return null;
     }
-    
+
     try {
       const result = await this.validateAndUploadFile(
-        file, 
-        'profil_fotograflari', 
+        file,
+        'profil_fotograflari',
         false
       );
-      
+
       logger.info('Profil fotoğrafı başarıyla yüklendi', {
         originalName: file.name,
         size: file.size,
         url: result
       });
-      
+
       return result;
     } catch (error) {
       logger.error('Profil fotoğrafı yükleme hatası', {
@@ -166,24 +173,25 @@ export class LocalFileUploadService {
    * Logo dosyası yükler
    */
   private static async uploadLogo(file: File): Promise<string | null> {
+    // Logo optional - boş dosya için null döndür
     if (!file || file.size === 0) {
-      logger.debug('Logo dosyası bulunamadı');
+      logger.debug('Logo dosyası bulunamadı veya boş');
       return null;
     }
-    
+
     try {
       const result = await this.validateAndUploadFile(
-        file, 
-        'firma_logolari', 
+        file,
+        'firma_logolari',
         false
       );
-      
+
       logger.info('Logo başarıyla yüklendi', {
         originalName: file.name,
         size: file.size,
         url: result
       });
-      
+
       return result;
     } catch (error) {
       logger.error('Logo yükleme hatası', {
@@ -200,23 +208,28 @@ export class LocalFileUploadService {
    */
   private static async uploadCatalog(file: File): Promise<string | null> {
     if (!file || file.size === 0) {
-      logger.debug('Katalog dosyası bulunamadı');
-      return null;
+      const errorMessage = 'Katalog dosyası boş veya bulunamadı';
+      logger.error('Katalog yükleme hatası', {
+        error: errorMessage,
+        hasFile: !!file,
+        fileSize: file?.size || 0
+      });
+      throw new Error(errorMessage);
     }
-    
+
     try {
       const result = await this.validateAndUploadFile(
-        file, 
-        'firma_kataloglari', 
+        file,
+        'firma_kataloglari',
         true
       );
-      
+
       logger.info('Katalog başarıyla yüklendi', {
         originalName: file.name,
         size: file.size,
         url: result
       });
-      
+
       return result;
     } catch (error) {
       logger.error('Katalog yükleme hatası', {

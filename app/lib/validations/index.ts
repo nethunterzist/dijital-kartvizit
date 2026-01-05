@@ -272,7 +272,9 @@ export const fileUploadSchema = z.object({
 });
 
 export const pdfUploadSchema = z.object({
-  size: z.number().max(10 * 1024 * 1024, 'PDF boyutu 10MB\'dan küçük olmalı'),
+  size: z.number()
+    .min(1, 'PDF dosyası boş olamaz')
+    .max(10 * 1024 * 1024, 'PDF boyutu 10MB\'dan küçük olmalı'),
   type: z.enum(['application/pdf'], {
     errorMap: () => ({ message: 'Sadece PDF dosyaları kabul edilir' }),
   }),

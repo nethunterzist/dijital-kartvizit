@@ -12,6 +12,14 @@ export async function uploadToCloudinary(file: File, folder: string = 'uploads')
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
+    logger.info('Starting Cloudinary upload', {
+      fileName: file.name,
+      fileSize: file.size,
+      fileType: file.type,
+      bufferSize: buffer.length,
+      folder
+    });
+
     // PDF dosyaları için özel ayarlar
     const isPdf = file.type === 'application/pdf';
     const uploadOptions: any = {
@@ -31,11 +39,25 @@ export async function uploadToCloudinary(file: File, folder: string = 'uploads')
       uploadOptions.quality = 'auto';
     }
 
+    logger.debug('Cloudinary upload options', {
+      isPdf,
+      resourceType: uploadOptions.resource_type,
+      uploadType: uploadOptions.type,
+      folder: uploadOptions.folder
+    });
+
     return new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream(
         uploadOptions,
         (error, result) => {
           if (error) {
+            logger.error('Cloudinary upload_stream error', {
+              error,
+              fileName: file.name,
+              fileSize: file.size,
+              folder,
+              isPdf
+            });
             reject(error);
           } else {
             // PDF için signed URL oluştur
@@ -46,8 +68,21 @@ export async function uploadToCloudinary(file: File, folder: string = 'uploads')
                 sign_url: true,
                 secure: true
               });
+              logger.info('Cloudinary PDF upload successful', {
+                fileName: file.name,
+                publicId: result.public_id,
+                signedUrl: signedUrl.substring(0, 100) + '...',
+                bytes: result.bytes
+              });
               resolve(signedUrl);
             } else {
+              logger.info('Cloudinary image upload successful', {
+                fileName: file.name,
+                secureUrl: result?.secure_url,
+                publicId: result?.public_id,
+                bytes: result?.bytes,
+                format: result?.format
+              });
               resolve(result?.secure_url || '');
             }
           }
@@ -55,7 +90,13 @@ export async function uploadToCloudinary(file: File, folder: string = 'uploads')
       ).end(buffer);
     });
   } catch (error) {
-    logger.error('Cloudinary upload error', { error, fileName: file.name, fileSize: file.size, folder });
+    logger.error('Cloudinary upload error', {
+      error,
+      fileName: file.name,
+      fileSize: file.size,
+      folder,
+      errorMessage: error instanceof Error ? error.message : 'Unknown error'
+    });
     throw new Error('File upload failed');
   }
 }
