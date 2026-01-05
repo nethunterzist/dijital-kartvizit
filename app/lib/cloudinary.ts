@@ -25,7 +25,7 @@ export async function uploadToCloudinary(file: File, folder: string = 'uploads')
     const uploadOptions: any = {
       folder: folder,
       resource_type: isPdf ? 'raw' : 'auto',
-      type: isPdf ? 'authenticated' : 'upload',  // PDF'ler için authenticated kullan
+      type: 'upload',  // Public upload - PDF'ler herkese açık olmalı
       // PDF'ler için orijinal dosya adını koru
       ...(isPdf && {
         use_filename: true,
@@ -60,31 +60,16 @@ export async function uploadToCloudinary(file: File, folder: string = 'uploads')
             });
             reject(error);
           } else {
-            // PDF için signed URL oluştur
-            if (isPdf && result?.public_id) {
-              const signedUrl = cloudinary.url(result.public_id, {
-                resource_type: 'raw',
-                type: 'authenticated',
-                sign_url: true,
-                secure: true
-              });
-              logger.info('Cloudinary PDF upload successful', {
-                fileName: file.name,
-                publicId: result.public_id,
-                signedUrl: signedUrl.substring(0, 100) + '...',
-                bytes: result.bytes
-              });
-              resolve(signedUrl);
-            } else {
-              logger.info('Cloudinary image upload successful', {
-                fileName: file.name,
-                secureUrl: result?.secure_url,
-                publicId: result?.public_id,
-                bytes: result?.bytes,
-                format: result?.format
-              });
-              resolve(result?.secure_url || '');
-            }
+            // Tüm dosyalar için secure_url kullan
+            logger.info('Cloudinary upload successful', {
+              fileName: file.name,
+              isPdf,
+              secureUrl: result?.secure_url,
+              publicId: result?.public_id,
+              bytes: result?.bytes,
+              format: result?.format
+            });
+            resolve(result?.secure_url || '');
           }
         }
       ).end(buffer);
