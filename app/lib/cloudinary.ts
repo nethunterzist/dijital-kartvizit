@@ -17,8 +17,7 @@ export async function uploadToCloudinary(file: File, folder: string = 'uploads')
     const uploadOptions: any = {
       folder: folder,
       resource_type: isPdf ? 'raw' : 'auto',
-      type: 'upload',  // Public access için gerekli
-      access_mode: 'public',  // Explicitly set public access
+      type: isPdf ? 'authenticated' : 'upload',  // PDF'ler için authenticated kullan
       // PDF'ler için orijinal dosya adını koru
       ...(isPdf && {
         use_filename: true,
@@ -39,7 +38,18 @@ export async function uploadToCloudinary(file: File, folder: string = 'uploads')
           if (error) {
             reject(error);
           } else {
-            resolve(result?.secure_url || '');
+            // PDF için signed URL oluştur
+            if (isPdf && result?.public_id) {
+              const signedUrl = cloudinary.url(result.public_id, {
+                resource_type: 'raw',
+                type: 'authenticated',
+                sign_url: true,
+                secure: true
+              });
+              resolve(signedUrl);
+            } else {
+              resolve(result?.secure_url || '');
+            }
           }
         }
       ).end(buffer);
