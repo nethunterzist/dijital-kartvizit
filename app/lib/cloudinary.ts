@@ -22,16 +22,18 @@ export async function uploadToCloudinary(file: File, folder: string = 'uploads')
 
     // PDF dosyaları için özel ayarlar
     const isPdf = file.type === 'application/pdf';
+
+    // PDF'ler için image resource_type kullan (raw yerine) - bu public URL verir
     const uploadOptions: any = {
       folder: folder,
-      resource_type: isPdf ? 'raw' : 'auto',
-      type: 'upload',  // Public upload - PDF'ler herkese açık olmalı
-      access_mode: 'public',  // Explicitly set public access for all files
+      resource_type: isPdf ? 'image' : 'auto',  // image ile public URL
+      type: 'upload',  // Public upload
       // PDF'ler için orijinal dosya adını koru
       ...(isPdf && {
         use_filename: true,
-        unique_filename: true,  // Cache sorunlarını önlemek için unique filename
-        format: 'pdf'
+        unique_filename: true,
+        format: 'pdf',
+        flags: 'attachment'  // PDF olarak indir
       })
     };
 
