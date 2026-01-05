@@ -262,65 +262,41 @@ export class LocalFileUploadService {
         throw new Error(`Dosya validasyon hatası: ${errorMessages}`);
       }
 
-      // HIBRIT STRATEJI:
-      // - Resimler (profil foto, logo) → Cloudinary (CDN + optimizasyon)
-      // - PDF'ler → Local Storage (authentication sorunu yok, CDN gereksiz)
-      const shouldUseCloudinary =
-        process.env.NODE_ENV === 'production' &&
-        process.env.CLOUDINARY_CLOUD_NAME &&
-        !isPdf; // PDF'ler için local storage kullan
+      // LOCAL STORAGE STRATEJISI:
+      // Tüm dosyalar (resim, PDF, logo) local storage'da tutulur
+      // Avantajlar:
+      // - Cloudinary quota/maliyet sorunu yok
+      // - Authentication URL sorunu yok
+      // - Tam kontrol ve basitlik
+      // - Hetzner Frankfurt sunucu Türkiye'ye yeterince yakın (CDN gereksiz)
 
-      if (shouldUseCloudinary) {
-        // Production: Resimler için Cloudinary'ye yükle
-        try {
-          const cloudinaryUrl = await uploadToCloudinary(file, folder);
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
 
-          logger.info('Resim Cloudinary\'ye başarıyla yüklendi', {
-            originalName: file.name,
-            cloudinaryUrl,
-            fileSize: file.size,
-            folder
-          });
+      // Benzersiz dosya adı oluştur
+      const uniqueFileName = this.generateUniqueFileName(file.name);
 
-          return cloudinaryUrl;
-        } catch (cloudinaryError) {
-          logger.error('Cloudinary upload failed', {
-            error: cloudinaryError instanceof Error ? cloudinaryError.message : 'Bilinmeyen hata',
-            fileName: file.name,
-            folder
-          });
-          throw new Error(`Cloudinary yükleme hatası: ${cloudinaryError instanceof Error ? cloudinaryError.message : 'Bilinmeyen hata'}`);
-        }
-      } else {
-        // Development: Tüm dosyalar için local storage
-        // Production: PDF'ler için local storage (Cloudinary authenticated URL sorununu çözer)
-        const arrayBuffer = await file.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
+      // Dosya yolunu oluştur
+      const filePath = join(this.uploadDir, folder, uniqueFileName);
 
-        // Benzersiz dosya adı oluştur
-        const uniqueFileName = this.generateUniqueFileName(file.name);
+      // Dosyayı kaydet
+      await writeFile(filePath, buffer);
 
-        // Dosya yolunu oluştur
-        const filePath = join(this.uploadDir, folder, uniqueFileName);
+      // Public URL'i döndür
+      const publicUrl = `/uploads/${folder}/${uniqueFileName}`;
 
-        // Dosyayı kaydet
-        await writeFile(filePath, buffer);
+      logger.info('Dosya local storage\'a başarıyla kaydedildi', {
+        originalName: file.name,
+        uniqueFileName,
+        filePath,
+        publicUrl,
+        fileSize: buffer.length,
+        fileType: file.type,
+        isPdf,
+        environment: process.env.NODE_ENV
+      });
 
-        // Public URL'i döndür
-        const publicUrl = `/uploads/${folder}/${uniqueFileName}`;
-
-        logger.info('Dosya local storage\'a başarıyla kaydedildi', {
-          originalName: file.name,
-          uniqueFileName,
-          filePath,
-          publicUrl,
-          fileSize: buffer.length,
-          isPdf,
-          environment: process.env.NODE_ENV
-        });
-
-        return publicUrl;
-      }
+      return publicUrl;
     } catch (error) {
       logger.error('Dosya yükleme/validasyon hatası:', {
         error: error instanceof Error ? error.message : 'Bilinmeyen hata',
