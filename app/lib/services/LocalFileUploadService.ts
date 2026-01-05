@@ -262,13 +262,20 @@ export class LocalFileUploadService {
         throw new Error(`Dosya validasyon hatası: ${errorMessages}`);
       }
 
-      // Production'da Cloudinary, development'ta local storage kullan
-      if (process.env.NODE_ENV === 'production' && process.env.CLOUDINARY_CLOUD_NAME) {
-        // Production: Cloudinary'ye yükle
+      // HIBRIT STRATEJI:
+      // - Resimler (profil foto, logo) → Cloudinary (CDN + optimizasyon)
+      // - PDF'ler → Local Storage (authentication sorunu yok, CDN gereksiz)
+      const shouldUseCloudinary =
+        process.env.NODE_ENV === 'production' &&
+        process.env.CLOUDINARY_CLOUD_NAME &&
+        !isPdf; // PDF'ler için local storage kullan
+
+      if (shouldUseCloudinary) {
+        // Production: Resimler için Cloudinary'ye yükle
         try {
           const cloudinaryUrl = await uploadToCloudinary(file, folder);
 
-          logger.info('Dosya Cloudinary\'ye başarıyla yüklendi', {
+          logger.info('Resim Cloudinary\'ye başarıyla yüklendi', {
             originalName: file.name,
             cloudinaryUrl,
             fileSize: file.size,
@@ -285,7 +292,8 @@ export class LocalFileUploadService {
           throw new Error(`Cloudinary yükleme hatası: ${cloudinaryError instanceof Error ? cloudinaryError.message : 'Bilinmeyen hata'}`);
         }
       } else {
-        // Development: Local storage'a yükle
+        // Development: Tüm dosyalar için local storage
+        // Production: PDF'ler için local storage (Cloudinary authenticated URL sorununu çözer)
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
@@ -306,7 +314,9 @@ export class LocalFileUploadService {
           uniqueFileName,
           filePath,
           publicUrl,
-          fileSize: buffer.length
+          fileSize: buffer.length,
+          isPdf,
+          environment: process.env.NODE_ENV
         });
 
         return publicUrl;
