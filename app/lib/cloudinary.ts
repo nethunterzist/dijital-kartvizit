@@ -26,6 +26,7 @@ export async function uploadToCloudinary(file: File, folder: string = 'uploads')
       folder: folder,
       resource_type: isPdf ? 'raw' : 'auto',
       type: 'upload',  // Public upload - PDF'ler herkese açık olmalı
+      access_mode: 'public',  // Explicitly set public access for all files
       // PDF'ler için orijinal dosya adını koru
       ...(isPdf && {
         use_filename: true,
