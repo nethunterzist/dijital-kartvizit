@@ -17,12 +17,12 @@ export async function uploadToCloudinary(file: File, folder: string = 'uploads')
     const uploadOptions: any = {
       folder: folder,
       resource_type: isPdf ? 'raw' : 'auto',
-      // PDF'ler için orijinal dosya adını koru - download sırasında .pdf uzantısı olsun
+      type: 'upload',  // Public access için gerekli
+      // PDF'ler için orijinal dosya adını koru
       ...(isPdf && {
         use_filename: true,
         unique_filename: true,  // Cache sorunlarını önlemek için unique filename
-        format: 'pdf',
-        flags: 'attachment'  // PDF'lerin indirilebilir olması için
+        format: 'pdf'
       })
     };
 
