@@ -99,34 +99,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Geçersiz klasör' }, { status: 400 });
     }
 
-    // Production'da Cloudinary, development'ta local storage kullan
+    // LOCAL STORAGE STRATEJISI: Tüm ortamlarda local storage kullan
     let fileUrl: string;
 
-    if (process.env.NODE_ENV === 'production' && process.env.CLOUDINARY_CLOUD_NAME) {
-      // Production: Cloudinary'ye yükle
-      try {
-        fileUrl = await uploadToCloudinary(file, folder);
-      } catch (error) {
-        console.error('Cloudinary upload error:', error);
-        return NextResponse.json({
-          error: 'Cloudinary yüklemesi başarısız',
-          details: error instanceof Error ? error.message : 'Unknown error'
-        }, { status: 500 });
-      }
-    } else {
-      // Development: Local file system'e yükle
-      const result = await LocalFileUploadService.uploadSingleFile(
-        file,
-        folder,
-        isPdf
-      );
+    // Production ve development için local storage kullan
+    const result = await LocalFileUploadService.uploadSingleFile(
+      file,
+      folder,
+      isPdf
+    );
 
-      if (!result.success || !result.url) {
-        return NextResponse.json({ error: result.error || 'Dosya yükleme başarısız' }, { status: 500 });
-      }
-
-      fileUrl = result.url;
+    if (!result.success || !result.url) {
+      return NextResponse.json({ error: result.error || 'Dosya yükleme başarısız' }, { status: 500 });
     }
+
+    fileUrl = result.url;
 
     return NextResponse.json({ url: fileUrl });
   } catch (error) {
