@@ -3,6 +3,7 @@ import { Metadata } from 'next';
 import handlebars from 'handlebars';
 import { cardTemplate } from '../lib/cardTemplate';
 import { getServerBaseUrl } from '../lib/utils/getBaseUrl';
+import { getPdfViewUrl } from '../lib/utils/pdf-url';
 import FontAwesomeLoader from '../components/FontAwesomeLoader';
 import ViewTracker from '../components/ViewTracker';
 
@@ -345,15 +346,15 @@ export default async function KartvizitPage({ params }: { params: { slug: string
             icon_order: getOrderedIcons({
                 social_media: socialMediaArray,
                 communication: communicationArray,
-                katalog: firma.katalog ? { url: firma.katalog } : null,
+                katalog: firma.katalog ? { url: getPdfViewUrl(firma.katalog) } : null,
                 iban: bankaHesaplari.length > 0 ? { value: true } : null,
                 tax: firma.firma_unvan ? { firma_unvan: firma.firma_unvan } : null,
                 about: firma.firma_hakkinda ? { content: firma.firma_hakkinda } : null
             }),
-            
+
             firma_hakkinda: firma.firma_hakkinda,
             firma_hakkinda_baslik: firma.firma_hakkinda_baslik || 'Hakkımızda',
-            katalog: firma.katalog ? { icon: EXTRA_META.katalog.icon, label: EXTRA_META.katalog.label, url: firma.katalog } : null,
+            katalog: firma.katalog ? { icon: EXTRA_META.katalog.icon, label: EXTRA_META.katalog.label, url: getPdfViewUrl(firma.katalog) } : null,
             bankaHesaplari: bankaHesaplari.length > 0 ? bankaHesaplari : [],
             tax: (firma.firma_unvan || firma.firma_vergi_no || firma.vergi_dairesi) ? {
                 icon: EXTRA_META.tax.icon,

@@ -135,6 +135,24 @@ const nextConfig = {
             value: 'public, max-age=86400, stale-while-revalidate=604800'
           }
         ]
+      },
+      // PDF files - proper MIME type and inline display
+      {
+        source: '/uploads/firma_kataloglari/:path*.pdf',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'application/pdf'
+          },
+          {
+            key: 'Content-Disposition',
+            value: 'inline'
+          },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=3600, stale-while-revalidate=86400'
+          }
+        ]
       }
     ]
   },

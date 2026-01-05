@@ -262,14 +262,25 @@ export class LocalFileUploadService {
         throw new Error(`Dosya validasyon hatası: ${errorMessages}`);
       }
 
-      // LOCAL STORAGE STRATEJISI:
-      // Tüm dosyalar (resim, PDF, logo) local storage'da tutulur
-      // Avantajlar:
-      // - Cloudinary quota/maliyet sorunu yok
-      // - Authentication URL sorunu yok
-      // - Tam kontrol ve basitlik
-      // - Hetzner Frankfurt sunucu Türkiye'ye yeterince yakın (CDN gereksiz)
+      // CLOUDINARY STRATEJISI: Cloudinary credentials varsa Cloudinary kullan
+      if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY) {
+        // Cloudinary credentials varsa: Cloudinary ile depolama
+        const cloudinaryUrl = await uploadToCloudinary(file, folder);
+        logger.info('Dosya Cloudinary\'ye başarıyla yüklendi', {
+          originalName: file.name,
+          fileSize: file.size,
+          fileType: file.type,
+          folder,
+          isPdf,
+          cloudinaryUrl,
+          environment: process.env.NODE_ENV || 'development'
+        });
+        return cloudinaryUrl;
+        // NOT: uploadToCloudinary içinde zaten hata yönetimi var
+        // Hata olursa exception fırlatacak ve buradan çıkacak
+      }
 
+      // Cloudinary credentials yoksa: Local storage
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 

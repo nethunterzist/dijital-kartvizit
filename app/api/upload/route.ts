@@ -99,11 +99,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Geçersiz klasör' }, { status: 400 });
     }
 
-    // CLOUDINARY STRATEJISI: Production'da Cloudinary (kalıcı), Dev'de local
+    // CLOUDINARY STRATEJISI: Cloudinary credentials varsa Cloudinary kullan
     let fileUrl: string;
 
-    if (process.env.NODE_ENV === 'production' && process.env.CLOUDINARY_CLOUD_NAME) {
-      // PRODUCTION: Cloudinary ile kalıcı depolama
+    if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY) {
+      // Cloudinary credentials varsa: Cloudinary ile depolama (local veya production)
       try {
         fileUrl = await uploadToCloudinary(file, folder);
         console.log('✅ Cloudinary upload başarılı:', fileUrl);
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
         }, { status: 500 });
       }
     } else {
-      // DEVELOPMENT: Local storage
+      // DEVELOPMENT: Local storage (Cloudinary credentials yoksa)
       const result = await LocalFileUploadService.uploadSingleFile(
         file,
         folder,

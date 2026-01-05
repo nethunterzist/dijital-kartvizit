@@ -23,15 +23,20 @@ export async function uploadToCloudinary(file: File, folder: string = 'uploads')
     // PDF dosyaları için özel ayarlar
     const isPdf = file.type === 'application/pdf';
 
-    // HER ZAMAN 'auto' kullan - Cloudinary otomatik tip belirler ve public URL verir
+    // PDF'ler için 'raw' resource type kullan (Cloudinary doğru serve etmesi için)
     const uploadOptions: any = {
       folder: folder,
-      resource_type: 'auto',  // KRITIK: auto kullan, raw kullanma
-      type: 'upload',
-      // PDF'ler için orijinal dosya adını koru
+      resource_type: isPdf ? 'raw' : 'auto',  // PDF için 'raw', resimler için 'auto'
+      type: 'upload',  // Public upload type
+      access_control: [{ access_type: 'anonymous' }],  // Anonymous public access
+      // PDF'ler için orijinal dosya adını ve uzantıyı koru
       ...(isPdf && {
-        use_filename: true,
-        unique_filename: true
+        public_id: file.name.replace(/\.[^/.]+$/, ''), // Uzantısız dosya adı (folder parametresi zaten var)
+        format: 'pdf', // PDF formatını belirt
+        use_filename: false, // public_id kullandığımız için false
+        unique_filename: false, // Hash ekleme, orijinal adı koru
+        overwrite: false, // Aynı isimli dosya varsa hata ver
+        access_mode: 'public' // Public erişim
       })
     };
 
