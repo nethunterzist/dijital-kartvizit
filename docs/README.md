@@ -23,6 +23,9 @@ Welcome to the comprehensive documentation for the Dijital Kartvizit platform. T
 
 ### For DevOps Engineers
 - **[Production Deployment](infrastructure/PRODUCTION.md)** - Hetzner + Coolify deployment guide
+- **[Webhook Setup Guide](infrastructure/WEBHOOK_SETUP_GUIDE.md)** - Automatic deployment configuration
+- **[Quick Webhook Setup](infrastructure/QUICK_WEBHOOK_SETUP.md)** - 5-minute webhook setup
+- **[Webhook Troubleshooting](infrastructure/WEBHOOK_TROUBLESHOOTING.md)** - Common webhook issues
 - **[Monitoring & Health Checks](infrastructure/MONITORING.md)** - Health checks and alerting
 - **[Production Snapshot](infrastructure/PRODUCTION_SNAPSHOT.md)** - Current live state (Jan 5, 2026)
 - **[Server Deep Dive](infrastructure/SERVER_DEEP_DIVE.md)** - SSH technical analysis (Jan 5, 2026)
@@ -50,11 +53,18 @@ docs/
 │   ├── WORKFLOWS.md            # Development workflows
 │   └── TROUBLESHOOTING.md      # Common issues
 │
-└── infrastructure/             # Infrastructure & deployment
-    ├── PRODUCTION.md           # Production deployment
-    ├── MONITORING.md           # Monitoring & health checks
-    ├── PRODUCTION_SNAPSHOT.md  # Current production state (Jan 5, 2026)
-    └── SERVER_DEEP_DIVE.md     # SSH technical analysis (Jan 5, 2026)
+├── infrastructure/             # Infrastructure & deployment
+│   ├── PRODUCTION.md           # Production deployment
+│   ├── WEBHOOK_SETUP_GUIDE.md  # Automatic deployment configuration
+│   ├── QUICK_WEBHOOK_SETUP.md  # 5-minute webhook setup
+│   ├── WEBHOOK_TROUBLESHOOTING.md # Common webhook issues
+│   ├── MONITORING.md           # Monitoring & health checks
+│   ├── PRODUCTION_SNAPSHOT.md  # Current production state (Jan 5, 2026)
+│   └── SERVER_DEEP_DIVE.md     # SSH technical analysis (Jan 5, 2026)
+│
+└── deployment-reports/         # Deployment history and reports
+    ├── pricing-feature-activation-report.md  # Pricing feature deployment (Dec 2025)
+    └── cloudinary-upload-fix-report.md       # Cloudinary upload fix (Jan 5, 2026)
 ```
 
 ## 🚀 Quick Links
@@ -66,10 +76,11 @@ docs/
 
 ### Essential Reading for Production Deployment
 1. [Production Deployment Guide](infrastructure/PRODUCTION.md) - Complete deployment walkthrough
-2. [Production Snapshot](infrastructure/PRODUCTION_SNAPSHOT.md) - Current live environment state
-3. [Server Deep Dive](infrastructure/SERVER_DEEP_DIVE.md) - SSH technical analysis & security audit
-4. [Architecture Overview](architecture/OVERVIEW.md) - Understand the system
-5. [Monitoring Setup](infrastructure/MONITORING.md) - Health checks and alerts
+2. [Webhook Setup Guide](infrastructure/WEBHOOK_SETUP_GUIDE.md) - Automatic deployment configuration ⚡
+3. [Production Snapshot](infrastructure/PRODUCTION_SNAPSHOT.md) - Current live environment state
+4. [Server Deep Dive](infrastructure/SERVER_DEEP_DIVE.md) - SSH technical analysis & security audit
+5. [Architecture Overview](architecture/OVERVIEW.md) - Understand the system
+6. [Monitoring Setup](infrastructure/MONITORING.md) - Health checks and alerts
 
 ## 🔗 Related Documentation
 

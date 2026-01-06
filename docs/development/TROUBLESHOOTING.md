@@ -161,6 +161,27 @@ curl -X POST "https://api.cloudinary.com/v1_1/$CLOUDINARY_CLOUD_NAME/image/uploa
   -F "upload_preset=unsigned"
 ```
 
+**Common Cloudinary Issues:**
+
+1. **401 Unauthorized Error:**
+   - Check API credentials are correct
+   - Verify `CLOUDINARY_API_SECRET` is set
+   - Ensure Cloudinary account is active
+
+2. **Access Denied (x-cld-error: deny or ACL failure):**
+   - Login to Cloudinary Dashboard → Settings → Security
+   - Disable "Strict transformations"
+   - Set "Restricted media types" → RAW files to public
+   - Or create an unsigned upload preset
+
+3. **Files Lost After Container Restart:**
+   - **Symptom**: PDFs show local paths `/uploads/firma_kataloglari/...` and return 404
+   - **Cause**: Local storage is ephemeral in Docker containers
+   - **Solution**: Ensure Cloudinary credentials are set in production
+   - **Fix**: Admin must re-upload PDFs through admin panel
+
+**⚠️ CRITICAL**: Never fallback to local storage when Cloudinary fails in production. The upload strategy enforces this (see `LocalFileUploadService.ts:266-281`). Local files are lost on container restart.
+
 ---
 
 ### Issue: Cache Errors

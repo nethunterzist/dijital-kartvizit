@@ -83,31 +83,59 @@ export abstract class FileUploadService {
 
 ### LocalFileUploadService
 
-Development implementation - stores files locally.
+Hybrid implementation - uses Cloudinary when available, local storage otherwise.
 
 **Location:** `app/lib/services/LocalFileUploadService.ts`
 
-**Storage Location:** `/public/uploads/`
+**Storage Strategy:**
+```typescript
+// CLOUDINARY STRATEGY (lines 266-281)
+if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY) {
+  // Cloudinary credentials exist: Use cloud storage
+  const cloudinaryUrl = await uploadToCloudinary(file, folder);
+  return cloudinaryUrl; // Exception propagates on failure
+}
+
+// LOCAL FALLBACK (only when Cloudinary not configured)
+const buffer = Buffer.from(await file.arrayBuffer());
+await writeFile(filePath, buffer);
+return `/uploads/${folder}/${uniqueFileName}`;
+```
 
 **Features:**
-- Saves files to local filesystem
-- Generates accessible URLs
-- Creates upload directory if missing
-- No cleanup (development only)
+- **Production**: Automatically uses Cloudinary when credentials available
+- **Development**: Falls back to local filesystem
+- **Fail-Fast**: No try-catch around Cloudinary - errors propagate immediately
+- **Container-Safe**: Never saves to local in production (ephemeral storage)
+
+**Upload Paths:**
+- Cloudinary: `https://res.cloudinary.com/[cloud]/[type]/upload/[folder]/[filename]`
+- Local: `/uploads/[folder]/[filename]` (development only)
+
+**Validation:**
+- File size limits (5MB images, 10MB PDFs)
+- MIME type validation via Zod schemas
+- Automatic folder creation for local storage
 
 **Usage:**
 ```typescript
 const service = new LocalFileUploadService();
-const result = await service.upload(file, {
-  folder: 'logos',
-  transformation: { width: 500, height: 500 }
-});
-// Returns: { url: '/uploads/logos/filename.jpg' }
+const result = await service.processUploads(formData);
+// Returns: { success: true, urls: { profilePhotoUrl, logoUrl, catalogUrl } }
 ```
 
 **Configuration:**
-- Auto-registered in development
-- No environment variables needed
+```env
+# Required for production
+CLOUDINARY_CLOUD_NAME="your-cloud-name"
+CLOUDINARY_API_KEY="your-api-key"
+CLOUDINARY_API_SECRET="your-api-secret"
+
+# Optional - defaults shown
+NODE_ENV="production"  # Triggers Cloudinary usage
+```
+
+**⚠️ CRITICAL**: The try-catch block was intentionally removed (commit `ef19f1a`) to prevent silent fallback to local storage in production. Local files are lost on Docker container restart.
 
 ---
 

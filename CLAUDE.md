@@ -104,6 +104,34 @@ Build succeeds even without database connection. Functions return empty data dur
 
 **Details**: See [CRITICAL_PATTERNS.md](docs/architecture/CRITICAL_PATTERNS.md#pattern-2-graceful-database-degradation)
 
+### 4. Cloudinary Upload Strategy (CRITICAL)
+
+**Rule**: Never fallback to local storage in production when Cloudinary upload fails.
+
+```typescript
+// ❌ WRONG - Allows fallback to local storage
+try {
+  const cloudinaryUrl = await uploadToCloudinary(file, folder);
+  return cloudinaryUrl;
+} catch (error) {
+  // Falls through to local storage code below ❌
+}
+
+// ✅ CORRECT - Fail fast on Cloudinary errors
+if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY) {
+  const cloudinaryUrl = await uploadToCloudinary(file, folder);
+  return cloudinaryUrl; // Exception propagates to caller
+}
+```
+
+**Why**: Local paths (`/uploads/...`) are lost when Docker containers restart. PDFs and images must be stored on persistent cloud storage (Cloudinary) in production.
+
+**Impact**:
+- Without this fix: Files uploaded during runtime are lost on container restart
+- With this fix: Upload fails immediately with clear error message, preventing data loss
+
+**Implementation**: See `app/lib/services/LocalFileUploadService.ts:266-281`
+
 ---
 
 ## Database Overview
@@ -195,9 +223,16 @@ CLOUDINARY_API_KEY="..."
 CLOUDINARY_API_SECRET="..."
 ```
 
-**Deployment Process**: Coolify auto-builds with Nixpacks (~4 minute deployment)
+**Deployment Process**:
+- **Automatic** (Recommended): Configure GitHub webhook for auto-deployment on `git push`
+  - Setup: [WEBHOOK_SETUP_GUIDE.md](docs/infrastructure/WEBHOOK_SETUP_GUIDE.md) (~5 minutes)
+  - Quick: [QUICK_WEBHOOK_SETUP.md](docs/infrastructure/QUICK_WEBHOOK_SETUP.md)
+- **Manual**: Click "Redeploy" in Coolify dashboard (http://157.180.78.53:8000)
+- Build time: ~4-5 minutes (Nixpacks)
 
 **Complete Guide**: See [PRODUCTION.md](docs/infrastructure/PRODUCTION.md)
+
+**Webhook Setup**: See [WEBHOOK_SETUP_GUIDE.md](docs/infrastructure/WEBHOOK_SETUP_GUIDE.md) ⚡
 
 **Monitoring**: See [MONITORING.md](docs/infrastructure/MONITORING.md)
 

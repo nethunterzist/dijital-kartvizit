@@ -480,8 +480,14 @@ git push origin main
 ```
 
 **2. Deploy via Coolify**:
-- **Option A**: Automatic deployment (if webhook configured)
+- **Option A**: Automatic deployment (if webhook configured) ✅ **Recommended**
+  - GitHub webhook automatically triggers deployment on `git push`
+  - Zero manual intervention required
+  - See: [Webhook Setup Guide](WEBHOOK_SETUP_GUIDE.md) for configuration
 - **Option B**: Manual deployment via Coolify dashboard → Redeploy
+  - Login to Coolify dashboard (http://157.180.78.53:8000)
+  - Click "Redeploy" button
+  - Only use when webhook is not configured
 
 **3. Deployment Process**:
 - Automatic build starts
@@ -522,6 +528,8 @@ docker stop [failed-container-id]
 - [ ] DNS records added and propagated
 - [ ] SSL certificate auto-generated
 - [ ] Local build successful (`npm run build`)
+- [ ] GitHub webhook configured for automatic deployments (recommended)
+  - See: [Webhook Setup Guide](WEBHOOK_SETUP_GUIDE.md)
 - [ ] All tests passing (`npm test`)
 
 ### Post-Deployment
@@ -822,6 +830,84 @@ docker logs traefik --tail 100
 
 ---
 
+## Webhook Configuration for Automatic Deployments
+
+**⚠️ IMPORTANT**: By default, Coolify requires manual deployment (clicking "Redeploy" button). Configure GitHub webhook for automatic deployments.
+
+### Why Use Webhooks?
+
+**Without Webhook** (Current Default):
+```
+1. git push origin main
+2. Open Coolify dashboard (http://157.180.78.53:8000)
+3. Click "Redeploy" button ← MANUAL STEP
+4. Wait ~4-5 minutes for build
+```
+
+**With Webhook** (Recommended):
+```
+1. git push origin main
+2. GitHub automatically triggers Coolify deployment ← AUTOMATIC
+3. Wait ~4-5 minutes for build
+```
+
+**Benefits**:
+- ✅ Zero manual intervention
+- ✅ Faster deployment workflow
+- ✅ Reduced human error
+- ✅ Professional CI/CD pipeline
+
+### Quick Setup (5 minutes)
+
+**Step 1: Get Coolify Webhook URL**
+```
+Coolify Dashboard → Application → Settings → Webhooks
+→ Copy webhook URL
+Format: http://157.180.78.53:8000/api/v1/deploy/webhook/[UUID]
+```
+
+**Step 2: Add to GitHub**
+```
+GitHub Repository → Settings → Webhooks → Add webhook
+→ Payload URL: [Paste Coolify webhook URL]
+→ Content type: application/json
+→ Events: Just the push event
+→ Active: ✅
+→ Save webhook
+```
+
+**Step 3: Test**
+```bash
+git commit --allow-empty -m "test: webhook test"
+git push origin main
+
+# Coolify should automatically start deployment! 🎉
+```
+
+### Detailed Guides
+
+For comprehensive webhook setup and troubleshooting:
+
+- **[Webhook Setup Guide](WEBHOOK_SETUP_GUIDE.md)** - Complete step-by-step instructions
+- **[Quick Webhook Setup](QUICK_WEBHOOK_SETUP.md)** - 5-minute fast track
+- **[Webhook Troubleshooting](WEBHOOK_TROUBLESHOOTING.md)** - Common issues and solutions
+
+### Verification
+
+**Check GitHub Webhook Status**:
+```
+GitHub → Settings → Webhooks → Recent Deliveries
+→ Should see "200 OK" responses after each push
+```
+
+**Check Coolify Deployment**:
+```
+Coolify Dashboard → Deployments
+→ Trigger should show "Webhook" (not "Manual")
+```
+
+---
+
 ## Additional Resources
 
 - **[Coolify Documentation](https://coolify.io/docs)**
@@ -829,6 +915,15 @@ docker logs traefik --tail 100
 - **[Nixpacks Documentation](https://nixpacks.com/docs)**
 - **[Traefik Documentation](https://doc.traefik.io/traefik/)**
 - **[Let's Encrypt](https://letsencrypt.org/docs/)**
+
+### Internal Documentation
+
+- **[Webhook Setup Guide](WEBHOOK_SETUP_GUIDE.md)** - Automatic deployment configuration
+- **[Quick Webhook Setup](QUICK_WEBHOOK_SETUP.md)** - Fast track webhook setup
+- **[Webhook Troubleshooting](WEBHOOK_TROUBLESHOOTING.md)** - Common webhook issues
+- **[Monitoring Guide](MONITORING.md)** - Health checks and observability
+- **[Production Snapshot](PRODUCTION_SNAPSHOT.md)** - Current live state (Jan 5, 2026)
+- **[Server Deep Dive](SERVER_DEEP_DIVE.md)** - SSH technical analysis (Jan 5, 2026)
 
 ---
 
