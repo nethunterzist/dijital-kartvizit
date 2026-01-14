@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/lib/auth';
 import { prisma } from '@/app/lib/db';
+import { logger } from '@/app/lib/logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -71,7 +72,9 @@ export async function GET(request: NextRequest) {
       });
     }
   } catch (error) {
-    console.error('Error fetching package inquiries:', error);
+    logger.error('Error fetching package inquiries', {
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -119,7 +122,9 @@ export async function PATCH(request: NextRequest) {
       data: updatedInquiry,
     });
   } catch (error) {
-    console.error('Error updating package inquiry:', error);
+    logger.error('Error updating package inquiry', {
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -157,7 +162,9 @@ export async function DELETE(request: NextRequest) {
       message: 'Talep silindi',
     });
   } catch (error) {
-    console.error('Error deleting package inquiry:', error);
+    logger.error('Error deleting package inquiry', {
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

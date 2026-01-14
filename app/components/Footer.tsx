@@ -30,7 +30,9 @@ export default function Footer() {
           setSocialMedia(activeLinks);
         }
       })
-      .catch(err => console.error('Sosyal medya yüklenemedi:', err));
+      .catch(() => {
+        // Use empty array if social media fails to load
+      });
 
     // Site ayarlarını yükle
     fetch('/api/settings/site')
@@ -41,7 +43,9 @@ export default function Footer() {
           if (data.site_logo) setSiteLogo(data.site_logo);
         }
       })
-      .catch(err => console.error('Site ayarları yüklenemedi:', err));
+      .catch(() => {
+        // Use default values if settings fail to load
+      });
   }, []);
   return (
     <footer className="w-full bg-white pt-12 pb-4 px-4 md:px-0 border-0 relative">

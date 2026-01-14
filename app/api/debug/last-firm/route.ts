@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/app/lib/db';
+import { logger } from '@/app/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -45,7 +46,9 @@ export async function GET() {
     });
 
   } catch (error) {
-    console.error('Debug API error:', error);
+    logger.error('Debug API error', {
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
     return NextResponse.json({
       error: 'API hatası',
       details: error instanceof Error ? error.message : 'Unknown error'

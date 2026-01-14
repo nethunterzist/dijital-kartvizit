@@ -1308,8 +1308,6 @@ export const wavesTemplate = `<!DOCTYPE html>
             const modal = document.getElementById('bank-modal');
             if (modal) {
                 modal.classList.add('open');
-            } else {
-                console.error('Banka modal elementi bulunamadı!');
             }
         }
 
@@ -1317,8 +1315,6 @@ export const wavesTemplate = `<!DOCTYPE html>
             const modal = document.getElementById(modalId);
             if (modal) {
                 modal.classList.remove('open');
-            } else {
-                console.error('Modal elementi bulunamadı:', modalId);
             }
         }
 

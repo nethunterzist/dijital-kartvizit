@@ -31,14 +31,10 @@ export default function ViewTracker({ slug }: ViewTrackerProps) {
         });
 
         if (response.ok) {
-          const data = await response.json();
-          console.log('View tracked:', data.goruntulenme);
           hasTracked.current = true;
-        } else {
-          console.error('Failed to track view:', response.status);
         }
-      } catch (error) {
-        console.error('Error tracking view:', error);
+      } catch {
+        // Silently fail - view tracking errors should not affect user experience
       }
     };
 

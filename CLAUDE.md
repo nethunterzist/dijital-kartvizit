@@ -35,10 +35,10 @@ npm run db:push          # Alias for prisma db push
 npm run health:check     # Run health check script
 ```
 
-**Admin Login** (change password after first deployment!):
+**Admin Login**:
 - URL: http://localhost:3000/admin
 - Username: `admin`
-- Password: `admin123` ⚠️
+- Password: Set via `DEFAULT_ADMIN_PASSWORD` environment variable (required for auto-creation)
 
 ---
 
@@ -202,11 +202,29 @@ if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY) {
 
 **Infrastructure**: Hetzner Cloud Server + Coolify v4 + Docker
 
+**Docker Files**:
+- `Dockerfile` - Multi-stage production build (optimized)
+- `.dockerignore` - Build context exclusions
+- `nixpacks.toml` - Coolify auto-deployment configuration
+
+**Build Commands**:
+```bash
+# Local Docker build
+docker build -t dijitalkartvizit:latest .
+
+# Test locally
+docker run -p 3000:3000 --env-file .env dijitalkartvizit:latest
+
+# Health check
+curl http://localhost:3000/api/health
+```
+
 **Required Environment Variables**:
 ```env
 DATABASE_URL="postgresql://user:password@host:5432/database"
 NEXTAUTH_SECRET="[64+ chars random]"  # Generate: node -e "console.log(require('crypto').randomBytes(64).toString('base64'))"
 NEXTAUTH_URL="https://your-domain.com"
+DEFAULT_ADMIN_PASSWORD="[secure-password]"  # Required for admin auto-creation
 NODE_ENV="production"
 ```
 

@@ -26,7 +26,9 @@ export default function FeedbackCarousel() {
           setFeedbacks(activeFeedbacks);
         }
       })
-      .catch(err => console.error('Yorumlar yüklenemedi:', err));
+      .catch(() => {
+        // Use empty array if testimonials fail to load
+      });
   }, []);
 
   // Otomatik kaydırma

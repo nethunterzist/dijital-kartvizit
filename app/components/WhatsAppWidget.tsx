@@ -31,8 +31,8 @@ export default function WhatsAppWidget() {
         }
         setLoading(false);
       })
-      .catch(err => {
-        console.error('WhatsApp ayarları yüklenemedi:', err);
+      .catch(() => {
+        // Widget will not render if settings fail to load
         setLoading(false);
       });
   }, []);

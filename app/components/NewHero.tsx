@@ -23,8 +23,7 @@ export default function NewHero() {
         const activeImages = data.filter(img => img.active);
         setSliderImages(activeImages);
       })
-      .catch(error => {
-        console.error('Failed to load slider images:', error);
+      .catch(() => {
         // Fallback to default images if API fails
         setSliderImages([
           { id: 1, image_url: '/img/hero/1.jpg', alt_text: null, active: true, display_order: 0 },

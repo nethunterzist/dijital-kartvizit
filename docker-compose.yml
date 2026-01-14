@@ -1,0 +1,64 @@
+name: dijitalkartvizit
+
+services:
+  # ================================================
+  # PostgreSQL Database
+  # ================================================
+  db:
+    image: dijitalkartvizit-postgres:16-alpine
+    container_name: dijitalkartvizit-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: kartvizit123
+      POSTGRES_DB: dijitalkartvizit
+    ports:
+      - "5412:5432"  # Sabit port - dijital kartvizit projesi
+    volumes:
+      - kartvizit_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d dijitalkartvizit"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - kartvizit-network
+
+  # ================================================
+  # Next.js Application
+  # ================================================
+  app:
+    image: dijitalkartvizit-frontend:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dijitalkartvizit-frontend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://postgres:kartvizit123@db:5432/dijitalkartvizit
+      NEXTAUTH_SECRET: local-dev-secret-change-in-production
+      NEXTAUTH_URL: http://localhost:3012
+      DEFAULT_ADMIN_PASSWORD: admin123
+      NODE_ENV: production
+    ports:
+      - "3012:3000"  # Sabit port - dijital kartvizit projesi
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
+    networks:
+      - kartvizit-network
+
+volumes:
+  kartvizit_postgres_data:
+    name: kartvizit-postgres-data
+
+networks:
+  kartvizit-network:
+    name: kartvizit-network
+    driver: bridge

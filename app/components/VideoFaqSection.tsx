@@ -28,7 +28,9 @@ export default function VideoFaqSection() {
           setFaqs(activeFaqs);
         }
       })
-      .catch(err => console.error('SSS yüklenemedi:', err));
+      .catch(() => {
+        // Use empty array if FAQs fail to load
+      });
 
     // Fetch video URL from site settings
     fetch('/api/settings/site')
@@ -36,7 +38,9 @@ export default function VideoFaqSection() {
       .then((data: SiteSettings) => {
         setVideoUrl(data.faq_video_url);
       })
-      .catch(err => console.error('Video URL yüklenemedi:', err));
+      .catch(() => {
+        // Video URL will remain null if settings fail to load
+      });
   }, []);
   return (
     <section id="diger-bilgiler" className="relative w-full min-h-[700px] flex flex-col items-center justify-center pt-48" style={{background: "linear-gradient(120deg, #f8fbfa 0%, #f8e8fa 100%)"}}>

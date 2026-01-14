@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/app/lib/db';
 import { VercelKVCache } from '@/app/lib/cache';
 import { ErrorResponse } from '@/app/lib/errors';
+import { logger } from '@/app/lib/logger';
 
 /**
  * GET /api/packages
@@ -47,7 +48,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(packages);
   } catch (error) {
-    console.error('Error fetching packages:', error);
+    logger.error('Error fetching packages', {
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
     const statusCode = ErrorResponse.getStatusCode(error as Error);
     const errorBody = ErrorResponse.build(error as Error);
     return NextResponse.json(errorBody, { status: statusCode });

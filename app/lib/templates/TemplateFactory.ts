@@ -18,6 +18,7 @@ import { lineMeshTemplate } from './template6-line-mesh';
 import { colorRingsTemplate } from './template7-color-rings';
 import { goldenBlocksTemplate } from './template8-golden-blocks';
 import { crystalStripesTemplate } from './template9-crystal-stripes';
+import { logger } from '@/app/lib/logger';
 
 /**
  * Template identifier type - ensures only valid template IDs are used
@@ -62,7 +63,7 @@ export class TemplateFactory {
   static getTemplate(templateId: number): string {
     // Type guard: Ensure templateId is valid
     if (!this.isValidTemplateId(templateId)) {
-      console.warn(`Invalid template ID: ${templateId}. Using default template.`);
+      logger.warn(`Invalid template ID: ${templateId}. Using default template.`);
       return TEMPLATE_REGISTRY[DEFAULT_TEMPLATE_ID];
     }
 

@@ -207,14 +207,10 @@ export class LocalFileUploadService {
    * Katalog PDF'i yükler
    */
   private static async uploadCatalog(file: File): Promise<string | null> {
+    // Katalog opsiyonel - dosya yoksa veya boşsa null döndür
     if (!file || file.size === 0) {
-      const errorMessage = 'Katalog dosyası boş veya bulunamadı';
-      logger.error('Katalog yükleme hatası', {
-        error: errorMessage,
-        hasFile: !!file,
-        fileSize: file?.size || 0
-      });
-      throw new Error(errorMessage);
+      logger.debug('Katalog dosyası sağlanmadı (opsiyonel alan)');
+      return null;
     }
 
     try {

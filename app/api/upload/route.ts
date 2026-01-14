@@ -5,6 +5,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 import { LocalFileUploadService } from '@/app/lib/services/LocalFileUploadService';
 import { uploadToCloudinary } from '@/app/lib/cloudinary';
+import { logger } from '@/app/lib/logger';
 
 // SECURITY: File upload configuration
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -106,9 +107,9 @@ export async function POST(request: NextRequest) {
       // Cloudinary credentials varsa: Cloudinary ile depolama (local veya production)
       try {
         fileUrl = await uploadToCloudinary(file, folder);
-        console.log('✅ Cloudinary upload başarılı:', fileUrl);
+        logger.fileUpload(file.name, file.size);
       } catch (error) {
-        console.error('❌ Cloudinary upload hatası:', error);
+        logger.fileError(file.name, error instanceof Error ? error : new Error('Unknown error'));
         return NextResponse.json({
           error: 'Cloudinary yüklemesi başarısız',
           details: error instanceof Error ? error.message : 'Unknown error'
@@ -132,15 +133,18 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ url: fileUrl });
   } catch (error) {
     // SECURITY: Environment-aware error handling
+    logger.error('Upload API error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
+
     if (process.env.NODE_ENV === 'production') {
       // Production: Generic error only
-      console.error('Upload error occurred');
       return NextResponse.json({
         error: 'Dosya yüklenirken bir hata oluştu'
       }, { status: 500 });
     } else {
       // Development: Detailed error for debugging
-      console.error('Upload API error:', error);
       return NextResponse.json({
         error: 'Yükleme başarısız',
         details: error instanceof Error ? error.message : 'Unknown error'

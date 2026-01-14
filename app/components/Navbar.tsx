@@ -30,7 +30,9 @@ export default function Navbar() {
           if (data.site_logo) setSiteLogo(data.site_logo);
         }
       })
-      .catch(err => console.error('Site ayarları yüklenemedi:', err));
+      .catch(() => {
+        // Use default values if settings fail to load
+      });
   }, []);
 
   const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {

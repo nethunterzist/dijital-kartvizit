@@ -1,7 +1,15 @@
 /** @type {import('next').NextConfig} */
-const withBundleAnalyzer = require('@next/bundle-analyzer')({
-  enabled: process.env.ANALYZE === 'true',
-});
+// Bundle analyzer - only load in development when ANALYZE=true
+const withBundleAnalyzer = process.env.ANALYZE === 'true'
+  ? (() => {
+      try {
+        return require('@next/bundle-analyzer')({ enabled: true });
+      } catch (e) {
+        console.log('Bundle analyzer not available, skipping...');
+        return (config) => config;
+      }
+    })()
+  : (config) => config;
 
 // Polyfill removed - not needed with proper webpack configuration
 

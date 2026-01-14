@@ -3,6 +3,7 @@ import { packageInquirySchema } from '@/app/lib/validations/package-inquiry.sche
 import { sendPackageInquiryEmail, sendCustomerConfirmationEmail } from '@/app/lib/email';
 import { prisma } from '@/app/lib/db';
 import { ZodError } from 'zod';
+import { logger } from '@/app/lib/logger';
 
 export async function POST(request: NextRequest) {
   try {
@@ -69,7 +70,9 @@ export async function POST(request: NextRequest) {
       });
     } catch (dbError) {
       // Log database error but don't fail the request if email was successful
-      console.error('Database save error:', dbError);
+      logger.error('Database save error', {
+        error: dbError instanceof Error ? dbError.message : 'Unknown error'
+      });
     }
 
     // Return success response
@@ -81,7 +84,9 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error('Package inquiry error:', error);
+    logger.error('Package inquiry error', {
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
 
     // Handle Zod validation errors
     if (error instanceof ZodError) {
@@ -100,7 +105,7 @@ export async function POST(request: NextRequest) {
 
     // Handle email sending errors
     if (error instanceof Error && error.message.includes('Admin email not configured')) {
-      console.error('SMTP configuration error');
+      logger.error('SMTP configuration error');
       return NextResponse.json(
         {
           success: false,

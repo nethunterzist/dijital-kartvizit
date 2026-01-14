@@ -1,15 +1,18 @@
 import nodemailer from 'nodemailer';
+import { logger } from '@/app/lib/logger';
 
 // Nodemailer transporter configuration
 export const createTransporter = () => {
-  // Debug: Log environment variables
-  console.log('🔍 SMTP Environment Variables Check:', {
-    SMTP_HOST: process.env.SMTP_HOST || '❌ UNDEFINED',
-    SMTP_PORT: process.env.SMTP_PORT || '❌ UNDEFINED',
-    SMTP_USER: process.env.SMTP_USER || '❌ UNDEFINED',
-    SMTP_PASS: process.env.SMTP_PASS ? '✅ SET (hidden)' : '❌ UNDEFINED',
-    ADMIN_EMAIL: process.env.ADMIN_EMAIL || '❌ UNDEFINED',
-  });
+  // Only log SMTP config status in development (never log secrets)
+  if (process.env.NODE_ENV === 'development') {
+    logger.debug('SMTP configuration check', {
+      host: process.env.SMTP_HOST ? 'configured' : 'missing',
+      port: process.env.SMTP_PORT ? 'configured' : 'missing',
+      user: process.env.SMTP_USER ? 'configured' : 'missing',
+      pass: process.env.SMTP_PASS ? 'configured' : 'missing',
+      adminEmail: process.env.ADMIN_EMAIL ? 'configured' : 'missing',
+    });
+  }
 
   return nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
@@ -256,10 +259,12 @@ export const sendPackageInquiryEmail = async (data: PackageInquiryData) => {
 
   try {
     const info = await transporter.sendMail(mailOptions);
-    console.log('Admin email sent successfully:', info.messageId);
+    logger.info('Admin email sent successfully', { messageId: info.messageId });
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error('Admin email sending error:', error);
+    logger.error('Admin email sending error', {
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
     throw error;
   }
 };
@@ -269,7 +274,7 @@ export const sendCustomerConfirmationEmail = async (data: { name: string; email:
   const transporter = createTransporter();
 
   if (!data.email) {
-    console.log('No customer email provided, skipping confirmation email');
+    logger.debug('No customer email provided, skipping confirmation email');
     return { success: true, skipped: true };
   }
 
@@ -282,10 +287,12 @@ export const sendCustomerConfirmationEmail = async (data: { name: string; email:
 
   try {
     const info = await transporter.sendMail(mailOptions);
-    console.log('Customer confirmation email sent successfully:', info.messageId);
+    logger.info('Customer confirmation email sent successfully', { messageId: info.messageId });
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error('Customer confirmation email error:', error);
+    logger.error('Customer confirmation email error', {
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
     // Don't throw - customer email is optional, admin email is critical
     return { success: false, error };
   }

@@ -153,8 +153,6 @@ export default function PricingFormSlider({
         onClose();
       }, 3000);
     } catch (error) {
-      console.error('Form submission error:', error);
-
       if (error instanceof ZodError) {
         // Handle Zod validation errors
         const fieldErrors: FormErrors = {};

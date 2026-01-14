@@ -5,6 +5,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 import { prisma } from '@/app/lib/db';
 import bcrypt from 'bcrypt';
+import { logger } from '@/app/lib/logger';
 
 /**
  * Enhanced Health Check Endpoint
@@ -64,25 +65,30 @@ export async function GET(request: NextRequest) {
 
     // Test 3: Auto-create default admin if missing (PRODUCTION WARNING)
     if (adminCount === 0) {
-      try {
-        // WARNING: Change this password immediately after first deployment
-        // Default credentials should NEVER be used in production
-        const defaultPassword = process.env.DEFAULT_ADMIN_PASSWORD || 'admin123';
-        const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+      const defaultPassword = process.env.DEFAULT_ADMIN_PASSWORD;
 
-        await prisma.admins.create({
-          data: {
-            username: 'admin',
-            password: hashedPassword
-          }
-        });
+      if (!defaultPassword) {
+        logger.warn('No admin user exists and DEFAULT_ADMIN_PASSWORD not set. Set DEFAULT_ADMIN_PASSWORD env var to auto-create admin.');
+      } else {
+        try {
+          const hashedPassword = await bcrypt.hash(defaultPassword, 10);
 
-        console.warn('⚠️  DEFAULT ADMIN CREATED - CHANGE PASSWORD IMMEDIATELY!');
-        console.warn('⚠️  Username: admin | Default Password: ' + defaultPassword);
-        console.warn('⚠️  Login at /api/auth/signin and change credentials NOW!');
-      } catch (adminCreateError) {
-        console.warn('Failed to create default admin:', adminCreateError);
-        // Non-critical error, don't fail health check
+          await prisma.admins.create({
+            data: {
+              username: 'admin',
+              password: hashedPassword
+            }
+          });
+
+          logger.securityEvent('Default admin created', 'system', {
+            message: 'Change password immediately after first login'
+          });
+        } catch (adminCreateError) {
+          logger.warn('Failed to create default admin', {
+            error: adminCreateError instanceof Error ? adminCreateError.message : 'Unknown error'
+          });
+          // Non-critical error, don't fail health check
+        }
       }
     }
 
@@ -123,7 +129,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(response, { status: httpStatus });
 
   } catch (error) {
-    console.error('Health check failed:', error);
+    logger.error('Health check failed', {
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
 
     const errorResponse: HealthCheckResponse = {
       status: 'unhealthy',

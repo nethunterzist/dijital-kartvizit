@@ -34,8 +34,7 @@ export default function PricingSection() {
       if (!res.ok) throw new Error('Paketler yüklenemedi');
       const data = await res.json();
       setPackages(data);
-    } catch (error) {
-      console.error('Paketler yüklenirken hata:', error);
+    } catch {
       // Hata durumunda boş array ile devam et
       setPackages([]);
     } finally {

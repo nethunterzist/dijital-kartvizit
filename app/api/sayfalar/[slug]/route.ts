@@ -128,8 +128,9 @@ export async function GET(
       try {
         await prisma.firmalar.count();
       } catch (dbError) {
-        console.error('Database connection error:', dbError);
-        logger.error('Database connection failed in sayfalar API', { error: dbError });
+        logger.error('Database connection failed in sayfalar API', {
+          error: dbError instanceof Error ? dbError.message : 'Unknown error'
+        });
       }
       
       return NextResponse.json({ error: 'Firma bulunamadı' }, { status: 404 });

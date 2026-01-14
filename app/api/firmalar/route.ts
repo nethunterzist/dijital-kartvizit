@@ -89,9 +89,9 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(responseData);
 
   } catch (error) {
-    logger.error('Error fetching firmalar', { error });
-    
-    console.error('Error fetching firmalar:', error);
+    logger.error('Error fetching firmalar', {
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
     
     return NextResponse.json({
       error: { 

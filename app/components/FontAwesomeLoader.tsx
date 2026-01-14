@@ -53,7 +53,6 @@ export default function FontAwesomeLoader({ children }: FontAwesomeLoaderProps) 
 
         // Fallback: set loaded after 3 seconds regardless
         const fallbackTimer = setTimeout(() => {
-            console.warn('Font Awesome loading timeout, proceeding anyway');
             setFontLoaded(true);
         }, 3000);
 
